@@ -1,3 +1,24 @@
+export type Usuario = {
+  id?: string;
+  email?: string;
+  name?: string;
+  role?: 'admin' | 'owner' | 'worker';
+  academy_id?: string;
+  academy?: Academia;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type Academia = {
+  id?: string;
+  name?: string;
+  description?: string;
+  has_registration?: boolean;
+  registration_price?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export type Alumno = {
   id?: string;
   name?: string;

@@ -16,6 +16,7 @@ export type FieldType =
   | 'email'
   | 'password'
   | 'integer'
+  | 'price'
   | 'textarea'
   | 'select'
   | 'multiple-select'
