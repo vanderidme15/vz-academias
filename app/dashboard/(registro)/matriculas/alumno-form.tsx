@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { isValidPeruDni } from "@/lib/utils-functions/dni-validator";
 import { Alumno } from "@/shared/types/supabase.types";
 import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";
-import { useEffect } from "react";
 import { z } from "zod";
 
 const alumnoFormSchema = z.object({

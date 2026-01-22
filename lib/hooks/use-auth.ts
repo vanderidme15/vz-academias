@@ -3,11 +3,12 @@
 import { useAuthStore } from "@/lib/store/auth.store"
 
 export function useAuth() {
-  const { user, loading } = useAuthStore()
+  const { userAuth, user, loading } = useAuthStore()
 
   return {
+    userAuth,
     user,
     isLoading: loading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!userAuth,
   }
 }

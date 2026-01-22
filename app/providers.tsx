@@ -2,56 +2,53 @@
 
 import type React from "react"
 import { useEffect } from "react"
-import { useAuthStore } from "@/lib/store/auth.store"
+import { useAuthStore, useUsuarioStore } from "@/lib/store/auth.store"
 import { createClient } from "@/lib/supabase/client"
+import type { User, AuthChangeEvent, Session } from "@supabase/supabase-js"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { setUser, setLoading } = useAuthStore()
+  const { setUserAuth, setLoading, setUser } = useAuthStore()
+  const { fetchUsuario } = useUsuarioStore()
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const supabase = createClient()
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
+    const supabase = createClient()
 
-        setUser(
-          user
-            ? {
-              id: user.id,
-              email: user.email || "",
-            }
-            : null,
-        )
+    // Función auxiliar para normalizar el usuario
+    const normalizeUserAuth = (user: User | null) => {
+      return user ? { id: user.id, email: user.email || "" } : null
+    }
+
+    const getUsuario = async (id?: string) => {
+      if (!id) return
+      const usuario = await fetchUsuario(id)
+      setUser(usuario);
+    }
+
+    // Inicializar sesión actual
+    const initAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUserAuth(normalizeUserAuth(user));
+        getUsuario(user?.id)
       } catch (error) {
-        console.error("[v0] Auth initialization error:", error)
-        setUser(null)
+        setUserAuth(null)
       } finally {
         setLoading(false)
       }
     }
 
-    initializeAuth()
+    initAuth()
 
-    const supabase = createClient()
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: any, session: any) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || "",
-        })
-      } else {
-        setUser(null)
+    // Escuchar cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event: AuthChangeEvent, session: Session | null) => {
+        setUserAuth(normalizeUserAuth(session?.user ?? null))
+        getUsuario(session?.user?.id)
       }
-    })
+    )
 
-    return () => {
-      subscription?.unsubscribe()
-    }
-  }, [setUser, setLoading])
+    return () => subscription.unsubscribe()
+  }, [setUserAuth, setLoading])
 
   return children
 }

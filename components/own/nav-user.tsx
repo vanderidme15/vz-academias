@@ -24,13 +24,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { User } from "@/lib/types"
 import { useAuthStore } from "@/lib/store/auth.store"
 import { getClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Usuario } from "@/shared/types/supabase.types"
 
-export function NavUser({ user }: { user: User | null }) {
+export function NavUser({ user }: { user: Usuario | null }) {
   const router = useRouter()
   const { isMobile } = useSidebar();
   const { logout } = useAuthStore();
@@ -52,7 +52,7 @@ export function NavUser({ user }: { user: User | null }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg">{user?.email.split("@")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{user?.email?.split("@")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate text-xs">{user?.email}</span>
@@ -69,7 +69,7 @@ export function NavUser({ user }: { user: User | null }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg">{user?.email.split("@")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">{user?.email?.split("@")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user?.email}</span>
@@ -77,7 +77,7 @@ export function NavUser({ user }: { user: User | null }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} asChild>
+            <DropdownMenuItem asChild>
               <Link href="/dashboard/academia">
                 <BrushIcon />
                 Personalizar academia

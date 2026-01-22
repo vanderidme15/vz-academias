@@ -20,6 +20,7 @@ import FieldHeight from './fields/field-height'
 import FieldRadio from './fields/field-radio'
 import FieldMultiSelect from './fields/field-multiple-select'
 import FieldTime from './fields/field-time'
+import FieldPrice from './fields/field-price'
 
 export function DynamicForm({
   buttonLabel,
@@ -108,6 +109,8 @@ export function DynamicForm({
               return <FieldHeight fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'time':
               return <FieldTime fieldConfig={fieldConfig} formField={enhancedFormField} />
+            case 'price':
+              return <FieldPrice fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'email':
             case 'text':
             default:

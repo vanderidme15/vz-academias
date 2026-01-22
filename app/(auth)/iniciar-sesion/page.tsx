@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getClient } from "@/lib/supabase/client"
-import { useAuthStore } from "@/lib/store/auth.store"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -17,13 +16,6 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { user, setUser } = useAuthStore()
-
-  useEffect(() => {
-    if (user) {
-      router.push("/dashboard/")
-    }
-  }, [user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,10 +32,6 @@ export default function LoginPage() {
       if (authError) throw authError
 
       if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || "",
-        })
         router.push("/dashboard")
       }
     } catch (err) {

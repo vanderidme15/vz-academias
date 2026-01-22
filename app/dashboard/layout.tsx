@@ -20,20 +20,20 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login")
+      router.push("/iniciar-sesion")
     }
   }, [isLoading, isAuthenticated, router])
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">Cargando...</p>
       </div>
     )
   }
 
   if (!isAuthenticated) {
-    return null
+    return <div>no autenticado</div>
   }
 
   return (
