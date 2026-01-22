@@ -54,8 +54,7 @@ export default function AlumnoPage() {
 
   return (
     <div className="w-full h-full flex flex-col gap-2 overflow-y-auto">
-      <h2 className="text-2xl font-bold">Detalle del alumno</h2>
-      <h3 className="">{alumno?.name}</h3>
+      <h2 className="text-2xl font-bold">Detalle del alumno - {alumno?.name}</h2>
 
       <Tabs defaultValue="datos" className="grow flex flex-col overflow-y-auto">
         <TabsList className="w-full">
@@ -72,8 +71,9 @@ export default function AlumnoPage() {
           value="datos"
           className="grow flex flex-col gap-2 overflow-y-auto"
         >
-          <h4 className="text-sm">Datos del alumno registrados</h4>
+          <h4 className="text-sm">Datos del alumno</h4>
           <div className="grow flex flex-col gap-2 overflow-y-auto border rounded-lg p-2">
+            {/* Aqui en principio solo se usa para editar */}
             {alumno && (
               <AlumnoForm dialogHandlers={dialogHandlers} onCreate={createAlumno} onEdit={updateAlumno} />
             )}
@@ -82,7 +82,7 @@ export default function AlumnoPage() {
         <TabsContent value="cursos" className="w-full h-full flex flex-col gap-2 overflow-y-auto">
           <h4 className="text-sm">Listado de cursos al que se inscribio el alumno</h4>
           <div className="w-full h-full flex flex-col gap-2 overflow-y-auto border rounded-lg p-2">
-            <InscripcionesTab />
+            <InscripcionesTab student={alumno} />
           </div>
         </TabsContent>
       </Tabs>

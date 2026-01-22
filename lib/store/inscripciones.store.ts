@@ -21,7 +21,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('inscripciones')
-        .select('*')
+        .select(`*, course:cursos (*)`)
         .order('created_at', { ascending: false }); // Ordenar por más reciente
 
       if (error) throw error;
@@ -35,7 +35,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('inscripciones')
-        .select('*')
+        .select(`*, course:cursos (*)`)
         .eq('id', id)
         .single();
 
@@ -53,7 +53,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       const { data, error } = await supabase
         .from('inscripciones')
         .insert(values)
-        .select('*')
+        .select(`*, course:cursos (*)`)
         .single();
 
       if (error) {
@@ -78,7 +78,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
         .from('inscripciones')
         .update(values)
         .eq('id', id)
-        .select('*')
+        .select(`*, course:cursos (*)`)
         .single();
 
       if (error) throw error;

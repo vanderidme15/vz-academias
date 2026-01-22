@@ -3,7 +3,7 @@
 import DeleteDialog from "@/components/own/generic-dialog/delete-dialog";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import { DataTable } from "@/components/own/table/data-table";
-import { Inscripcion } from "@/shared/types/supabase.types";
+import { Alumno, Inscripcion } from "@/shared/types/supabase.types";
 import { DialogHandlers } from "@/shared/types/ui.types";
 import { useEffect, useMemo, useState } from "react";
 import { columns } from "./inscripcion-columns";
@@ -29,7 +29,7 @@ function useDialogHandlers(): DialogHandlers {
   }), [openDialog, setOpenDialog, openDialogDelete, setOpenDialogDelete, selectedItem, setSelectedItem, customAction, setCustomAction]);
 }
 
-export default function InscripcionesTab() {
+export default function InscripcionesTab({ student }: { student: Alumno }) {
   const dialogHandlers = useDialogHandlers();
   const { inscripciones, fetchInscripciones, createInscripcion, updateInscripcion, deleteInscripcion } = useInscripcionesStore();
 
@@ -42,15 +42,20 @@ export default function InscripcionesTab() {
       <DataTable<Inscripcion, unknown>
         columns={columns}
         data={inscripciones || []}
-        entity="Inscripcion"
+        entity="Inscripción"
         dialogHandlers={dialogHandlers}
       />
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title="Nueva Inscripcion"
+        title={dialogHandlers.selectedItem ? 'Editar Inscripción' : 'Nueva Inscripción'}
       >
-        <InscripcionForm dialogHandlers={dialogHandlers} onCreate={createInscripcion} onEdit={updateInscripcion} />
+        <InscripcionForm
+          dialogHandlers={dialogHandlers}
+          onCreate={createInscripcion}
+          onEdit={updateInscripcion}
+          student={student}
+        />
       </GenericDialog>
       <DeleteDialog
         openDeleteDialog={dialogHandlers.openDialogDelete}

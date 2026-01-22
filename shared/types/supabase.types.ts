@@ -23,6 +23,8 @@ export type Inscripcion = {
   course?: Curso;
   payments?: Pago[];
   assistances?: Asistencia[];
+  registration_price?: number;
+  course_price?: number;
   price_charged?: number;
   includes_registration?: boolean;
   register_by?: string;

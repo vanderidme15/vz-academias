@@ -4,40 +4,21 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export const columns: ColumnDef<Inscripcion>[] = [
-  // {
-  //   accessorKey: 'student',
-  //   header: 'Alumno',
-  //   cell: ({ row }) => (
-  //     <div className="flex flex-col">
-  //       <span className="font-medium">{row.original.student?.name || '-'}</span>
-  //       {row.original.student?.email && (
-  //         <span className="text-xs text-muted-foreground">
-  //           {row.original.student.email}
-  //         </span>
-  //       )}
-  //     </div>
-  //   ),
-  //   meta: {
-  //     filterable: {
-  //       type: 'text',
-  //       placeholder: '',
-  //       label: 'Buscar por alumno'
-  //     }
-  //   }
-  // },
   {
     accessorKey: 'course',
     header: 'Curso',
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-medium">{row.original.course?.name || '-'}</span>
-        {row.original.course?.teacher?.name && (
-          <span className="text-xs text-muted-foreground">
-            Profesor: {row.original.course.teacher.name}
-          </span>
-        )}
-      </div>
-    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-col">
+          <span className="font-medium">{row.original.course?.name || '-'}</span>
+          {row.original.course?.teacher?.name && (
+            <span className="text-xs text-muted-foreground">
+              Profesor: {row.original.course.teacher.name}
+            </span>
+          )}
+        </div>
+      );
+    },
     meta: {
       filterable: {
         type: 'text',
@@ -48,14 +29,21 @@ export const columns: ColumnDef<Inscripcion>[] = [
   },
   {
     accessorKey: 'price_charged',
-    header: 'Precio',
+    header: 'Precio cobrado',
     cell: ({ row }) => {
-      const price = row.original.price_charged;
-      if (!price) return '-';
+      const priceCharged = row.original.price_charged;
+      const registrationPrice = row.original.registration_price;
+      const coursePrice = row.original.course_price;
+      if (!priceCharged) return '-';
 
       return (
-        <div className="text-sm font-medium">
-          S/ {price.toFixed(2)}
+        <div className="flex flex-col text-sm">
+          <span className="font-medium">S/ {priceCharged.toFixed(2)}</span>
+          {row.original.includes_registration && (
+            <span className="text-xs text-muted-foreground">
+              S/ {registrationPrice?.toFixed(2)} + S/ {coursePrice?.toFixed(2)}
+            </span>
+          )}
         </div>
       );
     }
@@ -64,13 +52,13 @@ export const columns: ColumnDef<Inscripcion>[] = [
     accessorKey: 'includes_registration',
     header: 'Incluye Matrícula',
     cell: ({ row }) => (
-      <div className="text-sm text-center">
+      <div>
         {row.original.includes_registration ? (
-          <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+          <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 font-medium text-green-700">
             Sí
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600">
+          <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 font-medium text-gray-600">
             No
           </span>
         )}
@@ -112,7 +100,7 @@ export const columns: ColumnDef<Inscripcion>[] = [
       const asistenciasRegistradas = assistances.length;
 
       return (
-        <div className="flex flex-col text-sm text-center">
+        <div className="flex flex-col text-sm">
           <span className="font-medium">
             {asistenciasRegistradas} / {totalClases}
           </span>
@@ -121,6 +109,21 @@ export const columns: ColumnDef<Inscripcion>[] = [
               {((asistenciasRegistradas / totalClases) * 100).toFixed(0)}%
             </span>
           )}
+        </div>
+      );
+    }
+  },
+  {
+    accessorKey: 'register_by',
+    header: 'Registrado por',
+    cell: ({ row }) => {
+      const register_by = row.original.register_by;
+      if (!register_by) return '-';
+      return (
+        <div className="flex flex-col text-sm">
+          <span className="font-medium">
+            {register_by}
+          </span>
         </div>
       );
     }
