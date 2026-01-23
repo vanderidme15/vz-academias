@@ -28,10 +28,12 @@ import {
 import { NavUser } from "./nav-user"
 import { useAuth } from "@/lib/hooks/use-auth"
 import Link from "next/link"
+import { useAcademiaStore } from "@/lib/store/academia.store"
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuth()
+  const { user } = useAuth();
+  const { academia } = useAcademiaStore();
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -46,8 +48,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NotebookPenIcon className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Academia</span>
-                <span className="truncate text-xs">Academia VZ</span>
+                <span className="truncate font-medium">{academia?.name}</span>
+                <span className="truncate text-xs">{academia?.description}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

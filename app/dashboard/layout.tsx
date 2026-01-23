@@ -8,6 +8,7 @@ import { DynamicBreadcrumb } from "@/components/own/dynamic-breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuth } from "@/lib/hooks/use-auth"
+import { useAcademiaStore } from "@/lib/store/academia.store"
 
 
 export default function DashboardLayout({
@@ -15,14 +16,22 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
-  const { isLoading, isAuthenticated } = useAuth()
+  const router = useRouter();
+  const { isLoading, isAuthenticated, user } = useAuth();
+  const { fetchAcademiaById } = useAcademiaStore();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/iniciar-sesion")
     }
   }, [isLoading, isAuthenticated, router])
+
+  // pedir de primeras tambien a la academia
+  useEffect(() => {
+    if (user?.id) {
+      fetchAcademiaById(user.academy_id)
+    }
+  }, [user])
 
   if (isLoading) {
     return (

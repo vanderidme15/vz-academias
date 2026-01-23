@@ -3,16 +3,26 @@
 import { GraduationCapIcon } from "lucide-react";
 import AcademiaForm from "./academia-form";
 import { useAcademiaStore } from "@/lib/store/academia.store";
-import { useEffect } from "react";
-import { useAuth } from "@/lib/hooks/use-auth";
+
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useMemo } from "react";
 
 export default function AcademiaPage() {
-  const { user } = useAuth();
-  const { academia, fetchAcademiaById, updateAcademia } = useAcademiaStore();
+  const { academia, updateAcademia } = useAcademiaStore();
 
-  useEffect(() => {
-    fetchAcademiaById(user?.academy_id);
-  }, [user]);
+  const fechaStart = useMemo(() => {
+    if (!academia?.start_date) return null;
+
+    return format(parseISO(academia?.start_date), "d 'de' MMMM 'de' yyyy", { locale: es });
+  }, [academia?.start_date]);
+
+  const fechaEnd = useMemo(() => {
+    if (!academia?.end_date) return null;
+
+    return format(parseISO(academia?.end_date), "d 'de' MMMM 'de' yyyy", { locale: es });
+  }, [academia?.end_date]);
+
 
   return (
     <div className="flex flex-col gap-4 w-full h-full bg-muted/30 rounded-xl px-20 py-4">
@@ -27,9 +37,9 @@ export default function AcademiaPage() {
           <div className="p-4 border border-dashed rounded-xl">
             <h3 className="text-lg font-bold">Información del plan</h3>
             <ul className="list-disc list-inside mt-2">
-              <li>Tipo de plan: <span>Anual</span></li>
-              <li>Fecha de inicio: <span>22/01/2026</span></li>
-              <li>Fecha de finalización: <span>22/01/2027</span></li>
+              <li>Tipo de plan: <span>{academia?.plan_type === 'year' ? 'Anual' : 'Mensual'}</span></li>
+              <li>Fecha de inicio: <span>{fechaStart}</span></li>
+              <li>Fecha de finalización: <span>{fechaEnd}</span></li>
             </ul>
             <span className="text-sm ">Para renovación contactar al whatsapp: <span>+51 966226600</span></span>
           </div>

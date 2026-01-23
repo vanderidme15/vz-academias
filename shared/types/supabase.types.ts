@@ -15,6 +15,9 @@ export type Academia = {
   description?: string;
   has_registration?: boolean;
   registration_price?: number;
+  plan_type?: 'month' | 'year';
+  start_date?: string;
+  end_date?: string;
   created_at?: string;
   updated_at?: string;
 }
