@@ -88,20 +88,13 @@ export type Profesor = {
   updated_at?: string;
 }
 
-
-
-
-
-
-
-
 // este es el json
 export type Pago = {
   id?: string;
   payment_amount?: number;
   payment_method?: 'yape' | 'efectivo';
-  payment_recipe_url?: string;
-  payment_checked?: boolean;
+  payment_code?: string;
+  register_by?: string;
   created_at?: string;
   updated_at?: string;
 }

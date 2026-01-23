@@ -9,6 +9,9 @@ import { useEffect, useMemo, useState } from "react";
 import { columns } from "./inscripcion-columns";
 import { useInscripcionesStore } from "@/lib/store/inscripciones.store";
 import InscripcionForm from "./inscripcion-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import InscripcionPagosTable from "./inscripcion-pagos/inscripcion-pagos-table";
+import { PiggyBankIcon } from "lucide-react";
 
 
 function useDialogHandlers(): DialogHandlers {
@@ -31,11 +34,23 @@ function useDialogHandlers(): DialogHandlers {
 
 export default function InscripcionesTab({ student }: { student: Alumno }) {
   const dialogHandlers = useDialogHandlers();
-  const { inscripciones, fetchInscripciones, createInscripcion, updateInscripcion, deleteInscripcion } = useInscripcionesStore();
+  const {
+    inscripciones,
+    fetchInscripciones,
+    createInscripcion,
+    updateInscripcion,
+    deleteInscripcion,
+    setSelectedInscripcion,
+    selectedInscripcion
+  } = useInscripcionesStore();
 
   useEffect(() => {
     fetchInscripciones();
   }, []);
+
+  useEffect(() => {
+    setSelectedInscripcion(dialogHandlers.selectedItem);
+  }, [dialogHandlers.selectedItem]);
 
   return (
     <div className="h-full flex flex-col overflow-auto">
@@ -50,12 +65,30 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
         setOpenDialog={dialogHandlers.setOpenDialog}
         title={dialogHandlers.selectedItem ? 'Editar Inscripción' : 'Nueva Inscripción'}
       >
-        <InscripcionForm
-          dialogHandlers={dialogHandlers}
-          onCreate={createInscripcion}
-          onEdit={updateInscripcion}
-          student={student}
-        />
+        <Tabs defaultValue="form" className="w-full overflow-auto">
+          <TabsList className="w-full">
+            <TabsTrigger value="form">Formulario</TabsTrigger>
+            <TabsTrigger value="pagos">Pagos</TabsTrigger>
+          </TabsList>
+          <TabsContent value="form" className="w-full overflow-auto">
+            <InscripcionForm
+              dialogHandlers={dialogHandlers}
+              onCreate={createInscripcion}
+              onEdit={updateInscripcion}
+              student={student}
+            />
+          </TabsContent>
+          <TabsContent value="pagos" className="w-full overflow-auto">
+            {selectedInscripcion ? (
+              <InscripcionPagosTable inscripcion={selectedInscripcion} />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-40 w-sm">
+                <PiggyBankIcon size={24} />
+                <p className="text-center">Un vez inscrito el alumno, se mostrarán los pagos aquí</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </GenericDialog>
       <DeleteDialog
         openDeleteDialog={dialogHandlers.openDialogDelete}

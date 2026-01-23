@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Inscripcion } from "@/shared/types/supabase.types";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
@@ -64,6 +65,34 @@ export const columns: ColumnDef<Inscripcion>[] = [
         )}
       </div>
     ),
+  },
+  {
+    accessorKey: 'payments',
+    accessorFn: (row) => row.payments,
+    header: 'Pagos',
+    cell: ({ row }) => {
+      const payments = row.original.payments ?? []
+      const total = payments.reduce((total, payment) => total + (payment.payment_amount || 0), 0)
+      const saldo = (row.original.price_charged || 0) - total
+      return (
+        <div>
+          <div><span className="font-medium">T: s/{total}</span>  <span className="text-xs text-muted-foreground">S: s/{saldo}</span></div>
+          {payments.length > 0 ? (
+            <div className="flex gap-px flex-wrap max-w-40">
+              {payments.map((payment, index) => (
+                <div key={`${payment.id}-${index}`} className={cn("flex items-center gap-px px-px rounded text-xs border-2", payment.payment_method === 'efectivo' ? 'border-green-500' : 'border-purple-500')}>
+                  {payment.payment_amount}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              No hay pagos
+            </div>
+          )}
+        </div>
+      )
+    }
   },
   // {
   //   accessorKey: 'payments',
