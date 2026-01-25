@@ -1,7 +1,7 @@
 'use client'
 
 import { DynamicForm } from "@/components/own/dynamic-form/dynamic-form";
-import { useCursosStore } from "@/lib/store/cursos.store";
+import { useCursosStore } from "@/lib/store/configuraciones/cursos.store";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { Alumno, Inscripcion } from "@/shared/types/supabase.types";
 import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";

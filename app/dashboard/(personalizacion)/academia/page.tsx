@@ -3,24 +3,18 @@
 import { GraduationCapIcon } from "lucide-react";
 import AcademiaForm from "./academia-form";
 import { useAcademiaStore } from "@/lib/store/academia.store";
-
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { useMemo } from "react";
+import { formatDate } from "@/lib/utils-functions/format-date";
 
 export default function AcademiaPage() {
   const { academia, updateAcademia } = useAcademiaStore();
 
   const fechaStart = useMemo(() => {
-    if (!academia?.start_date) return null;
-
-    return format(parseISO(academia?.start_date), "d 'de' MMMM 'de' yyyy", { locale: es });
+    return formatDate(academia?.start_date);
   }, [academia?.start_date]);
 
   const fechaEnd = useMemo(() => {
-    if (!academia?.end_date) return null;
-
-    return format(parseISO(academia?.end_date), "d 'de' MMMM 'de' yyyy", { locale: es });
+    return formatDate(academia?.end_date);
   }, [academia?.end_date]);
 
 

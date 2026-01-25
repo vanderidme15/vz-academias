@@ -3,7 +3,7 @@
 import DeleteDialog from "@/components/own/generic-dialog/delete-dialog";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import { DataTable } from "@/components/own/table/data-table";
-import { useHorariosStore } from "@/lib/store/horarios.store";
+import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import { Horario } from "@/shared/types/supabase.types";
 import { DialogHandlers } from "@/shared/types/ui.types";
 import { useEffect, useMemo, useState } from "react";

@@ -8,7 +8,7 @@ import { DialogHandlers } from "@/shared/types/ui.types";
 import { useEffect, useMemo, useState } from "react";
 import { columns } from "./profesor-columns";
 import ProfesorForm from "./profesor-form";
-import { useProfesoresStore } from "@/lib/store/profesores.store";
+import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
 
 
 function useDialogHandlers(): DialogHandlers {

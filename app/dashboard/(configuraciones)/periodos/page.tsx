@@ -3,12 +3,12 @@
 import DeleteDialog from "@/components/own/generic-dialog/delete-dialog";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import { DataTable } from "@/components/own/table/data-table";
-import { Profesor } from "@/shared/types/supabase.types";
+import { usePeriodosStore } from "@/lib/store/configuraciones/periodos.store";
+import { Periodo } from "@/shared/types/supabase.types";
 import { DialogHandlers } from "@/shared/types/ui.types";
 import { useEffect, useMemo, useState } from "react";
-import { columns } from "./curso-columns";
-import { useCursosStore } from "@/lib/store/configuraciones/cursos.store";
-import CursoForm from "./curso-form";
+import { columns } from "./periodo-columns";
+import PeriodoForm from "./periodo-form";
 
 
 function useDialogHandlers(): DialogHandlers {
@@ -29,36 +29,36 @@ function useDialogHandlers(): DialogHandlers {
   }), [openDialog, setOpenDialog, openDialogDelete, setOpenDialogDelete, selectedItem, setSelectedItem, customAction, setCustomAction]);
 }
 
-export default function CursosPage() {
+export default function PeriodosPage() {
   const dialogHandlers = useDialogHandlers();
-  const { cursos, fetchCursos, createCurso, updateCurso, deleteCurso } = useCursosStore();
+  const { periodos, fetchPeriodos, createPeriodo, updatePeriodo, deletePeriodo } = usePeriodosStore();
 
   useEffect(() => {
-    fetchCursos();
+    fetchPeriodos();
   }, []);
 
   return (
     <div className="h-full flex flex-col overflow-auto">
-      <h2 className="text-2xl font-bold">Cursos</h2>
-      <p className="text-xs">Registro de todos los cursos brindados</p>
-      <DataTable<Profesor, unknown>
+      <h2 className="text-2xl font-bold">Periodos</h2>
+      <p className="text-xs">Registro de todos los periodos</p>
+      <DataTable<Periodo, unknown>
         columns={columns}
-        data={cursos || []}
-        entity="Curso"
+        data={periodos || []}
+        entity="Periodo"
         dialogHandlers={dialogHandlers}
       />
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title={dialogHandlers.selectedItem ? 'Editar Curso' : 'Nuevo Curso'}
+        title={dialogHandlers.selectedItem ? 'Editar Periodo' : 'Nuevo Periodo'}
       >
-        <CursoForm dialogHandlers={dialogHandlers} onCreate={createCurso} onEdit={updateCurso} />
+        <PeriodoForm dialogHandlers={dialogHandlers} onCreate={createPeriodo} onEdit={updatePeriodo} />
       </GenericDialog>
       <DeleteDialog
         openDeleteDialog={dialogHandlers.openDialogDelete}
         setOpenDeleteDialog={dialogHandlers.setOpenDialogDelete}
         selectedItem={dialogHandlers.selectedItem}
-        action={deleteCurso}
+        action={deletePeriodo}
       />
     </div>
   )

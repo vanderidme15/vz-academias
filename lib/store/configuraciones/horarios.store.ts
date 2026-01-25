@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { toast } from "sonner"
-import { createClient } from "../supabase/client"
+import { createClient } from "@/lib/supabase/client";
 import { Horario } from "@/shared/types/supabase.types";
 
 const supabase = createClient();

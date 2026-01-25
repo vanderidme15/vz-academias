@@ -1,8 +1,8 @@
 'use client'
 
 import { DynamicForm } from "@/components/own/dynamic-form/dynamic-form";
-import { useHorariosStore } from "@/lib/store/horarios.store";
-import { useProfesoresStore } from "@/lib/store/profesores.store";
+import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
+import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
 import { Curso } from "@/shared/types/supabase.types";
 import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";
 import { useEffect } from "react";

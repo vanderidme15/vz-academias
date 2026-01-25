@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   BookAIcon,
   CalendarIcon,
+  CalendarsIcon,
   ClockIcon,
   GraduationCapIcon,
   HomeIcon,
@@ -96,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <Link href="/dashboard/periodos">
                 <SidebarMenuButton tooltip="Periodos">
-                  <CalendarIcon />
+                  <CalendarsIcon />
                   <span>Periodos</span>
                 </SidebarMenuButton>
               </Link>
