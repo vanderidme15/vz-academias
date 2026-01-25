@@ -3,11 +3,11 @@
 import * as React from "react"
 import {
   BookAIcon,
+  CalendarIcon,
   ClockIcon,
   GraduationCapIcon,
   HomeIcon,
   ListCheckIcon,
-  NotebookPenIcon,
   PieChartIcon,
   SquarePenIcon,
   UsersIcon,
@@ -92,6 +92,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Configuraciones</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="/dashboard/periodos">
+                <SidebarMenuButton tooltip="Periodos">
+                  <CalendarIcon />
+                  <span>Periodos</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          </SidebarMenu>
           <SidebarMenu>
             <SidebarMenuItem>
               <Link href="/dashboard/profesores">

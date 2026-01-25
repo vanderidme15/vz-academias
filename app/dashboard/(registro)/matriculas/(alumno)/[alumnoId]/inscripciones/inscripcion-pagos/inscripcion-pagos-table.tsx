@@ -7,7 +7,6 @@ import { useState, useMemo } from "react";
 import { useInscripcionesStore } from "@/lib/store/inscripciones.store";
 import { PagoForm } from "./pago-form";
 import { columns } from "./pago-columns";
-import { Separator } from "@/components/ui/separator";
 
 
 function useDialogHandlers(): DialogHandlers {

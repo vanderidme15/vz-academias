@@ -12,7 +12,14 @@ const cursoFormSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   class_count: z.coerce.number().min(1, 'Debe haber al menos 1 clase').optional(),
-  price: z.string().min(1, 'El precio es requerido'),
+  price: z.union([
+    z.string(),
+    z.number()
+  ]).transform((val) => {
+    if (val === '' || val === null || val === undefined) return 0;
+    const num = typeof val === 'string' ? parseFloat(val) : val;
+    return isNaN(num) ? 0 : num;
+  }).pipe(z.number().nonnegative('El precio debe ser mayor o igual a 0')),
   teacher_id: z.string().min(1, 'El profesor es requerido'),
   schedule_id: z.string().min(1, 'El horario es requerido'),
 })
@@ -91,7 +98,7 @@ export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFor
     {
       name: 'price',
       label: 'Precio (S/)',
-      type: 'text',
+      type: 'price',
       required: true,
       className: 'col-span-2',
       placeholder: 'Ej: 150.00'

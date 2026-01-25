@@ -36,7 +36,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
   const dialogHandlers = useDialogHandlers();
   const {
     inscripciones,
-    fetchInscripciones,
+    fetchInscripcionesByAlumnoId,
     createInscripcion,
     updateInscripcion,
     deleteInscripcion,
@@ -45,8 +45,8 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
   } = useInscripcionesStore();
 
   useEffect(() => {
-    fetchInscripciones();
-  }, []);
+    fetchInscripcionesByAlumnoId(student.id);
+  }, [student]);
 
   useEffect(() => {
     setSelectedInscripcion(dialogHandlers.selectedItem);
@@ -60,6 +60,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
         entity="Inscripción"
         dialogHandlers={dialogHandlers}
       />
+      {/* Dialogs para acciones de inscripciones */}
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}

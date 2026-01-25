@@ -7,7 +7,14 @@ import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";
 import { z } from "zod";
 
 const pagoFormSchema = z.object({
-  payment_amount: z.number().min(0, 'El precio es requerido'),
+  payment_amount: z.union([
+    z.string(),
+    z.number()
+  ]).transform((val) => {
+    if (val === '' || val === null || val === undefined) return 0;
+    const num = typeof val === 'string' ? parseFloat(val) : val;
+    return isNaN(num) ? 0 : num;
+  }).pipe(z.number().nonnegative('El precio debe ser mayor o igual a 0')),
   payment_method: z.enum(['yape', 'efectivo']),
   payment_code: z.string().optional(),
 });
@@ -39,7 +46,7 @@ export function PagoForm({ dialogHandlers, selectedInscripcion, onCreate, onEdit
     {
       name: 'payment_amount',
       label: 'Monto',
-      type: 'integer',
+      type: 'price',
       required: true,
       placeholder: 'Ingresa el monto del pago',
       inputMode: 'numeric',

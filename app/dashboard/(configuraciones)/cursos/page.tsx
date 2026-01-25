@@ -52,7 +52,7 @@ export default function CursosPage() {
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title="Nuevo Curso"
+        title={dialogHandlers.selectedItem ? 'Editar Curso' : 'Nuevo Curso'}
       >
         <CursoForm dialogHandlers={dialogHandlers} onCreate={createCurso} onEdit={updateCurso} />
       </GenericDialog>

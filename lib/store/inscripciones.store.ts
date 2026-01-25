@@ -13,6 +13,7 @@ type InscripcionesStore = {
   setSelectedInscripcion: (inscripcion: Inscripcion | null) => void
 
   fetchInscripciones: () => Promise<void>
+  fetchInscripcionesByAlumnoId: (alumnoId?: string) => Promise<void>
   fetchInscripcionById: (id: string) => Promise<Inscripcion | null>
   createInscripcion: (values: Inscripcion) => Promise<Inscripcion | null>
   updateInscripcion: (values: Inscripcion, id: string) => Promise<Inscripcion | null>
@@ -36,6 +37,25 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       const { data, error } = await supabase
         .from('inscripciones')
         .select(`*, course:cursos (*)`)
+        .order('created_at', { ascending: false }); // Ordenar por más reciente
+
+      if (error) throw error;
+      set({ inscripciones: data ?? [] });
+    } catch (error) {
+      toast.error('No se pudieron cargar las inscripciones');
+    }
+  },
+
+  fetchInscripcionesByAlumnoId: async (alumnoId?: string) => {
+    try {
+      if (!alumnoId) {
+        toast.error('No se proporciono un ID de alumno');
+        return;
+      }
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`*, course:cursos (*)`)
+        .eq('student_id', alumnoId)
         .order('created_at', { ascending: false }); // Ordenar por más reciente
 
       if (error) throw error;

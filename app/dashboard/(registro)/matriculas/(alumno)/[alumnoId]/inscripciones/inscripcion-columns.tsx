@@ -19,13 +19,6 @@ export const columns: ColumnDef<Inscripcion>[] = [
           )}
         </div>
       );
-    },
-    meta: {
-      filterable: {
-        type: 'text',
-        placeholder: '',
-        label: 'Buscar por curso'
-      }
     }
   },
   {

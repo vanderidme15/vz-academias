@@ -3,7 +3,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { CheckCircle2, XCircle } from "lucide-react";
 
 export const columns: ColumnDef<Pago>[] = [
   {
@@ -11,7 +10,7 @@ export const columns: ColumnDef<Pago>[] = [
     header: 'Monto',
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="font-medium">{row.original.payment_amount}</span>
+        <span className="font-medium">S/ {row.original.payment_amount}</span>
       </div>
     )
   },
