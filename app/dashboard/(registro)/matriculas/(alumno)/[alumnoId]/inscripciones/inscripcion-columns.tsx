@@ -26,11 +26,11 @@ export const columns: ColumnDef<Inscripcion>[] = [
     }
   },
   {
-    accessorKey: 'class_count',
+    accessorKey: 'total_classes',
     header: 'Clases',
     cell: ({ row }) => {
-      const inscriptionClassCount = row.original.class_count;
-      const courseClassCount = row.original.course?.class_count;
+      const inscriptionClassCount = row.original.total_classes;
+      const courseClassCount = row.original.course?.total_classes;
       const isPersonalized = row.original.is_personalized;
 
       // Verificar si el número de clases fue modificado
@@ -142,7 +142,7 @@ export const columns: ColumnDef<Inscripcion>[] = [
     header: 'Asistencias',
     cell: ({ row }) => {
       const assistances = row.original.assistances || [];
-      const totalClases = row.original.class_count || row.original.course?.class_count || 0;
+      const totalClases = row.original.class_count || 0;
       const asistenciasRegistradas = assistances.length;
       const porcentaje = totalClases > 0 ? ((asistenciasRegistradas / totalClases) * 100).toFixed(0) : 0;
 

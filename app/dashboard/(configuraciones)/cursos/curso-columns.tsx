@@ -65,17 +65,17 @@ export const columns: ColumnDef<Curso>[] = [
     }
   },
   {
-    accessorKey: 'class_count',
-    header: 'Clases Base',
+    accessorKey: 'total_classes',
+    header: 'Clases',
     cell: ({ row }) => (
       <div className="text-sm text-center">
-        {row.original.class_count ?? '-'}
+        {row.original.total_classes ?? '-'}
       </div>
     ),
   },
   {
     accessorKey: 'price',
-    header: 'Precio Base',
+    header: 'Precio',
     cell: ({ row }) => {
       const price = row.original.price;
       if (!price) return '-';

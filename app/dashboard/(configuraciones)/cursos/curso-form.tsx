@@ -11,7 +11,7 @@ import { z } from "zod";
 const cursoFormSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
-  class_count: z.coerce.number().min(1, 'Debe haber al menos 1 clase').optional(),
+  total_classes: z.coerce.number().min(1, 'Debe haber al menos 1 clase').optional(),
   price: z.union([
     z.string(),
     z.number()
@@ -88,7 +88,7 @@ export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFor
       }))
     },
     {
-      name: 'class_count',
+      name: 'total_classes',
       label: 'Número de Clases Base',
       type: 'integer',
       required: false,

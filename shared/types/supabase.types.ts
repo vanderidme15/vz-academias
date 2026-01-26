@@ -45,7 +45,8 @@ export type Inscripcion = {
   student?: Alumno;
   course_id?: string;
   course?: Curso;
-  class_count?: number;
+  class_count?: number; // clases tomadas
+  total_classes?: number; // clases totales
   payments?: Pago[];
   assistances?: Asistencia[];
   registration_price?: number;
@@ -63,7 +64,7 @@ export type Curso = {
   id?: string;
   name?: string;
   description?: string;
-  class_count?: number;
+  total_classes?: number;
   price?: number;
   schedule_id?: string;
   teacher_id?: string;

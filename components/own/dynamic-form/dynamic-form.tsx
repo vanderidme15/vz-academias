@@ -82,7 +82,7 @@ export function DynamicForm({
 
           let isDisabled = fieldConfig.disabled || formField.disabled;
 
-          if (fieldConfig.name === 'class_count' || fieldConfig.name === 'price_charged') {
+          if (fieldConfig.name === 'total_classes' || fieldConfig.name === 'price_charged') {
             const isPersonalized = form.watch('is_personalized');
             isDisabled = !isPersonalized; // Deshabilitar si no está personalizado
           }

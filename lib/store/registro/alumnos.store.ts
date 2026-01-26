@@ -7,7 +7,9 @@ const supabase = createClient();
 
 type AlumnosStore = {
   alumnos: Alumno[]
+  countAlumnos: number
   fetchAlumnos: () => Promise<void>
+  fetchCountAlumnos: () => Promise<void>
   fetchAlumnoById: (id: string) => Promise<Alumno | null>
   createAlumno: (values: Alumno) => Promise<Alumno | null>
   updateAlumno: (values: Alumno, id: string) => Promise<void>
@@ -16,6 +18,7 @@ type AlumnosStore = {
 
 export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
   alumnos: [],
+  countAlumnos: 0,
 
   fetchAlumnos: async () => {
     try {
@@ -28,6 +31,20 @@ export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
       set({ alumnos: data ?? [] });
     } catch (error) {
       toast.error('No se pudieron cargar los alumnos');
+    }
+  },
+
+  fetchCountAlumnos: async () => {
+    try {
+      const { count, error } = await supabase
+        .from('alumnos')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) throw error;
+
+      set({ countAlumnos: count });
+    } catch (error) {
+      toast.error('No se pudo cargar el conteo de alumnos');
     }
   },
 

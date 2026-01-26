@@ -14,6 +14,7 @@ type InscripcionesStore = {
 
   fetchInscripciones: () => Promise<void>
   fetchInscripcionesByAlumnoId: (alumnoId?: string) => Promise<void>
+  fetchInscripcionesByCursoId: (cursoId?: string) => Promise<Inscripcion[]>
   fetchInscripcionById: (id: string) => Promise<Inscripcion | null>
   createInscripcion: (values: Inscripcion) => Promise<Inscripcion | null>
   updateInscripcion: (values: Inscripcion, id: string) => Promise<Inscripcion | null>
@@ -64,6 +65,44 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       toast.error('No se pudieron cargar las inscripciones');
     }
   },
+
+  fetchInscripcionesByCursoId: async (cursoId?: string) => {
+    if (!cursoId) {
+      toast.error('No se proporcionó un ID de curso');
+      return [];
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`
+        id,
+        course_id,
+        class_count,
+        total_classes,
+        created_at,
+        student:students (
+          id,
+          name
+        )
+      `)
+        .eq('course_id', cursoId)
+        .lt('class_count', supabase.raw('total_classes'))
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error(error);
+        throw error;
+      }
+
+      return data ?? [];
+    } catch (err) {
+      console.error('Error cargando inscripciones:', err);
+      toast.error('No se pudieron cargar las inscripciones');
+      return [];
+    }
+  },
+
 
   fetchInscripcionById: async (id: string) => {
     try {
