@@ -72,3 +72,36 @@ export interface ExtraAction {
   icon: LucideIcon;
   variant?: 'default' | 'destructive'
 }
+
+// Cosas para el check-in
+// ========================================
+// 📁 types/check-in.types.ts
+// ========================================
+export interface CheckInEntity {
+  id?: string
+  name?: string
+  dni?: string
+  age?: number
+  is_under_18?: boolean
+  cellphone_number?: string
+  payment_method?: 'yape' | 'efectivo'
+  payment_recipe_url?: string
+  payment_checked?: boolean
+  parent_name?: string
+  parent_cellphone_number?: string
+  terms_accepted?: boolean
+  is_active?: boolean
+  register_by?: string
+  check_in?: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+export type CheckInType = 'inscripcion' | 'voluntario'
+
+export interface CheckInConfig<T extends CheckInEntity> {
+  type: CheckInType
+  fetchById: (id: string) => Promise<T | null>
+  handleCheckIn: (id: string) => Promise<void>
+  getExtraFields?: (entity: T) => React.ReactNode
+}

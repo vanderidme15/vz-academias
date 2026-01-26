@@ -2,27 +2,24 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, AlertCircle } from "lucide-react"
-import { CheckInEntity, CheckInType } from "@/shared/types/ui.types"
+import { CheckCircle, AlertCircle, DollarSign } from "lucide-react"
+import { Inscripcion, Pago } from "@/shared/types/supabase.types"
 
-
-interface EntityDetailModalProps<T extends CheckInEntity> {
+interface InscripcionDetailModalProps {
   open: boolean
   onClose: () => void
-  entity: T | null
-  onConfirmCheckIn: () => void
-  type: CheckInType
-  extraFields?: React.ReactNode
+  inscripcion: Inscripcion | null
+  onConfirmAction: () => void
+  actionLabel?: string
 }
 
-export function EntityDetailModal<T extends CheckInEntity>({
+export function InscripcionDetailModal({
   open,
   onClose,
-  entity,
-  onConfirmCheckIn,
-  type,
-  extraFields
-}: EntityDetailModalProps<T>) {
+  inscripcion,
+  onConfirmAction,
+  actionLabel = "Confirmar"
+}: InscripcionDetailModalProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString("es-PE", {
@@ -34,92 +31,164 @@ export function EntityDetailModal<T extends CheckInEntity>({
     })
   }
 
-  const getTitle = () => {
-    return type === 'inscripcion' ? 'Inscripción encontrada' : 'Voluntario encontrado'
+  const formatCurrency = (amount?: number) => {
+    if (!amount) return "S/ 0.00"
+    return `S/ ${amount.toFixed(2)}`
   }
 
-  if (!entity) return null
+  if (!inscripcion) return null
+
+  const student = inscripcion.student
+  const course = inscripcion.course
+  const progress = inscripcion.total_classes
+    ? `${inscripcion.class_count || 0}/${inscripcion.total_classes}`
+    : "N/A"
+
+  // Calcular información de pagos
+  const payments = inscripcion.payments || []
+  const totalPaid = payments.reduce((sum: number, payment: Pago) => sum + (payment.payment_amount || 0), 0)
+  const amountCharged = inscripcion.price_charged || 0
+  const remainingBalance = amountCharged - totalPaid
+  const hasPayments = payments.length > 0
+  const isFullyPaid = remainingBalance <= 0
+
+  // Mostrar advertencia si no tiene pagos o no está completamente pagado
+  const showPaymentWarning = !hasPayments || !isFullyPaid
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="w-6 h-6 text-green-500" />
-            {getTitle()}
+            Detalle de Inscripción
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4">
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            {/* Datos del alumno */}
             <div>
-              <span className="text-sm text-gray-500">Nombre</span>
-              <p className="font-semibold">{entity.name || "N/A"}</p>
+              <span className="text-sm text-gray-500">Alumno</span>
+              <p className="font-semibold">{student?.name || "N/A"}</p>
+              {student?.dni && (
+                <p className="text-sm text-gray-600">DNI: {student.dni}</p>
+              )}
             </div>
+
+            {/* Datos del curso */}
+            <div className="pt-3 border-t border-gray-200">
+              <span className="text-sm text-gray-500">Curso</span>
+              <p className="font-semibold">{course?.name || "N/A"}</p>
+              {inscripcion.is_personalized && (
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">
+                  Personalizado
+                </span>
+              )}
+            </div>
+
+            {/* Progreso */}
             <div>
-              <span className="text-sm text-gray-500">DNI</span>
-              <p className="font-semibold">{entity.dni || "N/A"}</p>
+              <span className="text-sm text-gray-500">Progreso</span>
+              <p className="font-semibold">{progress} clases</p>
             </div>
-            <div>
-              <span className="text-sm text-gray-500">Edad</span>
-              <p className="font-semibold">{entity.age || "N/A"} años</p>
-            </div>
-            {entity.cellphone_number && (
+
+            {/* Información de pago */}
+            <div className="pt-3 border-t border-gray-200 space-y-2">
               <div>
-                <span className="text-sm text-gray-500">Celular</span>
-                <p className="font-semibold">{entity.cellphone_number}</p>
+                <span className="text-sm text-gray-500">Monto a cobrar</span>
+                <p className="font-semibold">{formatCurrency(amountCharged)}</p>
+                {inscripcion.includes_registration && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    (Incluye matrícula: {formatCurrency(inscripcion.registration_price)})
+                  </p>
+                )}
               </div>
-            )}
 
-            {/* Campos extra específicos del tipo */}
-            {extraFields}
+              <div>
+                <span className="text-sm text-gray-500">Total pagado</span>
+                <p className={`font-semibold ${isFullyPaid ? 'text-green-600' : 'text-orange-600'}`}>
+                  {formatCurrency(totalPaid)}
+                </p>
+              </div>
 
-            <div>
-              <span className="text-sm text-gray-500">Método de pago</span>
-              <p className="font-semibold capitalize">{entity.payment_method || "N/A"}</p>
+              {remainingBalance > 0 && (
+                <div>
+                  <span className="text-sm text-gray-500">Saldo pendiente</span>
+                  <p className="font-semibold text-red-600">{formatCurrency(remainingBalance)}</p>
+                </div>
+              )}
+
+              <div>
+                <span className="text-sm text-gray-500">Estado de pago</span>
+                <p className="font-semibold">
+                  {isFullyPaid ? (
+                    <span className="text-green-600">✓ Pagado</span>
+                  ) : hasPayments ? (
+                    <span className="text-orange-600">⚠ Pago parcial</span>
+                  ) : (
+                    <span className="text-red-600">✗ Sin pagos</span>
+                  )}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className="text-sm text-gray-500">Pago verificado</span>
-              <p className="font-semibold">
-                {entity.payment_checked ? (
-                  <span className="text-green-600">✓ Verificado</span>
-                ) : (
-                  <span className="text-orange-600">⚠ Pendiente</span>
-                )}
-              </p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Estado check-in</span>
-              <p className="font-semibold">
-                {entity.check_in ? (
-                  <span className="text-green-600">✓ Ya realizó check-in</span>
-                ) : (
-                  <span className="text-gray-600">Pendiente</span>
-                )}
-              </p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Fecha de registro</span>
-              <p className="text-sm">{formatDate(entity.created_at)}</p>
-            </div>
-            {entity.is_under_18 && entity.parent_name && (
+
+            {/* Lista de pagos */}
+            {hasPayments && (
               <div className="pt-3 border-t border-gray-200">
-                <span className="text-sm text-gray-500">Tutor</span>
-                <p className="font-semibold">{entity.parent_name}</p>
-                {entity.parent_cellphone_number && (
-                  <p className="text-sm text-gray-600">{entity.parent_cellphone_number}</p>
-                )}
+                <span className="text-sm text-gray-500 mb-2 block">Pagos registrados</span>
+                <div className="space-y-2">
+                  {payments.map((payment: Pago, index: number) => (
+                    <div key={payment.id || index} className="bg-white p-2 rounded border border-gray-200">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-medium">{formatCurrency(payment.payment_amount)}</p>
+                          <p className="text-xs text-gray-600 capitalize">
+                            {payment.payment_method}
+                            {payment.payment_code && ` - ${payment.payment_code}`}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500">{formatDate(payment.created_at)}</p>
+                      </div>
+                      {payment.register_by && (
+                        <p className="text-xs text-gray-500 mt-1">Por: {payment.register_by}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* Observaciones */}
+            {inscripcion.observations && (
+              <div className="pt-3 border-t border-gray-200">
+                <span className="text-sm text-gray-500">Observaciones</span>
+                <p className="text-sm">{inscripcion.observations}</p>
+              </div>
+            )}
+
+            {/* Registrado por */}
+            {inscripcion.register_by && (
+              <div>
+                <span className="text-sm text-gray-500">Registrado por</span>
+                <p className="text-sm">{inscripcion.register_by}</p>
+              </div>
+            )}
+
+            {/* Fecha */}
+            <div>
+              <span className="text-sm text-gray-500">Fecha de inscripción</span>
+              <p className="text-sm">{formatDate(inscripcion.created_at)}</p>
+            </div>
           </div>
 
+          {/* Botones de acción */}
           <div className="flex gap-2">
             <Button
-              onClick={onConfirmCheckIn}
+              onClick={onConfirmAction}
               className="flex-1"
-              disabled={!entity.payment_checked}
             >
-              {entity.check_in ? "Cancelar check-in" : "Confirmar check-in"}
+              {actionLabel}
             </Button>
             <Button
               onClick={onClose}
@@ -130,11 +199,15 @@ export function EntityDetailModal<T extends CheckInEntity>({
             </Button>
           </div>
 
-          {!entity.payment_checked && (
+          {/* Advertencia de pago */}
+          {showPaymentWarning && (
             <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
               <AlertCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
               <p className="text-xs text-orange-700">
-                El pago aún no ha sido verificado. Debe verificarse antes de realizar el check-in.
+                {!hasPayments
+                  ? "No se han registrado pagos para esta inscripción."
+                  : `Falta pagar ${formatCurrency(remainingBalance)} para completar el pago.`
+                }
               </p>
             </div>
           )}

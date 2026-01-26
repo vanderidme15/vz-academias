@@ -3,6 +3,7 @@ import { toast } from "sonner"
 import { v4 as uuidv4 } from 'uuid';
 import { createClient } from "../../supabase/client"
 import { Inscripcion, InscripcionWithRelations } from "@/shared/types/supabase.types";
+import { useAsistenciasStore } from "./asistencias.store";
 
 const supabase = createClient();
 
@@ -28,6 +29,7 @@ type InscripcionesStore = {
   updatePayment: (values: Record<string, any>, paymentId: string, inscripcionId?: string) => Promise<void>
   deletePayment: (paymentId: string, inscripcionId?: string) => Promise<void>
 
+  handleConfirmCheckIn: (inscripcionId: string) => Promise<void>
 }
 
 export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
@@ -381,5 +383,47 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     } catch (error) {
       toast.error('El pago no se pudo eliminar');
     }
-  }
+  },
+
+  handleConfirmCheckIn: async (inscripcionId: string) => {
+    try {
+      const attendance = useAsistenciasStore.getState().markAsistenciaByStudent(inscripcionId);
+
+      if (!attendance) {
+        toast.error('No se pudo marcar la asistencia');
+        return;
+      }
+
+      // Primero obtenemos el valor actual
+      const { data: currentData, error: fetchError } = await supabase
+        .from('inscripciones')
+        .select('class_count')
+        .eq('id', inscripcionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Incrementamos el valor
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .update({ class_count: (currentData.class_count || 0) + 1 })
+        .eq('id', inscripcionId)
+        .select(`*, course:cursos (*)`)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        set({
+          inscripciones: get().inscripciones.map(
+            inscripcion => inscripcion.id === inscripcionId ? data : inscripcion
+          ),
+          selectedInscripcion: data
+        });
+        toast.success('Asistencia confirmada correctamente');
+      }
+    } catch (error) {
+      toast.error('La asistencia no se pudo confirmar');
+    }
+  },
 }))

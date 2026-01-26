@@ -9,8 +9,12 @@ import { NotebookPenIcon, QrCodeIcon, SearchIcon } from "lucide-react"
 import { useCursosStore } from "@/lib/store/configuraciones/cursos.store"
 import AsistenciaCursoDetalle from "./(registro)/asistencia/asistencia-curso-detalle"
 import { useState } from "react"
-import { Curso } from "@/shared/types/supabase.types"
+import { Curso, Inscripcion } from "@/shared/types/supabase.types"
 import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store"
+import { QRScannerModal } from "@/components/own/check-in/qr-scanner-modal"
+import { InscripcionDetailModal } from "@/components/own/check-in/entity-detail-modal"
+import { useCheckIn } from "@/components/own/check-in/use-check-in"
+import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store"
 
 export default function DashboardPage() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -20,6 +24,7 @@ export default function DashboardPage() {
   const { academia } = useAcademiaStore();
   const { fetchCursos, cursos } = useCursosStore();
   const { fetchProfesores } = useProfesoresStore();
+  const { fetchInscripcionById, handleConfirmCheckIn } = useInscripcionesStore();
 
   const today = new Date();
 
@@ -28,6 +33,12 @@ export default function DashboardPage() {
     fetchCursos();
     fetchProfesores();
   }, []);
+
+  const checkInInscripciones = useCheckIn<Inscripcion>({
+    type: 'inscripcion',
+    fetchById: fetchInscripcionById,
+    handleCheckIn: handleConfirmCheckIn,
+  })
 
   return (
     <>
@@ -56,7 +67,7 @@ export default function DashboardPage() {
               <Button>
                 <SearchIcon /> Buscar Alumno
               </Button>
-              <Button>
+              <Button onClick={checkInInscripciones.handleStartScan}>
                 <QrCodeIcon /> Marcar Asistencia con QR
               </Button>
             </div>
@@ -95,6 +106,25 @@ export default function DashboardPage() {
         openDialog={openDialog}
         setOpenDialog={setOpenDialog}
         curso={selectedCourse}
+      />
+      <QRScannerModal
+        open={checkInInscripciones.showScanModal}
+        onClose={checkInInscripciones.handleCloseScanModal}
+        onQRScanned={checkInInscripciones.handleQRScanned}
+      />
+
+      {/* <EntityDetailModal
+        open={checkInInscripciones.showResultModal}
+        onClose={checkInInscripciones.handleCloseResultModal}
+        entity={checkInInscripciones.scanResult}
+        onConfirmCheckIn={checkInInscripciones.handleConfirmCheckIn}
+      /> */}
+      <InscripcionDetailModal
+        open={checkInInscripciones.showResultModal}
+        onClose={checkInInscripciones.handleCloseResultModal}
+        inscripcion={checkInInscripciones.scanResult}
+        onConfirmAction={checkInInscripciones.handleConfirmCheckIn}
+        actionLabel="Registrar asistencia" // Opcional, por defecto es "Confirmar"
       />
     </>
   )
