@@ -67,9 +67,11 @@ export type InscripcionWithRelations = Inscripcion & {
     dni: string;
   };
   attendance?: {
+    attendance_id: string | null;
     has_attendance: boolean;
     own_check: boolean | null;
     admin_check: boolean | null;
+    teacher_id: string | null;
   };
 };
 

@@ -78,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>
-          <SidebarMenu>
+          {/* <SidebarMenu>
             <SidebarMenuItem>
               <Link href="/dashboard/asistencia">
                 <SidebarMenuButton tooltip="Asistencia">
@@ -87,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-          </SidebarMenu>
+          </SidebarMenu> */}
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Configuraciones</SidebarGroupLabel>
@@ -122,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarGroupLabel>Reportes</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -134,7 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarGroup>
+        </SidebarGroup> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
