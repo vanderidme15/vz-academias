@@ -172,7 +172,7 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       label: 'Nombre del padre ó tutor',
       type: 'text',
       required: true,
-      className: 'col-span-4',
+      className: 'col-span-2',
       placeholder: 'Requerido si es menor de 18 años',
       dependsOn: { field: 'is_under_18', value: true } // 👁️ Solo visible si es menor
     },
@@ -181,8 +181,11 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       label: 'Número del padre ó tutor',
       type: 'text',
       required: true,
-      className: 'col-span-4',
+      className: 'col-span-2',
       placeholder: 'Requerido si es menor de 18 años',
+      inputMode: 'numeric',
+      pattern: '[0-9]*',
+      maxLength: 9,
       dependsOn: { field: 'is_under_18', value: true } // 👁️ Solo visible si es menor
     },
     {

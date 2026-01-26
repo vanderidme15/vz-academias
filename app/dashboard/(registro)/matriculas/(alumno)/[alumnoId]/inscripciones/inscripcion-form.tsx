@@ -21,7 +21,18 @@ import { useAcademiaStore } from "@/lib/store/academia.store";
 
 const inscripcionFormSchema = z.object({
   course_id: z.string().min(1, 'El curso es requerido'),
+  class_count: z.number().optional(),
+  price_charged: z.union([
+    z.string(),
+    z.number()
+  ]).transform((val) => {
+    if (val === '' || val === null || val === undefined) return 0;
+    const num = typeof val === 'string' ? parseFloat(val) : val;
+    return isNaN(num) ? 0 : num;
+  }).pipe(z.number().nonnegative('El precio debe ser mayor o igual a 0')),
+  is_personalized: z.boolean().default(false),
   includes_registration: z.boolean().default(false),
+  observations: z.string().optional(),
 });
 
 interface InscripcionFormProps {
@@ -70,7 +81,78 @@ export default function InscripcionForm({
             </span>
           </div>
         )
-      }))
+      })),
+      onChange: (value: string, setValue: any, getValues: any) => {
+        // Buscar el curso seleccionado
+        const selectedCourse = cursos.find(c => c.id === value);
+
+        if (selectedCourse) {
+          // Auto-rellenar los campos con los datos del curso
+          setValue('class_count', selectedCourse.class_count || 0);
+          setValue('price_charged', selectedCourse.price || 0);
+
+          // Si no está personalizado, mantener deshabilitados los campos
+          const isPersonalized = getValues('is_personalized');
+          if (!isPersonalized) {
+            // Los campos se actualizan pero permanecen deshabilitados
+            setValue('is_personalized', false);
+          }
+        }
+      }
+    },
+    {
+      name: 'is_personalized',
+      label: '¿Personalizar clases y precio?',
+      type: 'checkbox',
+      required: false,
+      className: 'col-span-4',
+      dependsOn: {
+        field: 'course_id',
+        value: undefined
+      },
+      helpText: 'Habilita esta opción para modificar el número de clases y el precio del curso',
+      onChange: (value: boolean, setValue: any, getValues: any) => {
+        // Si se deshabilita la personalización, restaurar valores del curso
+        if (!value) {
+          const courseId = getValues('course_id');
+          const selectedCourse = cursos.find(c => c.id === courseId);
+
+          if (selectedCourse) {
+            setValue('class_count', selectedCourse.class_count || 0);
+            setValue('price_charged', selectedCourse.price || 0);
+          }
+        }
+      }
+    },
+    {
+      name: 'class_count',
+      label: 'Número de Clases',
+      type: 'integer',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ej: 12',
+      dependsOn: {
+        field: 'course_id',
+        value: undefined
+      },
+      helpText: 'Cantidad de clases del curso',
+      // Deshabilitar si no está personalizado
+      disabled: false, // Se manejará dinámicamente
+    },
+    {
+      name: 'price_charged',
+      label: 'Monto del Curso (S/)',
+      type: 'price',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ej: 150.00',
+      dependsOn: {
+        field: 'course_id',
+        value: undefined
+      },
+      helpText: 'Precio base del curso (sin matrícula)',
+      // Deshabilitar si no está personalizado
+      disabled: false, // Se manejará dinámicamente
     },
     {
       name: 'includes_registration',
@@ -79,7 +161,35 @@ export default function InscripcionForm({
       required: false,
       className: hasRegistration ? 'col-span-4' : 'hidden',
     },
+    {
+      name: 'observations',
+      label: 'Observaciones',
+      type: 'textarea',
+      required: false,
+      className: 'col-span-4',
+    }
   ], [cursos, hasRegistration, registrationPrice]);
+
+  // Ajustar disabled dinámicamente basado en is_personalized
+  const fieldsWithDynamicDisabled = useMemo(() => {
+    return fields.map(field => {
+      if (field.name === 'class_count' || field.name === 'price_charged') {
+        return {
+          ...field,
+          // Estos campos estarán deshabilitados a menos que is_personalized sea true
+          dependsOn: {
+            field: 'course_id',
+            value: undefined
+          },
+          // Usamos un truco: agregamos una segunda condición
+          onChange: field.onChange || ((value: any, setValue: any, getValues: any) => {
+            // Este onChange se ejecutará normalmente
+          })
+        };
+      }
+      return field;
+    });
+  }, [fields]);
 
   // Obtener curso seleccionado
   const getSelectedCourse = (courseId: string) => {
@@ -87,9 +197,9 @@ export default function InscripcionForm({
   };
 
   // Calcular precios
-  const calculatePrices = (courseId: string, includesRegistration: boolean) => {
+  const calculatePrices = (courseId: string, includesRegistration: boolean, customPrice?: number) => {
     const course = getSelectedCourse(courseId);
-    const coursePrice = course?.price ?? 0;
+    const coursePrice = customPrice ?? course?.price ?? 0;
     const registrationFee = includesRegistration ? registrationPrice : 0;
     const totalPrice = coursePrice + registrationFee;
 
@@ -111,8 +221,13 @@ export default function InscripcionForm({
       };
     }
 
-    const prices = calculatePrices(values.course_id, values.includes_registration);
+    const prices = calculatePrices(
+      values.course_id,
+      values.includes_registration,
+      values.price_charged
+    );
     const action = isEdit ? 'actualizará' : 'creará';
+    const isPersonalized = values.is_personalized ? ' (Personalizado)' : '';
 
     return {
       title: `¿Confirmar ${isEdit ? 'edición' : 'nueva inscripción'}?`,
@@ -120,27 +235,36 @@ export default function InscripcionForm({
         `
         Se ${action} la inscripción para ${student.name} con:
 
-        • Curso: ${course.name}
+        • Curso: ${course.name}${isPersonalized}
         • Horario: ${course.schedule?.name ?? 'Sin horario'}
-        • Precio del curso: S/ ${prices.coursePrice.toFixed(2)}
+        • Número de clases: ${values.class_count || 'No especificado'}
+        • Precio del curso: S/ ${(values.price_charged || 0).toFixed(2)}
         ${values.includes_registration ? `• Matrícula: S/ ${prices.registrationFee.toFixed(2)}` : ''}
-        • Total: S/ ${prices.totalPrice.toFixed(2)}
+        • Total a cobrar: S/ ${prices.totalPrice.toFixed(2)}
+        ${values.observations ? `• Observaciones: ${values.observations}` : ''}
       `.trim()
     };
   };
 
   // Construir datos de inscripción
   const buildInscripcionData = (values: Record<string, any>): Inscripcion => {
-    const prices = calculatePrices(values.course_id, values.includes_registration);
+    const prices = calculatePrices(
+      values.course_id,
+      values.includes_registration,
+      values.price_charged
+    );
 
     return {
       student_id: student.id,
       course_id: values.course_id,
+      class_count: values.class_count || 0,
+      is_personalized: values.is_personalized || false,
       includes_registration: values.includes_registration,
       price_charged: prices.totalPrice,
       registration_price: prices.registrationFee,
-      course_price: prices.coursePrice,
+      course_price: values.price_charged || 0,
       register_by: user?.email,
+      observations: values.observations,
     };
   };
 
@@ -182,7 +306,7 @@ export default function InscripcionForm({
     <>
       <DynamicForm
         schema={inscripcionFormSchema}
-        fields={fields}
+        fields={fieldsWithDynamicDisabled}
         onSubmit={handleFormSubmit}
         selectedItem={dialogHandlers.selectedItem}
         className='w-full grid-cols-4'

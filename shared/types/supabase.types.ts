@@ -45,6 +45,7 @@ export type Inscripcion = {
   student?: Alumno;
   course_id?: string;
   course?: Curso;
+  class_count?: number;
   payments?: Pago[];
   assistances?: Asistencia[];
   registration_price?: number;
@@ -52,6 +53,8 @@ export type Inscripcion = {
   price_charged?: number;
   includes_registration?: boolean;
   register_by?: string;
+  is_personalized?: boolean;
+  observations?: string;
   created_at?: string;
   updated_at?: string;
 }

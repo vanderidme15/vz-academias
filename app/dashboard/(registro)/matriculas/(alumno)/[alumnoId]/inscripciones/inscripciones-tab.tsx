@@ -46,7 +46,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
 
   useEffect(() => {
     fetchInscripcionesByAlumnoId(student.id);
-  }, [student]);
+  }, [student, fetchInscripcionesByAlumnoId]);
 
   useEffect(() => {
     setSelectedInscripcion(dialogHandlers.selectedItem);

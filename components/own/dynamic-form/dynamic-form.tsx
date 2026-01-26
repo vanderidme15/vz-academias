@@ -48,16 +48,21 @@ export function DynamicForm({
     await onSubmit(data)
   }
 
-  // 👁️ Función para verificar si un campo debe mostrarse
   const shouldShowField = (fieldConfig: FieldConfig): boolean => {
     if (!fieldConfig.dependsOn) return true;
 
     const dependentValue = form.watch(fieldConfig.dependsOn.field);
+
+    // Si value es undefined, verifica solo que exista un valor (truthy)
+    if (fieldConfig.dependsOn.value === undefined) {
+      return !!dependentValue;
+    }
+
+    // Si tiene un valor específico, verifica que coincida exactamente
     return dependentValue === fieldConfig.dependsOn.value;
-  }
+  };
 
   const renderField = (fieldConfig: FieldConfig) => {
-    // 👁️ No renderizar si el campo no debe mostrarse
     if (!shouldShowField(fieldConfig)) {
       return null;
     }
@@ -68,20 +73,24 @@ export function DynamicForm({
         control={form.control}
         name={fieldConfig.name}
         render={({ field: formField }) => {
-          // 🎯 Wrapper para onChange personalizado
           const handleChange = (value: any) => {
             formField.onChange(value);
-
-            // Ejecutar onChange personalizado si existe
             if (fieldConfig.onChange) {
               fieldConfig.onChange(value, form.setValue, form.getValues);
             }
           };
 
+          let isDisabled = fieldConfig.disabled || formField.disabled;
+
+          if (fieldConfig.name === 'class_count' || fieldConfig.name === 'price_charged') {
+            const isPersonalized = form.watch('is_personalized');
+            isDisabled = !isPersonalized; // Deshabilitar si no está personalizado
+          }
+
           const enhancedFormField = {
             ...formField,
             onChange: handleChange,
-            disabled: fieldConfig.disabled || formField.disabled
+            disabled: isDisabled
           };
 
           switch (fieldConfig.type) {
