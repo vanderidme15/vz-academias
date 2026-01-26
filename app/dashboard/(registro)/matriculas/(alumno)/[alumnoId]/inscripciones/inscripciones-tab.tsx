@@ -4,14 +4,15 @@ import DeleteDialog from "@/components/own/generic-dialog/delete-dialog";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import { DataTable } from "@/components/own/table/data-table";
 import { Alumno, Inscripcion } from "@/shared/types/supabase.types";
-import { DialogHandlers } from "@/shared/types/ui.types";
+import { DialogHandlers, ExtraAction } from "@/shared/types/ui.types";
 import { useEffect, useMemo, useState } from "react";
 import { columns } from "./inscripcion-columns";
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
 import InscripcionForm from "./inscripcion-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import InscripcionPagosTable from "./inscripcion-pagos/inscripcion-pagos-table";
-import { PiggyBankIcon } from "lucide-react";
+import { EyeIcon, PiggyBankIcon, SendIcon } from "lucide-react";
+import { toast } from "sonner";
 
 
 function useDialogHandlers(): DialogHandlers {
@@ -52,6 +53,44 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
     setSelectedInscripcion(dialogHandlers.selectedItem);
   }, [dialogHandlers.selectedItem]);
 
+  const extraActions: ExtraAction[] = [
+    {
+      label: "Compartir Carnet",
+      handler: async (inscripcion: Inscripcion) => {
+        const url = `${window.location.origin}/carnet/${inscripcion.id}`;
+        const mensaje = `Hola ${inscripcion.student?.name || ''}, aquí está tu carnet de inscripción: ${url}, por favor preséntalo en la entrada`;
+        console.log(inscripcion);
+        // Usar el número del estudiante o del padre si es menor de edad
+        const numero = inscripcion.student?.is_under_18 && inscripcion.student?.parent_cellphone
+          ? inscripcion.student.parent_cellphone
+          : inscripcion.student?.cellphone;
+
+        if (!numero) {
+          toast.error("No hay número de teléfono registrado");
+          return;
+        }
+
+        // Limpiar el número (remover espacios, guiones, etc.)
+        const numeroLimpio = numero.replace(/\D/g, '');
+
+        // Agregar código de país de Perú (+51)
+        const numeroCompleto = `51${numeroLimpio}`;
+
+        const whatsappUrl = `https://wa.me/${numeroCompleto}?text=${encodeURIComponent(mensaje)}`;
+        window.open(whatsappUrl, "_blank");
+      },
+      icon: SendIcon
+    },
+    {
+      label: "Ver Carnet",
+      handler: (inscripcion: Inscripcion) => {
+        const url = `${window.location.origin}/carnet/${inscripcion.id}`;
+        window.open(url, "_blank");
+      },
+      icon: EyeIcon
+    },
+  ];
+
   return (
     <div className="h-full flex flex-col overflow-auto">
       <DataTable<Inscripcion, unknown>
@@ -59,6 +98,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
         data={inscripciones || []}
         entity="Inscripción"
         dialogHandlers={dialogHandlers}
+        extraActions={extraActions}
       />
       {/* Dialogs para acciones de inscripciones */}
       <GenericDialog

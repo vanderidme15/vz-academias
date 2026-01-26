@@ -18,7 +18,7 @@ type InscripcionesStore = {
   fetchInscripcionesByCursoId: (cursoId?: string) => Promise<InscripcionWithRelations[]>
   fetchInscripcionesByCursoIdYFecha: (cursoId?: string, fecha?: string) => Promise<InscripcionWithRelations[]>
 
-  fetchInscripcionById: (id: string) => Promise<Inscripcion | null>
+  fetchInscripcionById: (id?: string) => Promise<Inscripcion | null>
   createInscripcion: (values: Inscripcion) => Promise<Inscripcion | null>
   updateInscripcion: (values: Inscripcion, id: string) => Promise<Inscripcion | null>
   deleteInscripcion: (id: string) => Promise<void>
@@ -58,7 +58,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       }
       const { data, error } = await supabase
         .from('inscripciones')
-        .select(`*, course:cursos (*)`)
+        .select(`*, course:cursos (*), student:alumnos (*)`)
         .eq('student_id', alumnoId)
         .order('created_at', { ascending: false }); // Ordenar por más reciente
 
@@ -164,11 +164,11 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     }
   },
 
-  fetchInscripcionById: async (id: string) => {
+  fetchInscripcionById: async (id?: string) => {
     try {
       const { data, error } = await supabase
         .from('inscripciones')
-        .select(`*, course:cursos (*)`)
+        .select(`*, course:cursos (*), student:alumnos (*)`)
         .eq('id', id)
         .single();
 

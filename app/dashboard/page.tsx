@@ -1,7 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
 import { useAcademiaStore } from "@/lib/store/academia.store"
 import { formatDate } from "@/lib/utils-functions/format-date"
 import { useAlumnosStore } from "@/lib/store/registro/alumnos.store"
@@ -52,17 +50,14 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="w-full flex flex-col gap-4">
-          <div className="w-full grid grid-cols-3 gap-4 bg-muted p-4 rounded-xl">
-            <h3 className="col-span-3 text-xl font-bold">Asistencia rápida</h3>
-            <div className="col-span-2 relative">
-              <Input placeholder="Buscar por nombre o codigo" className="bg-card" />
-              <Button variant="ghost" className="absolute right-2">
-                <SearchIcon />
+          <div className="w-full gap-4 bg-muted p-4 rounded-xl">
+            <h3 className="text-xl font-bold w-full">Asistencia rápida</h3>
+            <div className="flex justify-center items-center gap-2 w-full">
+              <Button>
+                <SearchIcon /> Buscar Alumno
               </Button>
-            </div>
-            <div className="col-span-1">
-              <Button className="w-full">
-                <QrCodeIcon /> Marcar Asistencia QR
+              <Button>
+                <QrCodeIcon /> Marcar Asistencia con QR
               </Button>
             </div>
           </div>
