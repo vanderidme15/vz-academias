@@ -138,29 +138,19 @@ export const columns: ColumnDef<Inscripcion>[] = [
     }
   },
   {
-    accessorKey: 'assistances',
+    accessorKey: 'class_count',
     header: 'Asistencias',
     cell: ({ row }) => {
-      const assistances = row.original.assistances || [];
-      const totalClases = row.original.class_count || 0;
-      const asistenciasRegistradas = assistances.length;
-      const porcentaje = totalClases > 0 ? ((asistenciasRegistradas / totalClases) * 100).toFixed(0) : 0;
+      const assistances = row.original.class_count || 0;
+      const totalClasses = row.original.total_classes || 0;
+      const porcentaje = totalClasses > 0 ? ((assistances / totalClasses) * 100).toFixed(0) : 0;
 
       return (
         <div className="flex flex-col text-sm">
           <span className="font-medium">
-            {asistenciasRegistradas} / {totalClases}
+            {assistances} / {totalClasses}
+            <span className="text-xs text-muted-foreground"> ({porcentaje}%)</span>
           </span>
-          {totalClases > 0 && (
-            <span className={cn(
-              "text-xs font-medium",
-              Number(porcentaje) >= 80 ? "text-green-600" :
-                Number(porcentaje) >= 60 ? "text-yellow-600" :
-                  "text-red-600"
-            )}>
-              {porcentaje}% asistencia
-            </span>
-          )}
         </div>
       );
     }

@@ -12,6 +12,7 @@ import { useCursosStore } from "@/lib/store/configuraciones/cursos.store"
 import AsistenciaCursoDetalle from "./(registro)/asistencia/asistencia-curso-detalle"
 import { useState } from "react"
 import { Curso } from "@/shared/types/supabase.types"
+import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store"
 
 export default function DashboardPage() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -20,12 +21,14 @@ export default function DashboardPage() {
   const { countAlumnos, fetchCountAlumnos } = useAlumnosStore();
   const { academia } = useAcademiaStore();
   const { fetchCursos, cursos } = useCursosStore();
+  const { fetchProfesores } = useProfesoresStore();
 
   const today = new Date();
 
   useEffect(() => {
     fetchCountAlumnos();
     fetchCursos();
+    fetchProfesores();
   }, []);
 
   return (

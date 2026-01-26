@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from 'uuid';
 import { createClient } from "../../supabase/client"
-import { Inscripcion } from "@/shared/types/supabase.types";
+import { Inscripcion, InscripcionWithRelations } from "@/shared/types/supabase.types";
 
 const supabase = createClient();
 
@@ -14,7 +14,10 @@ type InscripcionesStore = {
 
   fetchInscripciones: () => Promise<void>
   fetchInscripcionesByAlumnoId: (alumnoId?: string) => Promise<void>
-  fetchInscripcionesByCursoId: (cursoId?: string) => Promise<Inscripcion[]>
+  // fetch a vistas para traer inscripciones con asistencia
+  fetchInscripcionesByCursoId: (cursoId?: string) => Promise<InscripcionWithRelations[]>
+  fetchInscripcionesByCursoIdYFecha: (cursoId?: string, fecha?: string) => Promise<InscripcionWithRelations[]>
+
   fetchInscripcionById: (id: string) => Promise<Inscripcion | null>
   createInscripcion: (values: Inscripcion) => Promise<Inscripcion | null>
   updateInscripcion: (values: Inscripcion, id: string) => Promise<Inscripcion | null>
@@ -66,6 +69,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     }
   },
 
+  // Función para HOY (más simple y eficiente)
   fetchInscripcionesByCursoId: async (cursoId?: string) => {
     if (!cursoId) {
       toast.error('No se proporcionó un ID de curso');
@@ -74,35 +78,91 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
 
     try {
       const { data, error } = await supabase
-        .from('inscripciones')
-        .select(`
-        id,
-        course_id,
-        class_count,
-        total_classes,
-        created_at,
-        student:students (
-          id,
-          name
-        )
-      `)
-        .eq('course_id', cursoId)
-        .lt('class_count', supabase.raw('total_classes'))
-        .order('created_at', { ascending: false });
+        .rpc('get_inscripciones_activas_por_curso', {
+          p_course_id: cursoId
+        });
 
-      if (error) {
-        console.error(error);
-        throw error;
-      }
+      if (error) throw error;
 
-      return data ?? [];
+      // Transformar para mantener la estructura original con "student"
+      const transformedData = (data || []).map((item: any) => ({
+        id: item.id,
+        course_id: item.course_id,
+        student_id: item.student_id,
+        class_count: item.class_count,
+        total_classes: item.total_classes,
+        created_at: item.created_at,
+        attendance: {
+          id: item.attendance_id,
+          date_time: item.attendance_date_time,
+          own_check: item.own_check,
+          admin_check: item.admin_check,
+          rescheduled: item.rescheduled,
+          teacher_id: item.teacher_id,
+          has_attendance: item.has_attendance,
+        },
+        student: {
+          id: item.student_id,
+          name: item.student_name,
+          dni: item.student_dni
+        }
+      }));
+
+      return transformedData;
     } catch (err) {
-      console.error('Error cargando inscripciones:', err);
+      console.error(err);
       toast.error('No se pudieron cargar las inscripciones');
       return [];
     }
   },
 
+  // Función para FECHA ESPECÍFICA
+  fetchInscripcionesByCursoIdYFecha: async (cursoId?: string, fecha?: string) => {
+    if (!cursoId) {
+      toast.error('No se proporcionó un ID de curso');
+      return [];
+    }
+
+    try {
+      const { data, error } = await supabase
+        .rpc('get_inscripciones_activas_por_curso_fecha', {
+          p_course_id: cursoId,
+          p_fecha: fecha || new Date().toISOString().split('T')[0]
+        });
+
+      if (error) throw error;
+
+      // Transformar para mantener la estructura original
+      const transformedData = (data || []).map((item: any) => ({
+        id: item.id,
+        course_id: item.course_id,
+        student_id: item.student_id,
+        class_count: item.class_count,
+        total_classes: item.total_classes,
+        created_at: item.created_at,
+        attendance: {
+          id: item.attendance_id,
+          date_time: item.attendance_date_time,
+          own_check: item.own_check,
+          admin_check: item.admin_check,
+          rescheduled: item.rescheduled,
+          teacher_id: item.teacher_id,
+          has_attendance: item.has_attendance,
+        },
+        student: {
+          id: item.student_id,
+          name: item.student_name,
+          dni: item.student_dni
+        }
+      }));
+
+      return transformedData;
+    } catch (err) {
+      console.error(err);
+      toast.error('No se pudieron cargar las inscripciones');
+      return [];
+    }
+  },
 
   fetchInscripcionById: async (id: string) => {
     try {

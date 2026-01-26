@@ -60,6 +60,19 @@ export type Inscripcion = {
   updated_at?: string;
 }
 
+export type InscripcionWithRelations = Inscripcion & {
+  student?: {
+    id: string;
+    name: string;
+    dni: string;
+  };
+  attendance?: {
+    has_attendance: boolean;
+    own_check: boolean | null;
+    admin_check: boolean | null;
+  };
+};
+
 export type Curso = {
   id?: string;
   name?: string;
