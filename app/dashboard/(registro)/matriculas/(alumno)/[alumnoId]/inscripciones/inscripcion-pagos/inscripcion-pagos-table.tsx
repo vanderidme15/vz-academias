@@ -4,7 +4,7 @@ import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import DeleteDialog from "@/components/own/generic-dialog/delete-dialog";
 import { DialogHandlers } from "@/shared/types/ui.types";
 import { useState, useMemo } from "react";
-import { useInscripcionesStore } from "@/lib/store/inscripciones.store";
+import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
 import { PagoForm } from "./pago-form";
 import { columns } from "./pago-columns";
 

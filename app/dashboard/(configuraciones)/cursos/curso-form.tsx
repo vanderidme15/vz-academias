@@ -89,7 +89,7 @@ export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFor
     },
     {
       name: 'class_count',
-      label: 'Número de Clases',
+      label: 'Número de Clases Base',
       type: 'integer',
       required: false,
       className: 'col-span-2',
@@ -97,7 +97,7 @@ export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFor
     },
     {
       name: 'price',
-      label: 'Precio (S/)',
+      label: 'Precio (S/) Base',
       type: 'price',
       required: true,
       className: 'col-span-2',

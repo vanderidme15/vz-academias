@@ -9,3 +9,11 @@ export const formatDate = (date?: string) => {
 
   return format(parsedDate, "dd/MM/yyyy", { locale: es });
 }
+
+export const formatDateTime = (date?: string) => {
+  if (!date) return '';
+
+  const parsedTime = parseISO(date);
+
+  return format(parsedTime, "dd/MM/yyyy HH:mm", { locale: es });
+}

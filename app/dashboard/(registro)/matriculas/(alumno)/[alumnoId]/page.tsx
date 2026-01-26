@@ -1,6 +1,6 @@
 'use client'
 
-import { useAlumnosStore } from "@/lib/store/alumnos.store";
+import { useAlumnosStore } from "@/lib/store/registro/alumnos.store";
 import { Alumno } from "@/shared/types/supabase.types";
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react";

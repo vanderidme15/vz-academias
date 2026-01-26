@@ -7,7 +7,7 @@ import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import DeleteDialog from "@/components/own/generic-dialog/delete-dialog";
 import { Alumno } from "@/shared/types/supabase.types";
 import { columns } from "./alumno-columns";
-import { useAlumnosStore } from "@/lib/store/alumnos.store";
+import { useAlumnosStore } from "@/lib/store/registro/alumnos.store";
 import AlumnoForm from "./alumno-form";
 import { EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";

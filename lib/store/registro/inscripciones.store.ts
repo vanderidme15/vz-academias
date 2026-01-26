@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from 'uuid';
-import { createClient } from "../supabase/client"
+import { createClient } from "../../supabase/client"
 import { Inscripcion } from "@/shared/types/supabase.types";
 
 const supabase = createClient();

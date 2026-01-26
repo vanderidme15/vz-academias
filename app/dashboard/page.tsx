@@ -8,9 +8,8 @@ import { EntityDetailModal } from "@/components/own/check-in/entity-detail-modal
 import { CheckInButton } from "@/components/own/check-in/check-in-button"
 import { useCheckIn } from "@/components/own/check-in/use-check-in"
 
-import { Inscripcion, Voluntario } from "@/shared/types/supabase.types"
-import { useInscripcionesStore } from "@/lib/store/inscripciones.store"
-import { useVoluntariosStore } from "@/lib/store/voluntarios.store"
+import { Inscripcion } from "@/shared/types/supabase.types"
+import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store"
 import { Input } from "@/components/ui/input"
 
 export default function DashboardPage() {
@@ -19,20 +18,13 @@ export default function DashboardPage() {
 
   const router = useRouter()
   //cambiar esto por el check-in de alumnos
-  const { fetchInscripcionById, handleCheckInInscripcion } = useInscripcionesStore()
-  const { fetchVoluntarioById, handleCheckInVoluntario } = useVoluntariosStore()
+  const { fetchInscripcionById } = useInscripcionesStore()
 
-  const checkInInscripciones = useCheckIn<Inscripcion>({
-    type: 'inscripcion',
-    fetchById: fetchInscripcionById,
-    handleCheckIn: handleCheckInInscripcion,
-  })
-
-  const checkInVoluntarios = useCheckIn<Voluntario>({
-    type: 'voluntario',
-    fetchById: fetchVoluntarioById,
-    handleCheckIn: handleCheckInVoluntario,
-  })
+  // const checkInInscripciones = useCheckIn<Inscripcion>({
+  //   type: 'inscripcion',
+  //   fetchById: fetchInscripcionById,
+  //   handleCheckIn: handleCheckInInscripcion,
+  // })
 
   return (
     <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto">

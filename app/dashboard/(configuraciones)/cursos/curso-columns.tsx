@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/utils-functions/format-date";
 import { Curso } from "@/shared/types/supabase.types";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
@@ -65,7 +66,7 @@ export const columns: ColumnDef<Curso>[] = [
   },
   {
     accessorKey: 'class_count',
-    header: 'Clases',
+    header: 'Clases Base',
     cell: ({ row }) => (
       <div className="text-sm text-center">
         {row.original.class_count ?? '-'}
@@ -74,7 +75,7 @@ export const columns: ColumnDef<Curso>[] = [
   },
   {
     accessorKey: 'price',
-    header: 'Precio',
+    header: 'Precio Base',
     cell: ({ row }) => {
       const price = row.original.price;
       if (!price) return '-';
@@ -92,10 +93,9 @@ export const columns: ColumnDef<Curso>[] = [
     cell: ({ row }) => {
       if (!row.original.created_at) return '-';
       try {
-        const date = new Date(row.original.created_at);
         return (
           <div className="text-xs text-muted-foreground">
-            {formatDistanceToNow(date, { addSuffix: true, locale: es })}
+            {formatDateTime(row.original.created_at)}
           </div>
         );
       } catch {
@@ -109,10 +109,9 @@ export const columns: ColumnDef<Curso>[] = [
     cell: ({ row }) => {
       if (!row.original.updated_at) return '-';
       try {
-        const date = new Date(row.original.updated_at);
         return (
           <div className="text-xs text-muted-foreground">
-            {formatDistanceToNow(date, { addSuffix: true, locale: es })}
+            {formatDateTime(row.original.updated_at)}
           </div>
         );
       } catch {

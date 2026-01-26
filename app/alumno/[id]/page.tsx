@@ -1,10 +1,9 @@
 "use client"
 
-import { Voluntario } from "@/shared/types/supabase.types";
 import { useParams } from "next/navigation"
 import { QRCodeSVG } from 'qrcode.react';
 import { useState, useEffect } from "react";
-import { useVoluntariosStore } from "@/lib/store/voluntarios.store";
+
 
 // Date formatting utility
 const formatDate = (dateString: string) => {

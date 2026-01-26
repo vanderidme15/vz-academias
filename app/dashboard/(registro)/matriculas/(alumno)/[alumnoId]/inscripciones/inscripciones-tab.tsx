@@ -7,7 +7,7 @@ import { Alumno, Inscripcion } from "@/shared/types/supabase.types";
 import { DialogHandlers } from "@/shared/types/ui.types";
 import { useEffect, useMemo, useState } from "react";
 import { columns } from "./inscripcion-columns";
-import { useInscripcionesStore } from "@/lib/store/inscripciones.store";
+import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
 import InscripcionForm from "./inscripcion-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import InscripcionPagosTable from "./inscripcion-pagos/inscripcion-pagos-table";
