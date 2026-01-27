@@ -437,12 +437,15 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     adminCheck?: boolean
   ) => {
     try {
-      const attendance = useAsistenciasStore.getState().markAsistenciaByAdmin(registrationId, teacherId, ownCheck, adminCheck);
+      // const attendance = useAsistenciasStore.getState().markAsistenciaByAdmin(registrationId, teacherId, ownCheck, adminCheck);
+      const attendance = await useAsistenciasStore.getState().getAsistenciaByInscripcionIdToday(registrationId);
+      // console.log('handleConfirmMarkAttendanceByAdmin', registrationId, teacherId, ownCheck, adminCheck);
+      // console.log('attendance', attendance);
 
-      if (!attendance) {
-        toast.error('No se pudo marcar la asistencia');
-        return;
-      }
+      // if (!attendance) {
+      //   toast.error('No se pudo marcar la asistencia');
+      //   return;
+      // }
 
       // Primero obtenemos el valor actual
       const { data: currentData, error: fetchError } = await supabase
@@ -453,25 +456,52 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
 
       if (fetchError) throw fetchError;
 
-      // Incrementamos el valor
-      const { data, error } = await supabase
-        .from('inscripciones')
-        .update({ class_count: (currentData.class_count || 0) + 1 })
-        .eq('id', registrationId)
-        .select(`*, course:cursos (*)`)
-        .single();
+      // si no hay asistencia o asistencia.admin_check es false y viene a true, incrementamos el contador y luego marcamos la asistencia markAsistenciaByAdmin se encarga de crear la asistencia
+      if ((attendance?.admin_check === false && adminCheck)) {
+        console.log('incrementando contador', attendance, adminCheck);
+        const { data, error } = await supabase
+          .from('inscripciones')
+          .update({ class_count: (currentData.class_count || 0) + 1 })
+          .eq('id', registrationId)
+          .select(`*, course:cursos (*)`)
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (data) {
-        set({
-          inscripciones: get().inscripciones.map(
-            inscripcion => inscripcion.id === registrationId ? data : inscripcion
-          ),
-          selectedInscripcion: data
-        });
-        toast.success('Asistencia confirmada correctamente');
+        if (data) {
+          set({
+            inscripciones: get().inscripciones.map(
+              inscripcion => inscripcion.id === registrationId ? data : inscripcion
+            ),
+            selectedInscripcion: data
+          });
+          toast.success('Asistencia confirmada correctamente');
+        }
       }
+
+      // si hay asistencia o asistencia.admin_check es true y viene a false, decrementamos el contador hasta un mínimo de 0 y luego marcamos la asistencia markAsistenciaByAdmin se encarga de actualizar la asistencia
+      if (attendance && (attendance.admin_check === true && !adminCheck)) {
+        console.log('decrementando contador', attendance, adminCheck);
+        const { data, error } = await supabase
+          .from('inscripciones')
+          .update({ class_count: Math.max((currentData.class_count || 0) - 1, 0) })
+          .eq('id', registrationId)
+          .select(`*, course:cursos (*)`)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          set({
+            inscripciones: get().inscripciones.map(
+              inscripcion => inscripcion.id === registrationId ? data : inscripcion
+            ),
+            selectedInscripcion: data
+          });
+          toast.success('Asistencia confirmada correctamente');
+        }
+      }
+      useAsistenciasStore.getState().markAsistenciaByAdmin(registrationId, teacherId, ownCheck, adminCheck);
     } catch (error) {
       toast.error('La asistencia no se pudo confirmar');
     }

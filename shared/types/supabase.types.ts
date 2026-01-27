@@ -143,10 +143,13 @@ export type Pago = {
 }
 
 export type Asistencia = {
-  id?: string;
-  inscripcion_id?: string;
-  class_date?: string;
-  attended?: boolean;
+  id?: string | number;
+  registration_id?: string;
+  date_time?: string;
+  rescheduled?: boolean;
+  teacher_id?: string;
+  own_check?: boolean;
+  admin_check?: boolean;
   created_at?: string;
   updated_at?: string;
 }

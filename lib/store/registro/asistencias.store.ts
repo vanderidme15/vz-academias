@@ -18,6 +18,7 @@ type AsistenciasStore = {
   //actions
   markAsistenciaByStudent: (registrationId: string) => Promise<Asistencia | null>
   markAsistenciaByAdmin: (registrationId?: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean) => Promise<Asistencia | null>
+  getAsistenciaByInscripcionIdToday: (registrationId: string) => Promise<Asistencia | null>
 }
 
 export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
@@ -215,6 +216,8 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
     }
   },
 
+
+
   markAsistenciaByAdmin: async (
     registrationId?: string,
     teacherId?: string,
@@ -228,21 +231,23 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       }
 
       // Obtener la fecha de hoy sin la hora (solo YYYY-MM-DD)
-      const today = new Date().toISOString().split('T')[0];
+      // const today = new Date().toISOString().split('T')[0];
 
-      const { data: todayAttendance, error: todayAttendanceError } = await supabase
-        .from('asistencias')
-        .select('*')
-        .eq('registration_id', registrationId)
-        .gte('date_time', `${today}T00:00:00.000Z`)
-        .lt('date_time', `${today}T23:59:59.999Z`)
-        .maybeSingle();
+      // const { data: todayAttendance, error: todayAttendanceError } = await supabase
+      //   .from('asistencias')
+      //   .select('*')
+      //   .eq('registration_id', registrationId)
+      //   .gte('date_time', `${today}T00:00:00.000Z`)
+      //   .lt('date_time', `${today}T23:59:59.999Z`)
+      //   .maybeSingle();
 
-      if (todayAttendanceError) {
-        console.error('Error al verificar asistencia:', todayAttendanceError);
-        toast.error('Error al verificar la asistencia');
-        return null;
-      }
+      // if (todayAttendanceError) {
+      //   console.error('Error al verificar asistencia:', todayAttendanceError);
+      //   toast.error('Error al verificar la asistencia');
+      //   return null;
+      // }
+
+      const todayAttendance = await get().getAsistenciaByInscripcionIdToday(registrationId);
 
       if (todayAttendance) {
         // Ya existe asistencia, actualizarla
@@ -293,5 +298,26 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       toast.error('La asistencia no se pudo marcar');
       return null;
     }
-  }
+  },
+  getAsistenciaByInscripcionIdToday: async (registrationId: string) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      const { data: attendance, error } = await supabase
+        .from('asistencias')
+        .select('*')
+        .eq('registration_id', registrationId)
+        .gte('date_time', `${today}T00:00:00.000Z`)
+        .lt('date_time', `${today}T23:59:59.999Z`)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return attendance;
+    } catch (error) {
+      console.error('Error al obtener asistencia:', error);
+      toast.error('Error al obtener la asistencia');
+      return null;
+    }
+  },
 }))

@@ -5,7 +5,6 @@ import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import { Curso, InscripcionWithRelations } from "@/shared/types/supabase.types";
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
 import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
-import { useAsistenciasStore } from "@/lib/store/registro/asistencias.store";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2, XCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SaveIcon } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface AsistenciasCursoDetalleProps {
   openDialog: boolean;
@@ -179,15 +179,8 @@ export default function AsistenciaCursoDetalle({
       {!loading && inscripciones.length > 0 && (
         <div className="space-y-3">
           <p className="text-sm font-medium">
-            Alumnos inscriptos ({inscripciones.length})
+            Alumnos inscritos ({inscripciones.length})
           </p>
-          {/* encabezados */}
-          <div className="grid grid-cols-12 gap-3 items-center text-xs font-medium">
-            <div className="col-span-4">Alumno</div>
-            <div className="col-span-3">Profesor</div>
-            <div className="col-span-2">Asistencia</div>
-            <div className="col-span-3">Acciones</div>
-          </div>
           <ul className="space-y-2">
             {inscripciones.map((inscripcion) => {
               const inscripcionId = inscripcion.id || "";
@@ -203,9 +196,9 @@ export default function AsistenciaCursoDetalle({
                   className={`border rounded p-3 ${pendingChanges ? "border-yellow-500 bg-yellow-50/50" : ""
                     }`}
                 >
-                  <div className="grid grid-cols-12 gap-3 items-center">
+                  <div className="grid grid-cols-[1fr_1fr_5rem_5rem_3rem] gap-3 items-center">
                     {/* Información del estudiante */}
-                    <div className="col-span-4 space-y-1">
+                    <div className="space-y-1">
                       <p className="font-medium">{inscripcion.student?.name}</p>
                       <p className="text-xs text-muted-foreground">
                         DNI: {inscripcion.student?.dni}
@@ -222,7 +215,8 @@ export default function AsistenciaCursoDetalle({
                     </div>
 
                     {/* Selector de profesor */}
-                    <div className="col-span-3">
+                    <div className="">
+                      <Label className="text-sm text-muted-foreground mb-1">Profesor</Label>
                       <Select
                         value={state.teacher_id}
                         onValueChange={(value) =>
@@ -248,9 +242,10 @@ export default function AsistenciaCursoDetalle({
 
                     {/* Check propio */}
                     <div
-                      className="col-span-1 flex justify-center items-center"
+                      className="flex flex-col justify-center items-center"
                       title="Check propio del alumno"
                     >
+                      <Label className="text-xs text-muted-foreground mb-1">Check ingreso</Label>
                       <Checkbox
                         checked={state.own_check}
                         onCheckedChange={(checked) =>
@@ -267,9 +262,10 @@ export default function AsistenciaCursoDetalle({
 
                     {/* Check admin */}
                     <div
-                      className="col-span-1 flex justify-center items-center"
+                      className="flex flex-col justify-center items-center"
                       title="Check administrativo"
                     >
+                      <Label className="text-xs text-muted-foreground mb-1">Check admin</Label>
                       <Checkbox
                         checked={state.admin_check}
                         onCheckedChange={(checked) =>
@@ -285,14 +281,13 @@ export default function AsistenciaCursoDetalle({
                     </div>
 
                     {/* Botón de acción */}
-                    <div className="col-span-3">
+                    <div>
                       <Button
-                        size="sm"
-                        className="w-full"
+                        size="icon"
                         disabled={loading || !state.teacher_id}
                         onClick={() => handleSaveAsistencia(inscripcion)}
                       >
-                        {pendingChanges ? "Guardar cambios" : "Actualizar"}
+                        <SaveIcon />
                       </Button>
                     </div>
                   </div>
