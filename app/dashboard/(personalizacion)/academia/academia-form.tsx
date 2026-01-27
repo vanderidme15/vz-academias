@@ -45,7 +45,6 @@ const academiaFormSchema = z.object({
   }
 });
 
-
 interface AcademiaFormProps {
   academia: Academia | null;
   onEdit: (data: Academia, id: string) => Promise<void>;

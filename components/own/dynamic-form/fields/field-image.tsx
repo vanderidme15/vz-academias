@@ -59,7 +59,7 @@ export default function FieldImage({ fieldConfig, formField }: FormFieldProps) {
       {fieldConfig.helpText && <FormDescription>{fieldConfig.helpText}</FormDescription>}
 
       <FormControl>
-        <div className="space-y-4">
+        <div className="space-y-4 h-fit">
           {/* Input oculto */}
           <Input
             type="file"
@@ -72,7 +72,7 @@ export default function FieldImage({ fieldConfig, formField }: FormFieldProps) {
           {/* Área de preview o botón de subida */}
           {preview ? (
             <div className="relative w-full">
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+              <div className="relative aspect-video w-full max-h-44 overflow-hidden rounded-lg border bg-muted">
                 <img
                   src={preview}
                   alt="Preview"
@@ -84,7 +84,7 @@ export default function FieldImage({ fieldConfig, formField }: FormFieldProps) {
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute -right-2 -top-2 h-8 w-8 rounded-full"
+                className="absolute right-4 top-4 h-8 w-8 rounded-full"
                 onClick={handleRemove}
               >
                 <X className="h-4 w-4" />

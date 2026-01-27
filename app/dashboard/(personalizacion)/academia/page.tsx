@@ -5,6 +5,8 @@ import AcademiaForm from "./academia-form";
 import { useAcademiaStore } from "@/lib/store/academia.store";
 import { useMemo } from "react";
 import { formatDate } from "@/lib/utils-functions/format-date";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 export default function AcademiaPage() {
   const { academia, updateAcademia } = useAcademiaStore();
@@ -17,14 +19,23 @@ export default function AcademiaPage() {
     return formatDate(academia?.end_date);
   }, [academia?.end_date]);
 
-
   return (
     <div className="flex flex-col gap-4 w-full h-full bg-muted/30 rounded-xl p-4">
       <h1 className="text-3xl font-bold">Personalizar academia</h1>
       <div className="flex flex-col gap-4 w-full h-full bg-card rounded-xl overflow-hidden">
-        <div className="w-full bg-linear-to-b from-red-100 to-purple-200 h-30 relative">
-          <div className="absolute -bottom-10 left-10 w-20 h-20 rounded-full flex items-center justify-center bg-card border">
-            <GraduationCapIcon className="size-10" />
+        <div
+          className="w-full h-30 relative"
+          style={{
+            background: `linear-gradient(to bottom, ${academia?.primary_color},${academia?.secondary_color})`
+          }}
+        >
+          <div className="absolute -bottom-12 left-10 rounded-full flex items-center justify-center bg-card border">
+            <Avatar className="size-30">
+              <AvatarImage src={academia?.logo_url} />
+              <AvatarFallback>
+                <GraduationCapIcon size={30} />
+              </AvatarFallback>
+            </Avatar>
           </div>
         </div>
         <div className="w-full h-full mt-14 overflow-y-auto px-4 space-y-2">

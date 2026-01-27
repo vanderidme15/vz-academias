@@ -165,9 +165,9 @@ export default function FieldFile({ fieldConfig, formField }: FormFieldProps) {
 
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="destructive"
                     size="icon"
-                    className="shrink-0"
+                    className="shrink-0 h-8 w-8 rounded-full"
                     onClick={handleRemove}
                   >
                     <X className="h-4 w-4" />

@@ -6,8 +6,6 @@ import {
   ClockIcon,
   GraduationCapIcon,
   HomeIcon,
-  ListCheckIcon,
-  PieChartIcon,
   SquarePenIcon,
   UsersIcon,
 } from "lucide-react"
@@ -29,6 +27,7 @@ import { NavUser } from "./nav-user"
 import { useAuth } from "@/lib/hooks/use-auth"
 import Link from "next/link"
 import { useAcademiaStore } from "@/lib/store/academia.store"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -44,8 +43,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <GraduationCapIcon className="size-4" />
+              <div className="flex aspect-square items-center justify-center">
+                <Avatar className="size-12">
+                  <AvatarImage src={academia?.logo_url} />
+                  <AvatarFallback>
+                    <GraduationCapIcon size={20} />
+                  </AvatarFallback>
+                </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{academia?.name}</span>
