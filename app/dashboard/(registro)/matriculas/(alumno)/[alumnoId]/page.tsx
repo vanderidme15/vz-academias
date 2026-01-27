@@ -54,13 +54,13 @@ export default function AlumnoPage() {
 
   return (
     <div className="w-full h-full flex flex-col gap-2 overflow-y-auto">
-      <h2 className="text-2xl font-bold">Detalle del alumno - {alumno?.name}</h2>
+      <h2 className="text-2xl font-bold">{alumno?.name}</h2>
 
       <Tabs defaultValue="datos" className="grow flex flex-col overflow-y-auto">
         <TabsList className="w-full">
           <TabsTrigger value="datos">
             <UserIcon />
-            Datos del alumno
+            Datos
           </TabsTrigger>
           <TabsTrigger value="cursos">
             <BookAIcon />
@@ -71,7 +71,6 @@ export default function AlumnoPage() {
           value="datos"
           className="grow flex flex-col gap-2 overflow-y-auto"
         >
-          <h4 className="text-sm">Datos del alumno</h4>
           <div className="grow flex flex-col gap-2 overflow-y-auto border rounded-lg p-2">
             {/* Aqui en principio solo se usa para editar */}
             {alumno && (
@@ -80,7 +79,6 @@ export default function AlumnoPage() {
           </div>
         </TabsContent>
         <TabsContent value="cursos" className="w-full h-full flex flex-col gap-2 overflow-y-auto">
-          <h4 className="text-sm">Listado de cursos al que se inscribio el alumno</h4>
           <div className="w-full h-full flex flex-col gap-2 overflow-y-auto border rounded-lg p-2">
             <InscripcionesTab student={alumno} />
           </div>
