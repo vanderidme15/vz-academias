@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 
 import { useRouter } from "next/navigation"
-import { AppSidebar } from "@/components/own/app-sidebar"
+import { AppSidebar } from "@/components/own/sidebar/app-sidebar"
 import { DynamicBreadcrumb } from "@/components/own/dynamic-breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
