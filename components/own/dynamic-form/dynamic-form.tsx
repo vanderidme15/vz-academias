@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { getDefaultValueForField } from './get-default-values'
 import FieldPassword from './fields/field-password'
 import FieldDatePicker from './fields/field-date-picker'
-import FieldColor from './fields/field-color'
+import FieldColorPicker from './fields/field-color-picker'
 import FieldImage from './fields/field-image'
 import FieldHeight from './fields/field-height'
 import FieldRadio from './fields/field-radio'
@@ -23,6 +23,7 @@ import FieldTime from './fields/field-time'
 import FieldPrice from './fields/field-price'
 import { isFieldDisabled, shouldShowField } from './dynamic-form-utils'
 import FieldDateRangePicker from './fields/field-date-range-picker'
+import FieldFile from './fields/field-file'
 
 
 export function DynamicForm({
@@ -89,7 +90,7 @@ export function DynamicForm({
             case 'radio':
               return <FieldRadio fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'color':
-              return <FieldColor fieldConfig={fieldConfig} formField={enhancedFormField} />
+              return <FieldColorPicker fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'checkbox':
               return <FieldCheckbox fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'integer':
@@ -102,6 +103,8 @@ export function DynamicForm({
               return <FieldDateRangePicker fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'image':
               return <FieldImage fieldConfig={fieldConfig} formField={enhancedFormField} />
+            case 'file':
+              return <FieldFile fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'height':
               return <FieldHeight fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'time':

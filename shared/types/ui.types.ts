@@ -25,6 +25,7 @@ export type FieldType =
   | 'date-range'
   | 'color'
   | 'image'
+  | 'file'
   | 'height'
   | 'radio'
   | 'time'

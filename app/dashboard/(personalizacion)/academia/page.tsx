@@ -19,7 +19,7 @@ export default function AcademiaPage() {
 
 
   return (
-    <div className="flex flex-col gap-4 w-full h-full bg-muted/30 rounded-xl px-20 py-4">
+    <div className="flex flex-col gap-4 w-full h-full bg-muted/30 rounded-xl p-4">
       <h1 className="text-3xl font-bold">Personalizar academia</h1>
       <div className="flex flex-col gap-4 w-full h-full bg-card rounded-xl overflow-hidden">
         <div className="w-full bg-linear-to-b from-red-100 to-purple-200 h-30 relative">
@@ -27,7 +27,7 @@ export default function AcademiaPage() {
             <GraduationCapIcon className="size-10" />
           </div>
         </div>
-        <div className="w-full h-full mt-14 overflow-y-auto px-12">
+        <div className="w-full h-full mt-14 overflow-y-auto px-4 space-y-2">
           <div className="p-4 border border-dashed rounded-xl">
             <h3 className="text-lg font-bold">Información del plan</h3>
             <ul className="list-disc list-inside mt-2">

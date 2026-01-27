@@ -1,3 +1,5 @@
+'use client'
+
 import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import type { FieldConfig } from "@/shared/types/ui.types";

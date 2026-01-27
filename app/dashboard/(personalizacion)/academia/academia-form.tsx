@@ -8,7 +8,24 @@ import { useMemo, useCallback } from "react";
 
 const academiaFormSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').trim(),
-  description: z.string().trim().optional().or(z.literal('')),
+  description: z.string().optional(),
+  // main_domain_url: z.string().optional(), // solo desde admin
+  address: z.string().optional(),
+  cellphone: z.string().optional(),
+  primary_color: z.string().optional(),
+  secondary_color: z.string().optional(),
+  logo_url: z.union([
+    z.instanceof(File),
+    z.string(),
+    z.null(),
+    z.undefined()
+  ]).optional().nullable(),
+  terms_file_url: z.union([
+    z.instanceof(File),
+    z.string(),
+    z.null(),
+    z.undefined()
+  ]).optional().nullable(),
   has_registration: z.boolean().default(false),
   registration_price: z.union([
     z.string(),
@@ -54,11 +71,11 @@ export default function AcademiaForm({ academia, onEdit }: AcademiaFormProps) {
   const fields: FieldConfig[] = useMemo(() => [
     {
       name: 'name',
-      label: 'Nombre del Curso',
+      label: 'Nombre de la academia',
       type: 'text',
       required: true,
       className: 'col-span-4',
-      placeholder: 'Ingresa el nombre del curso',
+      placeholder: 'Ingresa el nombre de la academia',
     },
     {
       name: 'description',
@@ -66,7 +83,39 @@ export default function AcademiaForm({ academia, onEdit }: AcademiaFormProps) {
       type: 'textarea',
       required: false,
       className: 'col-span-4',
-      placeholder: 'Describe el curso (opcional)',
+      placeholder: 'Describe tu academia (opcional)',
+    },
+    {
+      name: 'address',
+      label: 'Dirección',
+      type: 'text',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ingresa la dirección de tu academia (opcional)',
+    },
+    {
+      name: 'cellphone',
+      label: 'Celular de contacto',
+      type: 'text',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ingresa el teléfono de tu academia (opcional)',
+    },
+    {
+      name: 'primary_color',
+      label: 'Color primario',
+      type: 'color',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ingresa el color primario de tu academia (opcional)',
+    },
+    {
+      name: 'secondary_color',
+      label: 'Color secundario',
+      type: 'color',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ingresa el color secundario de tu academia (opcional)',
     },
     {
       name: 'has_registration',
@@ -84,6 +133,23 @@ export default function AcademiaForm({ academia, onEdit }: AcademiaFormProps) {
       className: 'col-span-4',
       dependsOn: { field: 'has_registration', value: true },
       placeholder: '0.00',
+    },
+    {
+      name: 'logo_url',
+      label: 'Logo de tu academia',
+      type: 'image',
+      required: false,
+      className: 'col-span-4',
+      helpText: 'Sube una imagen en formato png para mejor calidad',
+    },
+    {
+      name: 'terms_file_url',
+      label: 'Términos y condiciones de tu academia',
+      type: 'file',
+      required: false,
+      className: 'col-span-4',
+      accept: 'application/pdf',
+      helpText: 'Sube un archivo en formato pdf',
     }
   ], [handleHasRegistrationChange]);
 
