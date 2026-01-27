@@ -15,6 +15,8 @@ const alumnoFormSchema = z.object({
     .refine(isValidPeruDni, {
       message: 'DNI inválido (debe tener 8 dígitos)',
     }),
+  address: z.string().optional().nullable().transform(val => val || undefined),
+  school_name: z.string().optional().nullable().transform(val => val || undefined),
   age: z
     .union([z.number(), z.string()])
     .transform((val) => {
@@ -121,11 +123,27 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       label: 'DNI',
       type: 'text',
       required: true,
-      className: 'col-span-4',
+      className: 'col-span-2',
       placeholder: 'Ingresa tu DNI',
       inputMode: 'numeric',
       pattern: '[0-9]*',
       maxLength: 8,
+    },
+    {
+      name: 'address',
+      label: 'Dirección',
+      type: 'text',
+      required: false,
+      className: 'col-span-2',
+      placeholder: 'Ingresa tu dirección',
+    },
+    {
+      name: 'school_name',
+      label: 'Institución educativa',
+      type: 'text',
+      required: false,
+      className: 'col-span-4',
+      placeholder: 'Ingresa el nombre de la institución educativa',
     },
     {
       name: 'cellphone',

@@ -56,6 +56,24 @@ export const columns: ColumnDef<Alumno>[] = [
     )
   },
   {
+    accessorKey: 'address',
+    header: 'Dirección',
+    cell: ({ row }) => (
+      <div className="flex flex-col gap-1">
+        {row.original.address}
+      </div>
+    )
+  },
+  {
+    accessorKey: 'school_name',
+    header: 'Institución educativa',
+    cell: ({ row }) => (
+      <div className="flex flex-col gap-1">
+        {row.original.school_name}
+      </div>
+    )
+  },
+  {
     accessorKey: 'observations',
     header: 'Observaciones',
     cell: ({ row }) => {

@@ -34,6 +34,8 @@ export type Alumno = {
   parent_cellphone?: string;
   terms_accepted?: boolean;
   register_by?: string;
+  address?: string;
+  school_name?: string;
   observations?: string;
   created_at?: string;
   updated_at?: string;
