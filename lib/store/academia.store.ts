@@ -51,7 +51,7 @@ export const useAcademiaStore = create<AcademiaStore>((set, get) => ({
       const { data, error } = await supabase
         .from('academias')
         .select('*')
-        .eq('main_domain_url', domain)
+        .contains('main_domain_url', [domain])
         .single();
 
       if (error) throw error;

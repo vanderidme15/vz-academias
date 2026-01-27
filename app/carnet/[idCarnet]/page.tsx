@@ -2,18 +2,24 @@
 
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store"
 import { cn } from "@/lib/utils";
-import { Inscripcion } from "@/shared/types/supabase.types";
+import { Academia, Inscripcion } from "@/shared/types/supabase.types";
 import { useParams } from "next/navigation"
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react"
+import { useAcademiaStore } from "@/lib/store/academia.store";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { GraduationCapIcon } from "lucide-react";
+import { formatDate } from "@/lib/utils-functions/format-date";
 
 export default function CarnetPage() {
   const { idCarnet } = useParams();
   const id = typeof idCarnet === 'string' ? idCarnet : undefined;
 
   const { fetchInscripcionById } = useInscripcionesStore();
+  const { fetchAcademiaByDomain } = useAcademiaStore();
 
   const [inscripcion, setInscripcion] = useState<Inscripcion | null>(null);
+  const [academia, setAcademia] = useState<Academia | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +32,19 @@ export default function CarnetPage() {
     fetchData();
   }, [idCarnet]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id) {
+        const data = await fetchAcademiaByDomain(window.location.origin);
+        setAcademia(data);
+      }
+    };
+
+    fetchData();
+  }, [idCarnet]);
+
+  const outOfDate = inscripcion?.date_to && new Date() > new Date(inscripcion.date_to);
+
   if (!inscripcion) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -33,15 +52,6 @@ export default function CarnetPage() {
       </div>
     );
   }
-
-  const formatDate = (date?: string) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('es-PE', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full bg-linear-to-br from-blue-50 to-purple-50 p-4">
@@ -59,17 +69,23 @@ export default function CarnetPage() {
         {/* Contenedor del boleto */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header del boleto */}
-          <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6">
+          <div
+            className="text-white p-6"
+            style={{
+              background: `linear-gradient(to bottom, ${academia?.primary_color}, ${academia?.secondary_color})`
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-1">CARNET DE ASISTENCIA</h1>
+                <h1 className="text-3xl font-bold mb-1">Carnet de asistencia - {academia?.name}</h1>
                 <p className="text-blue-100 text-sm">Inscripción #{inscripcion.id?.slice(0, 8).toUpperCase()}</p>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+              <Avatar className="size-20 bg-white">
+                <AvatarImage src={academia?.logo_url} />
+                <AvatarFallback>
+                  <GraduationCapIcon size={20} />
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
 
@@ -77,7 +93,7 @@ export default function CarnetPage() {
           <div className="grid md:grid-cols-2 gap-6 p-6">
             {/* Información del estudiante */}
             <div className="space-y-4">
-              <div className="border-l-4 border-blue-600 pl-4">
+              <div className="border-l-4 pl-4" style={{ borderColor: academia?.primary_color }}>
                 <h2 className="text-sm font-semibold text-gray-500 uppercase mb-2">Estudiante</h2>
                 <p className="text-2xl font-bold text-gray-900">
                   {inscripcion.student?.name}
@@ -87,7 +103,7 @@ export default function CarnetPage() {
                 )}
               </div>
 
-              <div className="border-l-4 border-purple-600 pl-4">
+              <div className="border-l-4 pl-4" style={{ borderColor: academia?.secondary_color }}>
                 <h2 className="text-sm font-semibold text-gray-500 uppercase mb-2">Curso</h2>
                 <p className="text-xl font-bold text-gray-900">{inscripcion.course?.name}</p>
                 {inscripcion.course?.schedule && (
@@ -96,7 +112,7 @@ export default function CarnetPage() {
               </div>
 
               {/* Progreso de clases */}
-              <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+              <div className="rounded-lg p-4 bg-muted">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold text-gray-700">Progreso de Clases</span>
                   <span className="text-lg font-bold text-blue-600">
@@ -105,9 +121,10 @@ export default function CarnetPage() {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-linear-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-500"
+                    className="h-3 rounded-full transition-all duration-500"
                     style={{
-                      width: `${inscripcion.total_classes ? ((inscripcion.class_count || 0) / inscripcion.total_classes) * 100 : 0}%`
+                      width: `${inscripcion.total_classes ? ((inscripcion.class_count || 0) / inscripcion.total_classes) * 100 : 0}%`,
+                      backgroundColor: academia?.primary_color
                     }}
                   ></div>
                 </div>
@@ -120,11 +137,15 @@ export default function CarnetPage() {
 
               {/* Detalles adicionales */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-500 mb-1">Fecha de Inscripción</p>
-                  <p className="text-sm font-semibold text-gray-900">{formatDate(inscripcion.created_at)}</p>
+                <div className="bg-muted rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Fechas</p>
+                  <p className="text-xs font-semibold text-gray-900"><span className="font-light">Inicio:</span> {formatDate(inscripcion.date_from || '')}</p>
+                  <p className="text-xs font-semibold text-gray-900"><span className="font-light">Fin:</span> {formatDate(inscripcion.date_to || '')}</p>
+                  {outOfDate && (
+                    <p className="text-xs text-red-400 font-bold mt-2">Inscripción vencida</p>
+                  )}
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
+                <div className="bg-muted rounded-lg p-3">
                   <p className="text-xs text-gray-500 mb-1">Precio</p>
                   <p className="text-sm font-semibold text-gray-900">
                     Total: S/ {inscripcion.price_charged?.toFixed(2) || '0.00'}
@@ -136,7 +157,7 @@ export default function CarnetPage() {
                     </>
                   )}
                 </div>
-                <div className="col-span-2 bg-gray-50 rounded-lg p-3">
+                <div className="col-span-2 bg-muted rounded-lg p-3">
                   <p className="text-xs text-gray-500 mb-1">Pagos</p>
                   {inscripcion.payments?.length == 0 || inscripcion.payments == null && (
                     <p className="text-sm font-semibold text-gray-900">Sin pagos registrados</p>
@@ -162,13 +183,12 @@ export default function CarnetPage() {
 
             {/* Código QR */}
             <div className="flex flex-col items-center justify-center">
-              <div className="bg-linear-to-br from-blue-100 to-purple-100 p-6 rounded-2xl">
+              <div className="p-6 rounded-2xl" style={{ background: `${academia?.primary_color}30` }}>
                 <div className="bg-white p-4 rounded-xl shadow-lg">
                   <QRCodeSVG
                     value={inscripcion.id || ""}
                     size={240}
                     level="H"
-                    includeMargin={true}
                   />
                 </div>
               </div>
@@ -180,7 +200,7 @@ export default function CarnetPage() {
               {/* Badges */}
               <div className="flex flex-wrap gap-2 justify-center mt-4">
                 {inscripcion.is_personalized && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border-2 border-dashed border-black">
                     ⭐ Personalizado
                   </span>
                 )}
@@ -212,7 +232,10 @@ export default function CarnetPage() {
       {/* Botón de impresión */}
       <button
         onClick={() => window.print()}
-        className="mt-6 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+        className="mt-6 px-6 py-3 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+        style={{
+          background: `${academia?.primary_color}`
+        }}
       >
         🖨️ Imprimir Carnet
       </button>
@@ -227,6 +250,6 @@ export default function CarnetPage() {
           }
         }
       `}</style>
-    </div>
+    </div >
   )
 }

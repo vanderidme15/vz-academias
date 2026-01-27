@@ -84,6 +84,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
     {
       label: "Ver Carnet",
       handler: (inscripcion: Inscripcion) => {
+        console.log(window.location.origin)
         const url = `${window.location.origin}/carnet/${inscripcion.id}`;
         window.open(url, "_blank");
       },
