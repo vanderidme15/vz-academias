@@ -43,6 +43,8 @@ export type Alumno = {
   register_by?: string;
   address?: string;
   school_name?: string;
+  has_materials?: boolean;
+  materials_description?: string;
   observations?: string;
   created_at?: string;
   updated_at?: string;

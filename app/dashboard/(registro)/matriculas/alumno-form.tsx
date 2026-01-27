@@ -53,6 +53,8 @@ const alumnoFormSchema = z.object({
     .optional()
     .nullable()
     .transform(val => val || undefined),
+  has_materials: z.boolean().default(false).optional(),
+  materials_description: z.string().optional().nullable().transform(val => val || undefined),
   terms_accepted: z.boolean().refine(val => val === true, {
     message: 'Debes aceptar los términos y condiciones'
   }),
@@ -205,6 +207,23 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       pattern: '[0-9]*',
       maxLength: 9,
       dependsOn: { field: 'is_under_18', value: true } // 👁️ Solo visible si es menor
+    },
+    {
+      name: 'has_materials',
+      label: '¿Se dio materiales?',
+      type: 'checkbox',
+      required: false,
+      className: 'col-span-4 items-end', //oculto
+      defaultValue: false,
+    },
+    {
+      name: 'materials_description',
+      label: 'Lista los materiales',
+      type: 'textarea',
+      required: false,
+      className: 'col-span-4',
+      placeholder: 'Lista los materiales',
+      dependsOn: { field: 'has_materials', value: true } // 👁️ Solo visible si tiene material
     },
     {
       name: 'terms_accepted',

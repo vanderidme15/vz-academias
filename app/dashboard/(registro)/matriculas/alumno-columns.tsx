@@ -74,12 +74,32 @@ export const columns: ColumnDef<Alumno>[] = [
     )
   },
   {
+    accessorKey: 'has_materials',
+    header: 'Tiene materiales',
+    cell: ({ row }) => {
+      const hasMaterials = row.original.has_materials;
+      let materialsDescription = '';
+
+
+      if (!hasMaterials) {
+        materialsDescription = 'No';
+      } else {
+        materialsDescription = row.original.materials_description ? row.original.materials_description : "";
+      }
+      return (
+        <div className="flex flex-col gap-1 text-xs">
+          {materialsDescription}
+        </div>
+      );
+    }
+  },
+  {
     accessorKey: 'observations',
     header: 'Observaciones',
     cell: ({ row }) => {
       if (!row.original.observations) return 'no hay observaciones';
       return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 text-xs">
           {row.original.observations}
         </div>
       );

@@ -29,7 +29,8 @@ type InscripcionesStore = {
   updatePayment: (values: Record<string, any>, paymentId: string, inscripcionId?: string) => Promise<void>
   deletePayment: (paymentId: string, inscripcionId?: string) => Promise<void>
 
-  handleConfirmCheckIn: (inscripcionId: string) => Promise<void>
+  handleConfirmMarkAttendanceByStudent: (inscripcionId: string) => Promise<void>
+  handleConfirmMarkAttendanceByAdmin: (registrationId: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean) => Promise<void>
 }
 
 export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
@@ -385,9 +386,58 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     }
   },
 
-  handleConfirmCheckIn: async (inscripcionId: string) => {
+  handleConfirmMarkAttendanceByStudent: async (inscripcionId: string) => {
     try {
       const attendance = useAsistenciasStore.getState().markAsistenciaByStudent(inscripcionId);
+
+      if (!attendance) {
+        toast.error('No se pudo marcar la asistencia');
+        return;
+      } else {
+        toast.success('Asistencia confirmada correctamente');
+        return
+      }
+
+      // Primero obtenemos el valor actual
+      // const { data: currentData, error: fetchError } = await supabase
+      //   .from('inscripciones')
+      //   .select('class_count')
+      //   .eq('id', inscripcionId)
+      //   .single();
+
+      // if (fetchError) throw fetchError;
+
+      // Incrementamos el valor
+      // const { data, error } = await supabase
+      //   .from('inscripciones')
+      //   .update({ class_count: (currentData.class_count || 0) + 1 })
+      //   .eq('id', inscripcionId)
+      //   .select(`*, course:cursos (*)`)
+      //   .single();
+
+      // if (error) throw error;
+
+      // if (data) {
+      //   set({
+      //     inscripciones: get().inscripciones.map(
+      //       inscripcion => inscripcion.id === inscripcionId ? data : inscripcion
+      //     ),
+      //     selectedInscripcion: data
+      //   });
+      //   toast.success('Asistencia confirmada correctamente');
+      // }
+    } catch (error) {
+      toast.error('La asistencia no se pudo confirmar');
+    }
+  },
+  handleConfirmMarkAttendanceByAdmin: async (
+    registrationId: string,
+    teacherId?: string,
+    ownCheck?: boolean,
+    adminCheck?: boolean
+  ) => {
+    try {
+      const attendance = useAsistenciasStore.getState().markAsistenciaByAdmin(registrationId, teacherId, ownCheck, adminCheck);
 
       if (!attendance) {
         toast.error('No se pudo marcar la asistencia');
@@ -398,7 +448,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       const { data: currentData, error: fetchError } = await supabase
         .from('inscripciones')
         .select('class_count')
-        .eq('id', inscripcionId)
+        .eq('id', registrationId)
         .single();
 
       if (fetchError) throw fetchError;
@@ -407,7 +457,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       const { data, error } = await supabase
         .from('inscripciones')
         .update({ class_count: (currentData.class_count || 0) + 1 })
-        .eq('id', inscripcionId)
+        .eq('id', registrationId)
         .select(`*, course:cursos (*)`)
         .single();
 
@@ -416,7 +466,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       if (data) {
         set({
           inscripciones: get().inscripciones.map(
-            inscripcion => inscripcion.id === inscripcionId ? data : inscripcion
+            inscripcion => inscripcion.id === registrationId ? data : inscripcion
           ),
           selectedInscripcion: data
         });

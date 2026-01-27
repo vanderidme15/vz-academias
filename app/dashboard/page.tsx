@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const { academia } = useAcademiaStore();
   const { fetchCursos, cursos } = useCursosStore();
   const { fetchProfesores } = useProfesoresStore();
-  const { fetchInscripcionById, handleConfirmCheckIn } = useInscripcionesStore();
+  const { fetchInscripcionById, handleConfirmMarkAttendanceByStudent } = useInscripcionesStore();
 
   const today = new Date();
 
@@ -37,19 +37,19 @@ export default function DashboardPage() {
   const checkInInscripciones = useCheckIn<Inscripcion>({
     type: 'inscripcion',
     fetchById: fetchInscripcionById,
-    handleCheckIn: handleConfirmCheckIn,
+    handleCheckIn: handleConfirmMarkAttendanceByStudent,
   })
 
   return (
     <>
       <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto">
-        <div className="w-full grid grid-cols-5 gap-4">
-          <div className="bg-muted rounded-xl col-span-3 p-4 flex flex-col justify-center">
+        <div className="w-full grid grid-cols-6 gap-4">
+          <div className="bg-muted rounded-xl col-span-6 lg:col-span-3 p-4 flex flex-col justify-center">
             <h2 className="font-display text-2xl">{academia?.name}</h2>
             <p>Suscripción: {academia?.plan_type === 'year' ? 'Anual' : 'Mensual'}</p>
             <p className="text-muted-foreground text-xs">vence el {formatDate(academia?.end_date)}</p>
           </div>
-          <div className="col-span-2 flex justify-between gap-2">
+          <div className="col-span-6 lg:col-span-3 flex justify-between gap-2">
             <div className="bg-muted rounded-xl p-2 flex flex-col justify-center gap-px grow">
               <p className="text-xs font-bold">Alumnos matriculados</p>
               <p className="font-display text-2xl">{countAlumnos}</p>
@@ -64,9 +64,9 @@ export default function DashboardPage() {
           <div className="w-full gap-4 bg-muted p-4 rounded-xl">
             <h3 className="text-xl font-bold w-full">Asistencia rápida</h3>
             <div className="flex justify-center items-center gap-2 w-full">
-              <Button>
+              {/* <Button>
                 <SearchIcon /> Buscar Alumno
-              </Button>
+              </Button> */}
               <Button onClick={checkInInscripciones.handleStartScan}>
                 <QrCodeIcon /> Marcar Asistencia con QR
               </Button>
@@ -86,14 +86,13 @@ export default function DashboardPage() {
                   key={curso.id}
                   className="grid grid-cols-4 gap-2 items-center bg-muted p-2 px-4 rounded-xl"
                 >
-                  <div className="">{curso.name}</div>
-                  <p className="text-sm">días: {curso.schedule?.days?.join(', ')}</p>
-                  <p className="text-sm">horario: {curso.schedule?.start_time} - {curso.schedule?.end_time}</p>
+                  <div className="font-bold col-span-4 lg:col-span-1">{curso.name}</div>
+                  <p className="text-sm col-span-1">días: {curso.schedule?.days?.join(', ')}</p>
+                  <p className="text-sm col-span-1">horario: {curso.schedule?.start_time} - {curso.schedule?.end_time}</p>
                   <Button variant="outline" onClick={() => {
                     setSelectedCourse(curso);
                     setOpenDialog(true);
                   }}>
-                    Llamar asistencia
                     <NotebookPenIcon />
                   </Button>
                 </div>

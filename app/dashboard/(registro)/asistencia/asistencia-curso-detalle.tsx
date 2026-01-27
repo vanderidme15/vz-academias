@@ -39,8 +39,7 @@ export default function AsistenciaCursoDetalle({
   const [asistenciaStates, setAsistenciaStates] = useState<Record<string, AsistenciaState>>({});
   const [hasChanges, setHasChanges] = useState<Record<string, boolean>>({});
 
-  const { fetchInscripcionesByCursoId } = useInscripcionesStore();
-  const { markAsistenciaByAdmin } = useAsistenciasStore();
+  const { fetchInscripcionesByCursoId, handleConfirmMarkAttendanceByAdmin } = useInscripcionesStore();
   const { profesores } = useProfesoresStore();
 
   // Cargar inscripciones
@@ -113,7 +112,7 @@ export default function AsistenciaCursoDetalle({
 
     try {
       setLoading(true);
-      await markAsistenciaByAdmin(
+      await handleConfirmMarkAttendanceByAdmin(
         inscripcionId,
         state.teacher_id,
         state.own_check,

@@ -221,8 +221,6 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
     ownCheck?: boolean,
     adminCheck?: boolean
   ) => {
-    console.log("registrationId", registrationId);
-    console.log("teacherId", teacherId);
     try {
       if (!registrationId || !teacherId) {
         toast.error('No se proporcionó un ID de registro o un ID de profesor');
