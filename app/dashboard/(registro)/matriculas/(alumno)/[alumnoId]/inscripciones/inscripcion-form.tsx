@@ -83,7 +83,6 @@ export default function InscripcionForm({
         )
       })),
       onChange: (value: string, setValue: any, getValues: any) => {
-        // Buscar el curso seleccionado
         const selectedCourse = cursos.find(c => c.id === value);
 
         if (selectedCourse) {
@@ -91,10 +90,9 @@ export default function InscripcionForm({
           setValue('total_classes', selectedCourse.total_classes || 0);
           setValue('price_charged', selectedCourse.price || 0);
 
-          // Si no está personalizado, mantener deshabilitados los campos
+          // Si no está personalizado, resetear el checkbox
           const isPersonalized = getValues('is_personalized');
           if (!isPersonalized) {
-            // Los campos se actualizan pero permanecen deshabilitados
             setValue('is_personalized', false);
           }
         }
@@ -108,7 +106,7 @@ export default function InscripcionForm({
       className: 'col-span-4',
       dependsOn: {
         field: 'course_id',
-        value: undefined
+        value: undefined // Se muestra solo si hay un curso seleccionado
       },
       helpText: 'Habilita esta opción para modificar el número de clases y el precio del curso',
       onChange: (value: boolean, setValue: any, getValues: any) => {
@@ -133,11 +131,13 @@ export default function InscripcionForm({
       placeholder: 'Ej: 12',
       dependsOn: {
         field: 'course_id',
-        value: undefined
+        value: undefined // Se muestra solo si hay un curso seleccionado
+      },
+      disabledWhen: {
+        field: 'is_personalized',
+        value: true // Se deshabilita cuando is_personalized NO es true
       },
       helpText: 'Cantidad de clases del curso',
-      // Deshabilitar si no está personalizado
-      disabled: false, // Se manejará dinámicamente
     },
     {
       name: 'price_charged',
@@ -148,11 +148,13 @@ export default function InscripcionForm({
       placeholder: 'Ej: 150.00',
       dependsOn: {
         field: 'course_id',
-        value: undefined
+        value: undefined // Se muestra solo si hay un curso seleccionado
+      },
+      disabledWhen: {
+        field: 'is_personalized',
+        value: true // Se deshabilita cuando is_personalized NO es true
       },
       helpText: 'Precio base del curso (sin matrícula)',
-      // Deshabilitar si no está personalizado
-      disabled: false, // Se manejará dinámicamente
     },
     {
       name: 'includes_registration',
@@ -169,27 +171,6 @@ export default function InscripcionForm({
       className: 'col-span-4',
     }
   ], [cursos, hasRegistration, registrationPrice]);
-
-  // Ajustar disabled dinámicamente basado en is_personalized
-  const fieldsWithDynamicDisabled = useMemo(() => {
-    return fields.map(field => {
-      if (field.name === 'total_classes' || field.name === 'price_charged') {
-        return {
-          ...field,
-          // Estos campos estarán deshabilitados a menos que is_personalized sea true
-          dependsOn: {
-            field: 'course_id',
-            value: undefined
-          },
-          // Usamos un truco: agregamos una segunda condición
-          onChange: field.onChange || ((value: any, setValue: any, getValues: any) => {
-            // Este onChange se ejecutará normalmente
-          })
-        };
-      }
-      return field;
-    });
-  }, [fields]);
 
   // Obtener curso seleccionado
   const getSelectedCourse = (courseId: string) => {
@@ -306,7 +287,7 @@ export default function InscripcionForm({
     <>
       <DynamicForm
         schema={inscripcionFormSchema}
-        fields={fieldsWithDynamicDisabled}
+        fields={fields}
         onSubmit={handleFormSubmit}
         selectedItem={dialogHandlers.selectedItem}
         className='w-full grid-cols-4'

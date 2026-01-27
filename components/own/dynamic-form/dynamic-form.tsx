@@ -21,6 +21,8 @@ import FieldRadio from './fields/field-radio'
 import FieldMultiSelect from './fields/field-multiple-select'
 import FieldTime from './fields/field-time'
 import FieldPrice from './fields/field-price'
+import { isFieldDisabled, shouldShowField } from './dynamic-form-utils'
+
 
 export function DynamicForm({
   buttonLabel,
@@ -48,22 +50,9 @@ export function DynamicForm({
     await onSubmit(data)
   }
 
-  const shouldShowField = (fieldConfig: FieldConfig): boolean => {
-    if (!fieldConfig.dependsOn) return true;
-
-    const dependentValue = form.watch(fieldConfig.dependsOn.field);
-
-    // Si value es undefined, verifica solo que exista un valor (truthy)
-    if (fieldConfig.dependsOn.value === undefined) {
-      return !!dependentValue;
-    }
-
-    // Si tiene un valor específico, verifica que coincida exactamente
-    return dependentValue === fieldConfig.dependsOn.value;
-  };
-
   const renderField = (fieldConfig: FieldConfig) => {
-    if (!shouldShowField(fieldConfig)) {
+    // Verificar si el campo debe mostrarse
+    if (!shouldShowField(fieldConfig, form)) {
       return null;
     }
 
@@ -80,12 +69,8 @@ export function DynamicForm({
             }
           };
 
-          let isDisabled = fieldConfig.disabled || formField.disabled;
-
-          if (fieldConfig.name === 'total_classes' || fieldConfig.name === 'price_charged') {
-            const isPersonalized = form.watch('is_personalized');
-            isDisabled = !isPersonalized; // Deshabilitar si no está personalizado
-          }
+          // Determinar si el campo debe estar deshabilitado
+          const isDisabled = isFieldDisabled(fieldConfig, form, formField.disabled);
 
           const enhancedFormField = {
             ...formField,

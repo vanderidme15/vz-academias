@@ -41,10 +41,14 @@ export interface FieldConfig {
   accept?: string // ⬅️ Para tipo 'image': acepta tipos de archivo (ej: "image/*")
   dependsOn?: { // ⬅️ Para mostrar/ocultar campos condicionalmente
     field: string
-    value: any
+    value?: any // value es opcional para casos donde solo importa si existe
+  }
+  disabledWhen?: { // ⬅️ NUEVO: Para deshabilitar campos condicionalmente
+    field: string
+    value?: any // Si no se especifica, se deshabilita cuando el campo dependiente esté vacío
   }
   onChange?: (value: any, setValue: any, getValues: any) => void // ⬅️ Callback cuando cambia el valor
-  disabled?: boolean // ⬅️ Para deshabilitar campos
+  disabled?: boolean // ⬅️ Para deshabilitar campos de forma estática
   inputMode?: 'text' | 'numeric' | 'tel' | 'email' | 'url' | 'search' | 'decimal' | 'none' // ⬅️ Tipo de teclado en móviles
   pattern?: string // ⬅️ Patrón HTML5 de validación (ej: '[0-9]*')
   maxLength?: number // ⬅️ Longitud máxima del input
