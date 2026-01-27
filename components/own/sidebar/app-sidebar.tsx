@@ -5,6 +5,7 @@ import {
   BookAIcon,
   ClockIcon,
   GraduationCapIcon,
+  HeadsetIcon,
   HomeIcon,
   SquarePenIcon,
   UsersIcon,
@@ -139,6 +140,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup> */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Soporte</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="/dashboard/centro-ayuda">
+                <SidebarMenuButton tooltip="Centro de ayuda">
+                  <HeadsetIcon />
+                  <span>Centro de ayuda</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
