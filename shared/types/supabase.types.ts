@@ -56,6 +56,8 @@ export type Inscripcion = {
   register_by?: string;
   is_personalized?: boolean;
   observations?: string;
+  date_from: string | null;
+  date_to: string | null;
   created_at?: string;
   updated_at?: string;
 }

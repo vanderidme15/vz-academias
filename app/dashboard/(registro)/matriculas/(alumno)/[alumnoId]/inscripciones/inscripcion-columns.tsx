@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils-functions/format-date";
 import { Inscripcion } from "@/shared/types/supabase.types";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
@@ -152,6 +153,25 @@ export const columns: ColumnDef<Inscripcion>[] = [
             <span className="text-xs text-muted-foreground"> ({porcentaje}%)</span>
           </span>
         </div>
+      );
+    }
+  },
+  {
+    accessorKey: 'date_from',
+    header: 'Fechas',
+    cell: ({ row }) => {
+      const dateFrom = row.original.date_from;
+      const dateTo = row.original.date_to;
+      if (!dateFrom || !dateTo) return '-';
+      return (
+        <>
+          <div className="text-xs">
+            Inicio: {formatDate(dateFrom || '')}
+          </div>
+          <div className="text-xs">
+            Fin: {formatDate(dateTo || '')}
+          </div>
+        </>
       );
     }
   },

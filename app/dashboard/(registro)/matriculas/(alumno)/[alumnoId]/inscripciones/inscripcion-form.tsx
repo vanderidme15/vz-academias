@@ -18,9 +18,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAcademiaStore } from "@/lib/store/academia.store";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 const inscripcionFormSchema = z.object({
   course_id: z.string().min(1, 'El curso es requerido'),
+  date_range: z.object({
+    from: z.date(),
+    to: z.date().optional(),
+  }).optional(),
   total_classes: z.number().optional(),
   price_charged: z.union([
     z.string(),
@@ -96,6 +102,18 @@ export default function InscripcionForm({
             setValue('is_personalized', false);
           }
         }
+      }
+    },
+    {
+      name: 'date_range',
+      label: 'Rango de fechas',
+      type: 'date-range',
+      required: false,
+      className: 'col-span-4',
+      helpText: 'Rango de fechas para el curso',
+      defaultValue: {
+        from: dialogHandlers.selectedItem?.date_from ? new Date(dialogHandlers.selectedItem.date_from) : null,
+        to: dialogHandlers.selectedItem?.date_to ? new Date(dialogHandlers.selectedItem.date_to) : null
       }
     },
     {
@@ -219,6 +237,8 @@ export default function InscripcionForm({
         • Curso: ${course.name}${isPersonalized}
         • Horario: ${course.schedule?.name ?? 'Sin horario'}
         • Número de clases: ${values.total_classes || 'No especificado'}
+        • Fecha inicio: ${values.date_range?.from ? format(values.date_range.from, 'dd/MM/yyyy', { locale: es }) : 'No especificada'}
+        • Fecha fin: ${values.date_range?.to ? format(values.date_range.to, 'dd/MM/yyyy', { locale: es }) : 'No especificada'}
         • Precio del curso: S/ ${(values.price_charged || 0).toFixed(2)}
         ${values.includes_registration ? `• Matrícula: S/ ${prices.registrationFee.toFixed(2)}` : ''}
         • Total a cobrar: S/ ${prices.totalPrice.toFixed(2)}
@@ -246,6 +266,13 @@ export default function InscripcionForm({
       course_price: values.price_charged || 0,
       register_by: user?.email,
       observations: values.observations,
+      // Agrega las fechas del date_range
+      date_from: values.date_range?.from
+        ? new Date(values.date_range.from.toTemporalInstant().toString()).toISOString()
+        : null,
+      date_to: values.date_range?.to
+        ? new Date(values.date_range.to.toTemporalInstant().toString()).toISOString()
+        : null,
     };
   };
 

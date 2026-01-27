@@ -195,6 +195,27 @@ export function DataTable<TData, TValue>({
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end">
+                          {extraActions?.map((action) => (
+                            <DropdownMenuItem
+                              key={action.label}
+                              onClick={() => action.handler(row.original)}
+                              variant={action.variant}
+                            >
+                              <action.icon className="mr-2 h-4 w-4" />
+                              {action.label}
+                            </DropdownMenuItem>
+                          ))}
+
+                          {extraActionsBuilder?.(row.original).map((action) => (
+                            <DropdownMenuItem
+                              key={action.label}
+                              onClick={() => action.handler(row.original)}
+                              variant={action.variant}
+                            >
+                              <action.icon className="mr-2 h-4 w-4" />
+                              {action.label}
+                            </DropdownMenuItem>
+                          ))}
                           {!disableEdit && (
                             <DropdownMenuItem
                               onClick={() => {
@@ -218,28 +239,6 @@ export function DataTable<TData, TValue>({
                               Eliminar
                             </DropdownMenuItem>
                           ) : null}
-
-                          {extraActions?.map((action) => (
-                            <DropdownMenuItem
-                              key={action.label}
-                              onClick={() => action.handler(row.original)}
-                              variant={action.variant}
-                            >
-                              <action.icon className="h-4 w-4" />
-                              {action.label}
-                            </DropdownMenuItem>
-                          ))}
-
-                          {extraActionsBuilder?.(row.original).map((action) => (
-                            <DropdownMenuItem
-                              key={action.label}
-                              onClick={() => action.handler(row.original)}
-                              variant={action.variant}
-                            >
-                              <action.icon className="h-4 w-4" />
-                              {action.label}
-                            </DropdownMenuItem>
-                          ))}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

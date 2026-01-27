@@ -36,7 +36,7 @@ export default function FieldMultiSelect({ fieldConfig, formField }: FormFieldPr
 
   return (
     <FormItem className={fieldConfig.className}>
-      <FormLabel>
+      <FormLabel className="w-fit">
         {fieldConfig.label} {fieldConfig.required && <span className="text-red-400">*</span>}
       </FormLabel>
 

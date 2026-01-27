@@ -22,6 +22,7 @@ export type FieldType =
   | 'multiple-select'
   | 'checkbox'
   | 'date'
+  | 'date-range'
   | 'color'
   | 'image'
   | 'height'

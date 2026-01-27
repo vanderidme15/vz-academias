@@ -22,6 +22,7 @@ import FieldMultiSelect from './fields/field-multiple-select'
 import FieldTime from './fields/field-time'
 import FieldPrice from './fields/field-price'
 import { isFieldDisabled, shouldShowField } from './dynamic-form-utils'
+import FieldDateRangePicker from './fields/field-date-range-picker'
 
 
 export function DynamicForm({
@@ -97,6 +98,8 @@ export function DynamicForm({
               return <FieldPassword fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'date':
               return <FieldDatePicker fieldConfig={fieldConfig} formField={enhancedFormField} />
+            case 'date-range':
+              return <FieldDateRangePicker fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'image':
               return <FieldImage fieldConfig={fieldConfig} formField={enhancedFormField} />
             case 'height':

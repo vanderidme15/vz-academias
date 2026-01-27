@@ -15,7 +15,7 @@ export default function FieldSelect({ fieldConfig, formField }: FormFieldProps) 
 
   return (
     <FormItem className={fieldConfig.className}>
-      <FormLabel>
+      <FormLabel className="w-fit">
         {fieldConfig.label} {fieldConfig.required && <span className="text-red-400">*</span>}
       </FormLabel>
 
