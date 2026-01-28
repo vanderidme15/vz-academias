@@ -95,7 +95,12 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
   }
 
   const handleEdit = async (values: Record<string, any>): Promise<void> => {
-    await onEdit(values as Alumno, dialogHandlers.selectedItem?.id);
+    console.log("values", values);
+    const valuesToEdit = {
+      ...values,
+      materials_description: values.has_materials ? values.materials_description : null,
+    }
+    await onEdit(valuesToEdit as Alumno, dialogHandlers.selectedItem?.id);
     dialogHandlers.setOpenDialog(false);
   }
 
@@ -106,7 +111,7 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
     // Si pasa a ser mayor de 18, limpiar campos del padre
     if (!isUnder18) {
       setValue('parent_name', '', { shouldValidate: true });
-      setValue('parent_cellphone_number', '', { shouldValidate: true });
+      setValue('parent_cellphone', '', { shouldValidate: true });
     }
   }
 
@@ -213,7 +218,7 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       label: '¿Se dio materiales?',
       type: 'checkbox',
       required: false,
-      className: 'col-span-4 items-end', //oculto
+      className: 'col-span-4 h-fit', //oculto
       defaultValue: false,
     },
     {
@@ -230,7 +235,7 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       label: 'Acepto los términos y condiciones',
       type: 'checkbox',
       required: true,
-      className: 'col-span-4',
+      className: 'col-span-4 h-fit',
       defaultValue: false
     },
     {
