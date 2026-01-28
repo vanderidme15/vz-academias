@@ -3,11 +3,16 @@
 import * as React from "react"
 import {
   BookAIcon,
+  ChartColumnBigIcon,
   ClockIcon,
   GraduationCapIcon,
   HeadsetIcon,
   HomeIcon,
+  ListCheckIcon,
+  PieChartIcon,
+  PiggyBankIcon,
   SquarePenIcon,
+  TrelloIcon,
   UsersIcon,
 } from "lucide-react"
 
@@ -127,19 +132,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        {/* <SidebarGroup>
+        <SidebarGroup>
           <SidebarGroupLabel>Reportes</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/dashboard/reporte">
+              <Link href="/dashboard/reporte-asistencia">
                 <SidebarMenuButton tooltip="Reporte">
-                  <PieChartIcon />
-                  <span>Reporte general</span>
+                  <ChartColumnBigIcon />
+                  <span>Reporte de asistencia</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/dashboard/reporte-pagos">
+                <SidebarMenuButton tooltip="Reporte">
+                  <PiggyBankIcon />
+                  <span>Reporte de pagos</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarGroup> */}
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Soporte</SidebarGroupLabel>
           <SidebarMenu>

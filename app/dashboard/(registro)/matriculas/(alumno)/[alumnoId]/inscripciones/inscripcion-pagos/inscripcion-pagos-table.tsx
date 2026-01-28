@@ -54,6 +54,7 @@ export default function InscripcionPagosTable({ inscripcion }: { inscripcion: In
         data={inscripcion?.payments || []}
         entity=""
         dialogHandlers={dialogHandlers}
+        disableEdit
       />
       <GenericDialog
         openDialog={dialogHandlers.openDialog}

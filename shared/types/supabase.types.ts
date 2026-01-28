@@ -140,7 +140,6 @@ export type Pago = {
   payment_code?: string;
   register_by?: string;
   created_at?: string;
-  updated_at?: string;
 }
 
 export type Asistencia = {
