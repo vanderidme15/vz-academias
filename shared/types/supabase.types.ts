@@ -96,6 +96,7 @@ export type Curso = {
   price?: number;
   schedule_id?: string;
   teacher_id?: string;
+  color?: string;
   // relaciones opcionales
   teacher?: Profesor;
   schedule?: Horario;

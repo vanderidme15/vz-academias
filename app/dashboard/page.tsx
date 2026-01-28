@@ -1,11 +1,11 @@
 "use client"
 
 import { useAcademiaStore } from "@/lib/store/academia.store"
-import { formatDate } from "@/lib/utils-functions/format-date"
+import { formatDate, formatDateTime, formatTime } from "@/lib/utils-functions/format-date"
 import { useAlumnosStore } from "@/lib/store/registro/alumnos.store"
 import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { NotebookPenIcon, QrCodeIcon, SearchIcon } from "lucide-react"
+import { CalendarIcon, ClockIcon, NotebookPenIcon, QrCodeIcon, SearchIcon } from "lucide-react"
 import { useCursosStore } from "@/lib/store/configuraciones/cursos.store"
 import AsistenciaCursoDetalle from "./(registro)/asistencia/asistencia-curso-detalle"
 import { useState } from "react"
@@ -15,6 +15,7 @@ import { QRScannerModal } from "@/components/own/check-in/qr-scanner-modal"
 import { InscripcionDetailModal } from "@/components/own/check-in/entity-detail-modal"
 import { useCheckIn } from "@/components/own/check-in/use-check-in"
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store"
+import { DaysConfig, daysConfig } from "@/lib/constants/days"
 
 export default function DashboardPage() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -40,33 +41,37 @@ export default function DashboardPage() {
     handleCheckIn: handleConfirmMarkAttendanceByStudent,
   })
 
+  const getShortDays = (days: string[]) => {
+    return days.map((day) => daysConfig[day as DaysConfig].shortName).join(' • ')
+  }
+
   return (
     <>
-      <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto">
+      <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto bg-muted rounded-xl p-2">
         <div className="w-full grid grid-cols-6 gap-4">
-          <div className="bg-muted rounded-xl col-span-6 lg:col-span-3 p-4 flex flex-col justify-center">
+          <div className="rounded-xl col-span-6 lg:col-span-3 p-4 flex flex-col justify-center bg-card">
             <h2 className="font-display text-2xl">{academia?.name}</h2>
             <p>Suscripción: {academia?.plan_type === 'year' ? 'Anual' : 'Mensual'}</p>
             <p className="text-muted-foreground text-xs">vence el {formatDate(academia?.end_date)}</p>
           </div>
           <div className="col-span-6 lg:col-span-3 flex justify-between gap-2">
-            <div className="bg-muted rounded-xl p-2 flex flex-col justify-center gap-px grow">
+            <div className="bg-card rounded-xl p-2 flex flex-col justify-center gap-px grow">
               <p className="text-xs font-bold">Alumnos matriculados</p>
               <p className="font-display text-2xl">{countAlumnos}</p>
             </div>
-            <div className="bg-muted rounded-xl p-2 flex flex-col justify-center gap-px grow">
+            <div className="bg-card rounded-xl p-2 flex flex-col justify-center gap-px grow">
               <p className="font-display text-3xl">{today.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
               <p className="font-display text-lg">{today.toLocaleDateString('es-ES')}</p>
             </div>
           </div>
         </div>
         <div className="w-full flex flex-col gap-4">
-          <div className="w-full gap-4 bg-muted p-4 rounded-xl">
+          <div className="bg-card w-full gap-4 p-4 rounded-xl">
             <h3 className="text-xl font-bold w-full">Asistencia rápida</h3>
             <div className="flex justify-center items-center gap-2 w-full">
-              {/* <Button>
+              <Button>
                 <SearchIcon /> Buscar Alumno
-              </Button> */}
+              </Button>
               <Button onClick={checkInInscripciones.handleStartScan}>
                 <QrCodeIcon /> Marcar Asistencia con QR
               </Button>
@@ -80,19 +85,26 @@ export default function DashboardPage() {
 
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               {cursos.map((curso) => (
                 <div
                   key={curso.id}
-                  className="grid grid-cols-4 gap-2 items-center bg-muted p-2 px-4 rounded-xl"
+                  className="flex gap-2 items-end p-4 border rounded-xl bg-card"
                 >
-                  <div className="font-bold col-span-4 lg:col-span-1">{curso.name}</div>
-                  <p className="text-sm col-span-1">días: {curso.schedule?.days?.join(', ')}</p>
-                  <p className="text-sm col-span-1">horario: {curso.schedule?.start_time} - {curso.schedule?.end_time}</p>
-                  <Button variant="outline" onClick={() => {
+                  <div style={{ backgroundColor: curso.color }} className="w-2 h-full rounded-full"></div>
+                  <div className="grow">
+                    <p className="font-bold">{curso.name}</p>
+                    <div className="flex gap-3 text-sm">
+                      <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" /> {getShortDays(curso.schedule?.days || [])}</p>
+                      <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" /> {formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{curso.teacher?.name}</p>
+                  </div>
+                  <Button className="" variant="outline" onClick={() => {
                     setSelectedCourse(curso);
                     setOpenDialog(true);
                   }}>
+                    Ver asistencia
                     <NotebookPenIcon />
                   </Button>
                 </div>

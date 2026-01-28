@@ -1,8 +1,6 @@
 import { formatDateTime } from "@/lib/utils-functions/format-date";
 import { Curso } from "@/shared/types/supabase.types";
 import type { ColumnDef } from "@tanstack/react-table";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
 
 export const columns: ColumnDef<Curso>[] = [
   {
@@ -11,6 +9,7 @@ export const columns: ColumnDef<Curso>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <div className="flex flex-col">
+          <div className="w-8 h-1.5 rounded-full" style={{ backgroundColor: row.original.color }}></div>
           <span className="font-medium">{row.original.name || '-'}</span>
           {row.original.description && (
             <span className="text-xs text-muted-foreground line-clamp-1">

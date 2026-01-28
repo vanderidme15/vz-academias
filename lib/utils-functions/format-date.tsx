@@ -17,3 +17,8 @@ export const formatDateTime = (date?: string) => {
 
   return format(parsedTime, "dd/MM/yyyy HH:mm", { locale: es });
 }
+
+export const formatTime = (time?: string) => {
+  if (!time) return '';
+  return time.slice(0, 5); // Obtiene solo "08:00"
+}

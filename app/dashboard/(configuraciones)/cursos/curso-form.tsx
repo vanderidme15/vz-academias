@@ -22,6 +22,7 @@ const cursoFormSchema = z.object({
   }).pipe(z.number().nonnegative('El precio debe ser mayor o igual a 0')),
   teacher_id: z.string().min(1, 'El profesor es requerido'),
   schedule_id: z.string().min(1, 'El horario es requerido'),
+  color: z.string().optional(),
 })
 
 interface CursoFormProps {
@@ -102,6 +103,14 @@ export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFor
       required: true,
       className: 'col-span-2',
       placeholder: 'Ej: 150.00'
+    },
+    {
+      name: 'color',
+      label: 'Color del curso',
+      type: 'color',
+      required: false,
+      className: 'col-span-4',
+      placeholder: 'Selecciona un color'
     },
     {
       name: 'description',
