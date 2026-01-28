@@ -1,3 +1,4 @@
+// stores/useAlumnosStore.ts
 import { create } from "zustand"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client";
@@ -5,12 +6,18 @@ import { Alumno } from "@/shared/types/supabase.types";
 
 const supabase = createClient();
 
+type StudentStats = {
+  inscripcionesCount: number;
+}
+
 type AlumnosStore = {
   alumnos: Alumno[]
   countAlumnos: number
+  studentStats: Record<string, StudentStats> // Cache de estadísticas por alumno
   fetchAlumnos: () => Promise<void>
   fetchCountAlumnos: () => Promise<void>
   fetchAlumnoById: (id: string) => Promise<Alumno | null>
+  fetchStudentStats: (studentId: string) => Promise<StudentStats>
   createAlumno: (values: Alumno) => Promise<Alumno | null>
   updateAlumno: (values: Alumno, id: string) => Promise<void>
   deleteAlumno: (id: string) => Promise<void>
@@ -19,13 +26,14 @@ type AlumnosStore = {
 export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
   alumnos: [],
   countAlumnos: 0,
+  studentStats: {},
 
   fetchAlumnos: async () => {
     try {
       const { data, error } = await supabase
         .from('alumnos')
         .select('*')
-        .order('created_at', { ascending: false }); // Ordenar por más reciente
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       set({ alumnos: data ?? [] });
@@ -42,7 +50,7 @@ export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
 
       if (error) throw error;
 
-      set({ countAlumnos: count });
+      set({ countAlumnos: count ?? 0 });
     } catch (error) {
       toast.error('No se pudo cargar el conteo de alumnos');
     }
@@ -65,6 +73,46 @@ export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
     }
   },
 
+  /**
+   * Obtiene estadísticas de un alumno específico
+   * - Total de inscripciones
+   * Guarda en cache para evitar múltiples llamadas
+   */
+  fetchStudentStats: async (studentId: string) => {
+    try {
+      // Si ya está en cache, retornar
+      const cached = get().studentStats[studentId];
+      if (cached) return cached;
+
+      // Contar inscripciones del alumno
+      const { count, error } = await supabase
+        .from("inscripciones")
+        .select("*", { count: "exact", head: true })
+        .eq("student_id", studentId);
+
+      if (error) throw error;
+
+      const stats = {
+        inscripcionesCount: count || 0,
+      };
+
+      // Guardar en cache
+      set({
+        studentStats: {
+          ...get().studentStats,
+          [studentId]: stats
+        }
+      });
+
+      return stats;
+    } catch (error) {
+      console.error("Error fetching student stats:", error);
+
+      // En caso de error, retornar cero pero no guardar en cache
+      return { inscripcionesCount: 0 };
+    }
+  },
+
   createAlumno: async (values) => {
     try {
       const { data, error } = await supabase
@@ -84,7 +132,7 @@ export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
         return data;
       }
     } catch (error) {
-      toast.error('El precio no se pudo crear');
+      toast.error('El alumno no se pudo crear');
       return null;
     }
   },
@@ -125,11 +173,14 @@ export const useAlumnosStore = create<AlumnosStore>((set, get) => ({
       if (error) throw error;
 
       if (data) {
+        // Limpiar stats del cache al eliminar
+        const { [id]: _, ...restStats } = get().studentStats;
+
         set({
-          alumnos: get().alumnos.filter(
-            alumno => alumno.id !== id
-          )
+          alumnos: get().alumnos.filter(alumno => alumno.id !== id),
+          studentStats: restStats
         });
+
         toast.success('Alumno eliminado correctamente');
       }
     } catch (error) {
