@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
-import { Curso, InscripcionWithRelations } from "@/shared/types/supabase.types";
+import { Asistencia, Curso, InscripcionWithRelations } from "@/shared/types/supabase.types";
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
 import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
 import { Button } from "@/components/ui/button";
@@ -14,19 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SaveIcon } from "lucide-react";
+import { CalendarIcon, ClockIcon, SaveIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
+import { Progress } from "@/components/ui/progress";
 
 interface AsistenciasCursoDetalleProps {
   openDialog: boolean;
   setOpenDialog: (openDialog: boolean) => void;
   curso: Curso | null;
-}
-
-interface AsistenciaState {
-  teacher_id: string;
-  own_check: boolean;
-  admin_check: boolean;
 }
 
 export default function AsistenciaCursoDetalle({
@@ -36,7 +32,7 @@ export default function AsistenciaCursoDetalle({
 }: AsistenciasCursoDetalleProps) {
   const [loading, setLoading] = useState(false);
   const [inscripciones, setInscripciones] = useState<InscripcionWithRelations[]>([]);
-  const [asistenciaStates, setAsistenciaStates] = useState<Record<string, AsistenciaState>>({});
+  const [asistenciaStates, setAsistenciaStates] = useState<Record<string, Asistencia>>({});
   const [hasChanges, setHasChanges] = useState<Record<string, boolean>>({});
 
   const { fetchInscripcionesByCursoId, handleConfirmMarkAttendanceByAdmin } = useInscripcionesStore();
@@ -62,12 +58,11 @@ export default function AsistenciaCursoDetalle({
             };
           }
           return acc;
-        }, {} as Record<string, AsistenciaState>);
+        }, {} as Record<string, Asistencia>);
 
         setAsistenciaStates(initialStates);
         setHasChanges({});
       } catch (error) {
-        console.error("Error cargando inscripciones:", error);
         setInscripciones([]);
       } finally {
         setLoading(false);
@@ -78,10 +73,10 @@ export default function AsistenciaCursoDetalle({
   }, [curso?.id, curso?.teacher_id, fetchInscripcionesByCursoId]);
 
   // Actualizar un campo específico de la asistencia
-  const updateAsistenciaField = <K extends keyof AsistenciaState>(
+  const updateAsistenciaField = <K extends keyof Asistencia>(
     inscripcionId: string,
     field: K,
-    value: AsistenciaState[K]
+    value: Asistencia[K]
   ) => {
     setAsistenciaStates((prev) => ({
       ...prev,
@@ -149,18 +144,18 @@ export default function AsistenciaCursoDetalle({
       title="Asistencia del curso"
     >
       {/* Header del curso */}
-      <div className="flex justify-between items-center border px-3 py-2 rounded border-dashed mb-4">
-        <div>
+      <div className="flex items-end gap-2 border p-4 rounded-xl border-dashed">
+        <div style={{ backgroundColor: curso.color }} className="w-2 h-12 rounded-full shrink-0"></div>
+
+        <div className="grow">
           <p className="text-lg font-medium">{curso.name}</p>
           <p className="text-xs text-muted-foreground">
             Profesor: {curso.teacher?.name ?? "Sin asignar"}
           </p>
         </div>
-        <div className="text-right text-sm">
-          <p className="text-xs">{curso.schedule?.days?.join(", ")}</p>
-          <p>
-            {curso.schedule?.start_time} - {curso.schedule?.end_time}
-          </p>
+        <div className="flex flex-col lg:flex-row gap-px lg:gap-3 text-sm">
+          <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(curso.schedule?.days || [])}</p>
+          <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
         </div>
       </div>
 
@@ -178,10 +173,10 @@ export default function AsistenciaCursoDetalle({
       {/* Lista de inscripciones */}
       {!loading && inscripciones.length > 0 && (
         <div className="space-y-3">
-          <p className="text-sm font-medium">
-            Alumnos inscritos ({inscripciones.length})
+          <p className="font-medium">
+            Listado de alumnos ({inscripciones.length})
           </p>
-          <ul className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {inscripciones.map((inscripcion) => {
               const inscripcionId = inscripcion.id || "";
               const state = asistenciaStates[inscripcionId];
@@ -191,110 +186,110 @@ export default function AsistenciaCursoDetalle({
               if (!state) return null;
 
               return (
-                <li
+                <div
                   key={inscripcionId}
-                  className={`border rounded p-3 ${pendingChanges ? "border-yellow-500 bg-yellow-50/50" : ""
+                  className={`border rounded-xl p-3 ${pendingChanges ? "border-yellow-500 bg-yellow-50/50" : ""
                     }`}
                 >
-                  <div className="grid grid-cols-[1fr_1fr_5rem_5rem_3rem] gap-3 items-center">
-                    {/* Información del estudiante */}
-                    <div className="space-y-1">
+                  {/* Información del estudiante */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-2">
                       <p className="font-medium">{inscripcion.student?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        DNI: {inscripcion.student?.dni}
+                      <p className="text-xs text-muted-foreground"> DNI: {inscripcion.student?.dni}</p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <span>Clases: {inscripcion.class_count || 0}/{inscripcion.total_classes}</span>
+                      <Progress value={inscripcion.class_count || 0} max={inscripcion.total_classes} />
+                    </div>
+                    {hasRecord && (
+                      <p className="text-xs text-green-600">
+                        ✓ Asistencia registrada
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Clases: {inscripcion.class_count || 0}/
-                        {inscripcion.total_classes}
-                      </p>
-                      {hasRecord && (
-                        <p className="text-xs text-green-600">
-                          ✓ Asistencia registrada
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Selector de profesor */}
-                    <div className="">
-                      <Label className="text-sm text-muted-foreground mb-1">Profesor</Label>
-                      <Select
-                        value={state.teacher_id}
-                        onValueChange={(value) =>
-                          updateAsistenciaField(inscripcionId, "teacher_id", value)
-                        }
-                        disabled={loading}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar profesor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {profesores.map((profesor) => (
-                            <SelectItem
-                              key={profesor.id}
-                              value={profesor.id || ""}
-                            >
-                              {profesor.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Check propio */}
-                    <div
-                      className="flex flex-col justify-center items-center"
-                      title="Check propio del alumno"
-                    >
-                      <Label className="text-xs text-muted-foreground mb-1">Check ingreso</Label>
-                      <Checkbox
-                        checked={state.own_check}
-                        onCheckedChange={(checked) =>
-                          updateAsistenciaField(
-                            inscripcionId,
-                            "own_check",
-                            !!checked
-                          )
-                        }
-                        disabled={loading}
-                        className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-                      />
-                    </div>
-
-                    {/* Check admin */}
-                    <div
-                      className="flex flex-col justify-center items-center"
-                      title="Check administrativo"
-                    >
-                      <Label className="text-xs text-muted-foreground mb-1">Check admin</Label>
-                      <Checkbox
-                        checked={state.admin_check}
-                        onCheckedChange={(checked) =>
-                          updateAsistenciaField(
-                            inscripcionId,
-                            "admin_check",
-                            !!checked
-                          )
-                        }
-                        disabled={loading}
-                        className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                      />
-                    </div>
-
-                    {/* Botón de acción */}
-                    <div>
-                      <Button
-                        size="icon"
-                        disabled={loading || !state.teacher_id}
-                        onClick={() => handleSaveAsistencia(inscripcion)}
-                      >
-                        <SaveIcon />
-                      </Button>
-                    </div>
+                    )}
                   </div>
-                </li>
+
+                  {/* Selector de profesor */}
+                  <div className="mt-2 w-full">
+                    <Label className="text-sm text-muted-foreground">Profesor asignado</Label>
+                    <Select
+                      value={state.teacher_id}
+                      onValueChange={(value) =>
+                        updateAsistenciaField(inscripcionId, "teacher_id", value)
+                      }
+                      disabled={loading}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar profesor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profesores.map((profesor) => (
+                          <SelectItem
+                            key={profesor.id}
+                            value={profesor.id || ""}
+                          >
+                            {profesor.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Check propio */}
+                  <div
+                    className="flex gap-2 items-center pt-2"
+                    title="Check propio del alumno"
+                  >
+                    <Checkbox
+                      checked={state.own_check}
+                      onCheckedChange={(checked) =>
+                        updateAsistenciaField(
+                          inscripcionId,
+                          "own_check",
+                          !!checked
+                        )
+                      }
+                      disabled={loading}
+                      className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                    />
+                    <Label className="text-xs text-muted-foreground">Asistencia confirmada por el alumno</Label>
+                  </div>
+
+                  {/* Check admin */}
+                  <div
+                    className="flex gap-2 items-center pt-2"
+                    title="Check administrativo"
+                  >
+                    <Checkbox
+                      checked={state.admin_check}
+                      onCheckedChange={(checked) =>
+                        updateAsistenciaField(
+                          inscripcionId,
+                          "admin_check",
+                          !!checked
+                        )
+                      }
+                      disabled={loading}
+                      className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                    />
+                    <Label className="text-xs text-muted-foreground">Asistencia confirmada por el administrador</Label>
+                  </div>
+
+                  {/* Botón de acción */}
+                  <div className="flex pt-2 w-full">
+                    <Button
+                      className="w-full"
+                      disabled={loading || !state.teacher_id}
+                      onClick={() => handleSaveAsistencia(inscripcion)}
+                    >
+                      <span>Guardar cambios</span>
+                      <SaveIcon />
+                    </Button>
+                  </div>
+
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
       )}
     </GenericDialog>

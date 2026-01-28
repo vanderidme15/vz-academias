@@ -1,7 +1,7 @@
 "use client"
 
 import { useAcademiaStore } from "@/lib/store/academia.store"
-import { formatDate, formatTime } from "@/lib/utils-functions/format-date"
+import { formatDate, formatTime, getShortDays } from "@/lib/utils-functions/format-date"
 import { useAlumnosStore } from "@/lib/store/registro/alumnos.store"
 import { useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
@@ -115,10 +115,6 @@ export default function DashboardPage() {
     handleCheckIn: handleConfirmMarkAttendanceByStudent,
   })
 
-  const getShortDays = (days: string[]) => {
-    return days.map((day) => daysConfig[day as DaysConfig].shortName).join(' • ')
-  }
-
   // Filtrar cursos por horario seleccionado
   const cursosFiltrados = useMemo(() => {
     if (!selectedHorarioId) return cursos;
@@ -211,8 +207,8 @@ export default function DashboardPage() {
                     <div className="grow">
                       <p className="font-bold">{curso.name}</p>
                       <div className="flex gap-3 text-sm">
-                        <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" /> {getShortDays(curso.schedule?.days || [])}</p>
-                        <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" /> {formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
+                        <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(curso.schedule?.days || [])}</p>
+                        <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">{curso.teacher?.name}</p>
                     </div>
