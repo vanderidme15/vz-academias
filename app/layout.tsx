@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
 import { AuthProvider } from "./providers"
-import { hanken, protest } from "./fonts"
 import { Toaster } from "sonner"
 
 
@@ -34,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${hanken.variable} ${protest.variable}`}>
+    <html lang="es">
       <body className="font-sans antialiased">
         <AuthProvider>
           {children}

@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto bg-muted rounded-xl p-2">
+      <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto bg-muted rounded-xl p-4">
         <div className="w-full grid grid-cols-6 gap-4">
           <div className="rounded-xl col-span-6 lg:col-span-3 p-4 flex flex-col justify-center bg-card">
             <h2 className="font-display text-2xl">{academia?.name}</h2>
@@ -145,12 +145,12 @@ export default function DashboardPage() {
           </div>
           <div className="col-span-6 lg:col-span-3 flex justify-between gap-2">
             <div className="bg-card rounded-xl p-2 flex flex-col justify-center gap-px grow">
-              <p className="text-xs font-bold">Alumnos matriculados</p>
+              <p className="text-xs font-bold">ALUMNOS</p>
               <p className="font-display text-2xl">{countAlumnos}</p>
             </div>
             <div className="bg-card rounded-xl p-2 flex flex-col justify-center gap-px grow">
-              <p className="font-display text-3xl">{today.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
-              <p className="font-display text-lg">{today.toLocaleDateString('es-ES')}</p>
+              <p className="uppercase font-bold">{today.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
+              <p className="text-2xl">{today.toLocaleDateString('es-ES')}</p>
             </div>
           </div>
         </div>
