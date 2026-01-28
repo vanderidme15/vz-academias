@@ -14,6 +14,7 @@ type InscripcionesStore = {
   setSelectedInscripcion: (inscripcion: Inscripcion | null) => void
 
   fetchInscripciones: () => Promise<void>
+  fetchAllInscripciones: () => Promise<Inscripcion[]>
   fetchInscripcionesByAlumnoId: (alumnoId?: string) => Promise<void>
   // fetch a vistas para traer inscripciones con asistencia
   fetchInscripcionesByCursoId: (cursoId?: string) => Promise<InscripcionWithRelations[]>
@@ -50,6 +51,32 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       set({ inscripciones: data ?? [] });
     } catch (error) {
       toast.error('No se pudieron cargar las inscripciones');
+    }
+  },
+
+  // cosa rara
+  // Agregar este método a tu useInscripcionesStore
+  fetchAllInscripciones: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`
+        *,
+        student:alumnos(*),
+        course:cursos(
+          *,
+          schedule:horarios(*),
+          teacher:profesores(*)
+        )
+      `)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return data || []
+    } catch (error) {
+      console.error('Error fetching inscripciones:', error)
+      return []
     }
   },
 

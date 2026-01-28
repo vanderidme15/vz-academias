@@ -17,6 +17,7 @@ import { useCheckIn } from "@/components/own/check-in/use-check-in"
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store"
 import { DaysConfig, daysConfig } from "@/lib/constants/days"
 import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store"
+import { ManualSearchModal } from "@/components/own/check-in/manual-search-modal"
 
 export default function DashboardPage() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -28,7 +29,9 @@ export default function DashboardPage() {
   const { fetchCursos, cursos } = useCursosStore();
   const { fetchProfesores } = useProfesoresStore();
   const { fetchHorarios, horarios } = useHorariosStore();
-  const { fetchInscripcionById, handleConfirmMarkAttendanceByStudent } = useInscripcionesStore();
+  const { fetchInscripcionById, handleConfirmMarkAttendanceByStudent, fetchAllInscripciones } = useInscripcionesStore();
+  const [showManualSearchModal, setShowManualSearchModal] = useState(false)
+  const [allInscripciones, setAllInscripciones] = useState<Inscripcion[]>([])
 
   const today = new Date();
 
@@ -109,6 +112,18 @@ export default function DashboardPage() {
     }
   }, [horarios]);
 
+  // Cargar inscripciones al abrir el modal de búsqueda
+  const handleOpenManualSearch = async () => {
+    const inscripciones = await fetchAllInscripciones()
+    setAllInscripciones(inscripciones)
+    setShowManualSearchModal(true)
+  }
+
+  const handleSelectInscripcionFromSearch = (inscripcion: Inscripcion) => {
+    setShowManualSearchModal(false)
+    checkInInscripciones.handleManualSelection(inscripcion)
+  }
+
   const checkInInscripciones = useCheckIn<Inscripcion>({
     type: 'inscripcion',
     fetchById: fetchInscripcionById,
@@ -158,7 +173,7 @@ export default function DashboardPage() {
           <div className="bg-card w-full gap-4 p-4 rounded-xl">
             <h3 className="text-xl font-bold w-full">Asistencia rápida</h3>
             <div className="flex justify-center items-center gap-2 w-full">
-              <Button>
+              <Button onClick={handleOpenManualSearch}>
                 <SearchIcon /> Buscar Alumno
               </Button>
               <Button onClick={checkInInscripciones.handleStartScan}>
@@ -242,6 +257,12 @@ export default function DashboardPage() {
         inscripcion={checkInInscripciones.scanResult}
         onConfirmAction={checkInInscripciones.handleConfirmCheckIn}
         actionLabel="Registrar asistencia"
+      />
+      <ManualSearchModal
+        open={showManualSearchModal}
+        onClose={() => setShowManualSearchModal(false)}
+        inscripciones={allInscripciones}
+        onSelectInscripcion={handleSelectInscripcionFromSearch}
       />
     </>
   )

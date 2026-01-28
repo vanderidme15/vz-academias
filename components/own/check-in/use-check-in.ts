@@ -51,6 +51,12 @@ export function useCheckIn<T extends CheckInEntity>(config: CheckInConfig<T>) {
     setScanResult(null)
   }
 
+  // Nuevo método para selección manual
+  const handleManualSelection = (entity: T) => {
+    setScanResult(entity)
+    setShowResultModal(true)
+  }
+
   return {
     showScanModal,
     showResultModal,
@@ -60,5 +66,6 @@ export function useCheckIn<T extends CheckInEntity>(config: CheckInConfig<T>) {
     handleQRScanned,
     handleConfirmCheckIn,
     handleCloseResultModal,
+    handleManualSelection, // Agregar este método
   }
 }
