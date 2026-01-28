@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, TrendingUp, CreditCard, Wallet } from 'lucide-react';
-import { useReportesStore } from '@/lib/store/reportes/reportes.store';
+import { useReportePagosStore } from '@/lib/store/reportes/reporte-pagos.store';
 
 export default function PaymentsChart() {
   const {
@@ -29,10 +29,8 @@ export default function PaymentsChart() {
     isLoading,
     error,
     fetchPaymentsByDay,
-    dateFrom,
-    dateTo,
     setDateRange
-  } = useReportesStore();
+  } = useReportePagosStore();
 
   const [localDateFrom, setLocalDateFrom] = useState('');
   const [localDateTo, setLocalDateTo] = useState('');
@@ -40,9 +38,9 @@ export default function PaymentsChart() {
   useEffect(() => {
     // Cargar datos del último mes por defecto
     const today = new Date();
-    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
 
-    const fromDate = lastMonth.toISOString().split('T')[0];
+    const fromDate = lastWeek.toISOString().split('T')[0];
     const toDate = today.toISOString().split('T')[0];
 
     setLocalDateFrom(fromDate);

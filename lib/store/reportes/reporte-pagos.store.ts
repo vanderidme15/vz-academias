@@ -1,11 +1,6 @@
-// stores/reportesStore.ts
 import { create } from 'zustand';
-
-
-// Importa tus tipos
-import type { Pago } from '@/shared/types/supabase.types'; // ajusta la ruta según tu estructura
+import type { Pago } from '@/shared/types/supabase.types';
 import { createClient } from '@/lib/supabase/client';
-
 
 const supabase = createClient()
 
@@ -22,7 +17,7 @@ interface PaymentByDay {
   }>;
 }
 
-interface ReportesState {
+interface ReportePagosState {
   paymentsByDay: PaymentByDay[];
   isLoading: boolean;
   error: string | null;
@@ -36,7 +31,7 @@ interface ReportesState {
   reset: () => void;
 }
 
-export const useReportesStore = create<ReportesState>((set, get) => ({
+export const useReportePagosStore = create<ReportePagosState>((set, get) => ({
   paymentsByDay: [],
   isLoading: false,
   error: null,

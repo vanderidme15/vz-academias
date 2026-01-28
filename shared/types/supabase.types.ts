@@ -104,17 +104,6 @@ export type Curso = {
   updated_at?: string;
 }
 
-export type Periodo = {
-  id?: string;
-  name?: string;
-  description?: string;
-  start_date?: string;
-  end_date?: string;
-  is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
 export type Horario = {
   id?: string;
   days?: string[];
@@ -146,7 +135,6 @@ export type Asistencia = {
   id?: string | number;
   registration_id?: string;
   date_time?: string;
-  rescheduled?: boolean;
   teacher_id?: string;
   own_check?: boolean;
   admin_check?: boolean;
