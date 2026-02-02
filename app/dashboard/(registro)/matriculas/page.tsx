@@ -52,12 +52,12 @@ export default function MatriculasPage() {
 
   return (
     <div className="h-full flex flex-col overflow-auto">
-      <h2 className="text-2xl font-bold">Matriculas</h2>
+      <h2 className="text-2xl font-bold">Matrículas</h2>
       <p className="text-xs">Registro de todos los alumnos matriculados y sus cursos</p>
       <DataTable<Alumno, unknown>
         columns={columns}
         data={alumnos || []}
-        entity="Alumno"
+        entity="Matricular"
         dialogHandlers={dialogHandlers}
         disableDelete={true}
         disableEdit={true}
@@ -66,7 +66,7 @@ export default function MatriculasPage() {
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title="Nuevo Alumno"
+        title="Nueva Matrícula"
       >
         <AlumnoForm dialogHandlers={dialogHandlers} onCreate={createAlumno} onEdit={updateAlumno} />
       </GenericDialog>

@@ -97,7 +97,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
       <DataTable<Inscripcion, unknown>
         columns={columns}
         data={inscripciones || []}
-        entity="Inscripción"
+        entity="Inscribir a curso"
         dialogHandlers={dialogHandlers}
         extraActions={extraActions}
       />

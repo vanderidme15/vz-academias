@@ -151,8 +151,8 @@ export function DataTable<TData, TValue>({
               dialogHandlers.setOpenDialog(true)
             }}
           >
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Crear {entity}
+            <PlusIcon className="h-4 w-4" />
+            {entity}
           </Button>
 
           <DataTableViewOptions table={table} />
