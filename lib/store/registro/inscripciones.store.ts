@@ -31,7 +31,7 @@ type InscripcionesStore = {
   deletePayment: (paymentId: string, inscripcionId?: string) => Promise<void>
 
   handleConfirmMarkAttendanceByStudent: (inscripcionId: string) => Promise<void>
-  handleConfirmMarkAttendanceByAdmin: (registrationId: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean) => Promise<void>
+  handleConfirmMarkAttendanceByAdmin: (registrationId: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean, classCountDelta?: number) => Promise<void>
 }
 
 export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
@@ -432,68 +432,51 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     registrationId: string,
     teacherId?: string,
     ownCheck?: boolean,
-    adminCheck?: boolean
+    adminCheck?: boolean,
+    classCountDelta?: number // Nuevo parámetro opcional
   ) => {
     try {
-      const attendance = await useAsistenciasStore.getState().getAsistenciaByInscripcionIdToday(registrationId);
+      // Si no se proporciona classCountDelta, calcularlo (compatibilidad con llamadas antiguas)
+      if (classCountDelta === undefined) {
+        const attendance = await useAsistenciasStore.getState().getAsistenciaByInscripcionIdToday(registrationId);
+        const wasChecked = attendance?.admin_check === true;
+        const willBeChecked = adminCheck === true;
 
-      // Primero obtenemos el valor actual
-      const { data: currentData, error: fetchError } = await supabase
-        .from('inscripciones')
-        .select('class_count')
-        .eq('id', registrationId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // si no hay asistencia o asistencia.admin_check es false y viene a true, incrementamos el contador y luego marcamos la asistencia markAsistenciaByAdmin se encarga de crear la asistencia
-      if ((attendance?.admin_check === false && adminCheck)) {
-        console.log('incrementando contador', attendance, adminCheck);
-        const { data, error } = await supabase
-          .from('inscripciones')
-          .update({ class_count: (currentData.class_count || 0) + 1 })
-          .eq('id', registrationId)
-          .select(`*, course:cursos (*)`)
-          .single();
-
-        if (error) throw error;
-
-        if (data) {
-          // set({
-          //   inscripciones: get().inscripciones.map(
-          //     inscripcion => inscripcion.id === registrationId ? data : inscripcion
-          //   ),
-          //   selectedInscripcion: data
-          // });
-          toast.success('Asistencia guardada correctamente');
+        if (!wasChecked && willBeChecked) {
+          classCountDelta = 1;
+        } else if (wasChecked && !willBeChecked) {
+          classCountDelta = -1;
+        } else {
+          classCountDelta = 0;
         }
       }
 
-      // si hay asistencia o asistencia.admin_check es true y viene a false, decrementamos el contador hasta un mínimo de 0 y luego marcamos la asistencia markAsistenciaByAdmin se encarga de actualizar la asistencia
-      if (attendance && (attendance.admin_check === true && !adminCheck)) {
-        console.log('decrementando contador', attendance, adminCheck);
-        const { data, error } = await supabase
-          .from('inscripciones')
-          .update({ class_count: Math.max((currentData.class_count || 0) - 1, 0) })
-          .eq('id', registrationId)
-          .select(`*, course:cursos (*)`)
-          .single();
+      // Solo actualizar class_count si hay cambio
+      if (classCountDelta !== 0) {
+        const { error } = await supabase.rpc('increment_class_count', {
+          p_registration_id: registrationId,
+          p_increment: classCountDelta
+        });
 
         if (error) throw error;
-
-        if (data) {
-          // set({
-          //   inscripciones: get().inscripciones.map(
-          //     inscripcion => inscripcion.id === registrationId ? data : inscripcion
-          //   ),
-          //   selectedInscripcion: data
-          // });
-          toast.success('Asistencia confirmada correctamente');
-        }
       }
-      useAsistenciasStore.getState().markAsistenciaByAdmin(registrationId, teacherId, ownCheck, adminCheck);
+
+      // Marcar asistencia (sin toasts duplicados)
+      await useAsistenciasStore.getState().markAsistenciaByAdmin(
+        registrationId,
+        teacherId,
+        ownCheck,
+        adminCheck,
+        false // Nuevo parámetro para no mostrar toast
+      );
+
+      // Toast único aquí
+      toast.success('Asistencia guardada correctamente');
+
     } catch (error) {
+      console.error('Error en handleConfirmMarkAttendanceByAdmin:', error);
       toast.error('La asistencia no se pudo confirmar');
+      throw error; // Re-lanzar para que handleSaveAsistencia pueda hacer rollback
     }
   },
 }))

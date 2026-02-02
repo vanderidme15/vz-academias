@@ -105,23 +105,26 @@ export default function AsistenciaCursoDetalle({
       return;
     }
 
+    // Guardar estado previo para rollback en caso de error
+    const previousInscripciones = inscripciones;
+
     try {
+      // Verificar si el estado de admin_check está cambiando
+      const wasChecked = inscripcion.attendance?.admin_check === true;
+      const willBeChecked = state.admin_check === true;
+
+      // Calcular el cambio en el contador de clases
+      let classCountDelta = 0;
+      if (!wasChecked && willBeChecked) {
+        classCountDelta = 1;
+      } else if (wasChecked && !willBeChecked) {
+        classCountDelta = -1;
+      }
+
       // Actualización optimista del estado local
       setInscripciones((prev) =>
         prev.map((ins) => {
           if (ins.id === inscripcionId) {
-            // Verificar si el estado de admin_check está cambiando
-            const wasChecked = ins.attendance?.admin_check === true;
-            const willBeChecked = state.admin_check === true;
-
-            // Calcular el cambio en el contador de clases
-            let classCountDelta = 0;
-            if (!wasChecked && willBeChecked) {
-              classCountDelta = 1; // Incrementar
-            } else if (wasChecked && !willBeChecked) {
-              classCountDelta = -1; // Decrementar
-            }
-
             return {
               ...ins,
               class_count: Math.max((ins.class_count || 0) + classCountDelta, 0),
@@ -138,12 +141,13 @@ export default function AsistenciaCursoDetalle({
         })
       );
 
-      // Realizar la actualización en el servidor
+      // Realizar la actualización en el servidor (pasamos el delta calculado)
       await handleConfirmMarkAttendanceByAdmin(
         inscripcionId,
         state.teacher_id,
         state.own_check,
-        state.admin_check
+        state.admin_check,
+        classCountDelta // Nuevo parámetro
       );
 
       // Limpiar el flag de cambios
@@ -155,12 +159,12 @@ export default function AsistenciaCursoDetalle({
     } catch (error) {
       console.error("Error al guardar asistencia:", error);
 
-      // En caso de error, recargar los datos reales desde el servidor
-      if (curso?.id) {
-        const updated = await fetchInscripcionesByCursoId(curso.id);
-        setInscripciones(updated ?? []);
-      }
-    } finally {
+      // Rollback: restaurar el estado previo
+      setInscripciones(previousInscripciones);
+
+      // Opcionalmente, recargar desde el servidor para estar seguros
+      // const updated = await fetchInscripcionesByCursoId(curso.id);
+      // setInscripciones(updated ?? []);
     }
   };
 

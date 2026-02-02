@@ -17,7 +17,7 @@ type AsistenciasStore = {
 
   //actions
   markAsistenciaByStudent: (registrationId: string) => Promise<Asistencia | null>
-  markAsistenciaByAdmin: (registrationId?: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean) => Promise<Asistencia | null>
+  markAsistenciaByAdmin: (registrationId?: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean, showToast?: boolean) => Promise<Asistencia | null>
   getAsistenciaByInscripcionIdToday: (registrationId: string) => Promise<Asistencia | null>
 }
 
@@ -216,42 +216,24 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
     }
   },
 
-
-
   markAsistenciaByAdmin: async (
     registrationId?: string,
     teacherId?: string,
     ownCheck?: boolean,
-    adminCheck?: boolean
+    adminCheck?: boolean,
+    showToast: boolean = true // Nuevo parámetro para controlar toasts
   ) => {
     try {
       if (!registrationId || !teacherId) {
-        toast.error('No se proporcionó un ID de registro o un ID de profesor');
+        if (showToast) toast.error('No se proporcionó un ID de registro o un ID de profesor');
         return null;
       }
-
-      // Obtener la fecha de hoy sin la hora (solo YYYY-MM-DD)
-      // const today = new Date().toISOString().split('T')[0];
-
-      // const { data: todayAttendance, error: todayAttendanceError } = await supabase
-      //   .from('asistencias')
-      //   .select('*')
-      //   .eq('registration_id', registrationId)
-      //   .gte('date_time', `${today}T00:00:00.000Z`)
-      //   .lt('date_time', `${today}T23:59:59.999Z`)
-      //   .maybeSingle();
-
-      // if (todayAttendanceError) {
-      //   console.error('Error al verificar asistencia:', todayAttendanceError);
-      //   toast.error('Error al verificar la asistencia');
-      //   return null;
-      // }
 
       const todayAttendance = await get().getAsistenciaByInscripcionIdToday(registrationId);
 
       if (todayAttendance) {
-        // Ya existe asistencia, actualizarla
-        const { data: attendanceUpdated, error: attendanceUpdatedError } = await supabase
+        // Actualizar asistencia existente
+        const { data: attendanceUpdated, error } = await supabase
           .from('asistencias')
           .update({
             teacher_id: teacherId,
@@ -262,17 +244,17 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
           .select('*')
           .single();
 
-        if (attendanceUpdatedError) {
-          console.error('Error al actualizar asistencia:', attendanceUpdatedError);
-          toast.error('La asistencia no se pudo actualizar');
-          return null;
+        if (error) {
+          console.error('Error al actualizar asistencia:', error);
+          if (showToast) toast.error('La asistencia no se pudo actualizar');
+          throw error;
         }
 
-        toast.success('Asistencia actualizada correctamente');
+        if (showToast) toast.success('Asistencia actualizada correctamente');
         return attendanceUpdated;
       } else {
-        // No existe asistencia, crearla
-        const { data: attendanceCreated, error: attendanceCreatedError } = await supabase
+        // Crear nueva asistencia
+        const { data: attendanceCreated, error } = await supabase
           .from('asistencias')
           .insert({
             registration_id: registrationId,
@@ -284,19 +266,19 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
           .select('*')
           .single();
 
-        if (attendanceCreatedError) {
-          console.error('Error al crear asistencia:', attendanceCreatedError);
-          toast.error('La asistencia no se pudo crear');
-          return null;
+        if (error) {
+          console.error('Error al crear asistencia:', error);
+          if (showToast) toast.error('La asistencia no se pudo crear');
+          throw error;
         }
 
-        toast.success('Asistencia creada correctamente');
+        if (showToast) toast.success('Asistencia creada correctamente');
         return attendanceCreated;
       }
     } catch (error) {
       console.error('Error en markAsistenciaByAdmin:', error);
-      toast.error('La asistencia no se pudo marcar');
-      return null;
+      if (showToast) toast.error('La asistencia no se pudo marcar');
+      throw error;
     }
   },
 
