@@ -59,7 +59,6 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
       handler: async (inscripcion: Inscripcion) => {
         const url = `${window.location.origin}/carnet/${inscripcion.id}`;
         const mensaje = `Hola ${inscripcion.student?.name || ''}, aquí está tu carnet de inscripción: ${url}, por favor preséntalo en la entrada`;
-        console.log(inscripcion);
         // Usar el número del estudiante o del padre si es menor de edad
         const numero = inscripcion.student?.is_under_18 && inscripcion.student?.parent_cellphone
           ? inscripcion.student.parent_cellphone
@@ -84,7 +83,6 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
     {
       label: "Ver Carnet",
       handler: (inscripcion: Inscripcion) => {
-        console.log(window.location.origin)
         const url = `${window.location.origin}/carnet/${inscripcion.id}`;
         window.open(url, "_blank");
       },

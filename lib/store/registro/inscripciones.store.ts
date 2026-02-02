@@ -321,7 +321,6 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       }
 
       if (data) {
-        console.log(data);
         toast.success('Pago creado correctamente');
         set({
           inscripciones: get().inscripciones.map(

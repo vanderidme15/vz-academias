@@ -95,7 +95,6 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
   }
 
   const handleEdit = async (values: Record<string, any>): Promise<void> => {
-    console.log("values", values);
     const valuesToEdit = {
       ...values,
       materials_description: values.has_materials ? values.materials_description : null,
