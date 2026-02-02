@@ -8,13 +8,17 @@ import { z } from "zod";
 
 const pagoFormSchema = z.object({
   payment_amount: z.union([
-    z.string(),
+    z.string().min(1, 'El monto es obligatorio'),
     z.number()
-  ]).transform((val) => {
-    if (val === '' || val === null || val === undefined) return 0;
-    const num = typeof val === 'string' ? parseFloat(val) : val;
-    return isNaN(num) ? 0 : num;
-  }).pipe(z.number().nonnegative('El precio debe ser mayor o igual a 0')),
+  ])
+    .transform((val) => {
+      const num = typeof val === 'string' ? parseFloat(val) : val;
+      if (isNaN(num)) {
+        throw new Error('El monto debe ser un número válido');
+      }
+      return num;
+    })
+    .pipe(z.number().nonnegative('El monto debe ser mayor o igual a 0')),
   payment_method: z.enum(['yape', 'efectivo']),
   payment_code: z.string().optional(),
 });

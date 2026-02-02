@@ -105,7 +105,7 @@ export default function InscripcionesTab({ student }: { student: Alumno }) {
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title={dialogHandlers.selectedItem ? 'Editar Inscripción' : 'Nueva Inscripción'}
+        title={dialogHandlers.selectedItem ? 'Editar inscripción a curso' : 'Nueva inscripción a curso'}
       >
         <Tabs defaultValue="form" className="w-full overflow-auto">
           <TabsList className="w-full">

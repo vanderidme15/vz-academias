@@ -59,7 +59,7 @@ export default function InscripcionPagosTable({ inscripcion }: { inscripcion: In
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title="Nuevo Precio"
+        title="Agregar pago"
       >
         <PagoForm dialogHandlers={dialogHandlers} selectedInscripcion={inscripcion} onCreate={createPayment} onEdit={updatePayment} />
       </GenericDialog>

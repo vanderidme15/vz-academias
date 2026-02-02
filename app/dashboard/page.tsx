@@ -294,24 +294,26 @@ export default function DashboardPage() {
                 cursosFiltrados.map((curso) => (
                   <div
                     key={curso.id}
-                    className="flex gap-2 items-end p-4 border rounded-xl bg-card"
+                    className="flex gap-2 p-4 border rounded-xl bg-card"
                   >
                     <div style={{ backgroundColor: curso.color }} className="w-2 h-full rounded-full"></div>
-                    <div className="grow">
-                      <p className="font-bold">{curso.name}</p>
-                      <div className="flex gap-3 text-sm">
-                        <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(curso.schedule?.days || [])}</p>
-                        <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
+                    <div className="grow flex flex-col md:flex-row gap-1 md:items-end">
+                      <div className="grow flex flex-col">
+                        <p className="font-bold">{curso.name}</p>
+                        <div className="flex gap-3 text-sm">
+                          <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(curso.schedule?.days || [])}</p>
+                          <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{curso.teacher?.name}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">{curso.teacher?.name}</p>
+                      <Button className="" variant="outline" onClick={() => {
+                        setSelectedCourse(curso);
+                        setOpenDialog(true);
+                      }}>
+                        Ver asistencia
+                        <NotebookPenIcon />
+                      </Button>
                     </div>
-                    <Button className="" variant="outline" onClick={() => {
-                      setSelectedCourse(curso);
-                      setOpenDialog(true);
-                    }}>
-                      Ver asistencia
-                      <NotebookPenIcon />
-                    </Button>
                   </div>
                 ))
               )}

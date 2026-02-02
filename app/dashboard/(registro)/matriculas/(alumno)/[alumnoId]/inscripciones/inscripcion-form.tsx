@@ -80,7 +80,7 @@ export default function InscripcionForm({
       options: cursos.map(curso => ({
         value: curso.id!,
         label: (
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-col items-start text-xs">
             <span className="font-medium">{curso.name}</span>
             <span className="text-muted-foreground">
               {curso.schedule?.name} • S/ {curso.price}
@@ -317,7 +317,7 @@ export default function InscripcionForm({
         fields={fields}
         onSubmit={handleFormSubmit}
         selectedItem={dialogHandlers.selectedItem}
-        className='w-full grid-cols-4'
+        className='w-full md:w-lg grid-cols-4'
       />
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
