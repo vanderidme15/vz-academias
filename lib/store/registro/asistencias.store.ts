@@ -299,6 +299,7 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       return null;
     }
   },
+
   getAsistenciaByInscripcionIdToday: async (registrationId: string) => {
     try {
       const today = new Date().toISOString().split('T')[0];

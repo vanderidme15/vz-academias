@@ -70,7 +70,7 @@ export default function AsistenciaCursoDetalle({
     };
 
     loadInscripciones();
-  }, [curso?.id, curso?.teacher_id, fetchInscripcionesByCursoId]);
+  }, [curso?.id, curso?.teacher_id]);
 
   // Actualizar un campo específico de la asistencia
   const updateAsistenciaField = <K extends keyof Asistencia>(
@@ -97,7 +97,7 @@ export default function AsistenciaCursoDetalle({
   const handleSaveAsistencia = async (inscripcion: InscripcionWithRelations) => {
     if (!curso?.id || !inscripcion.id) return;
 
-    const inscripcionId = inscripcion.id; // Extraer el ID primero
+    const inscripcionId = inscripcion.id;
     const state = asistenciaStates[inscripcionId];
 
     if (!state?.teacher_id) {
@@ -106,7 +106,39 @@ export default function AsistenciaCursoDetalle({
     }
 
     try {
-      setLoading(true);
+      // Actualización optimista del estado local
+      setInscripciones((prev) =>
+        prev.map((ins) => {
+          if (ins.id === inscripcionId) {
+            // Verificar si el estado de admin_check está cambiando
+            const wasChecked = ins.attendance?.admin_check === true;
+            const willBeChecked = state.admin_check === true;
+
+            // Calcular el cambio en el contador de clases
+            let classCountDelta = 0;
+            if (!wasChecked && willBeChecked) {
+              classCountDelta = 1; // Incrementar
+            } else if (wasChecked && !willBeChecked) {
+              classCountDelta = -1; // Decrementar
+            }
+
+            return {
+              ...ins,
+              class_count: Math.max((ins.class_count || 0) + classCountDelta, 0),
+              attendance: {
+                attendance_id: ins.attendance?.attendance_id || null,
+                has_attendance: true,
+                own_check: state.own_check ?? null,
+                admin_check: state.admin_check ?? null,
+                teacher_id: state.teacher_id || null,
+              }
+            };
+          }
+          return ins;
+        })
+      );
+
+      // Realizar la actualización en el servidor
       await handleConfirmMarkAttendanceByAdmin(
         inscripcionId,
         state.teacher_id,
@@ -114,19 +146,21 @@ export default function AsistenciaCursoDetalle({
         state.admin_check
       );
 
-      // Recargar inscripciones
-      const updated = await fetchInscripcionesByCursoId(curso.id);
-      setInscripciones(updated ?? []);
-
       // Limpiar el flag de cambios
       setHasChanges((prev) => ({
         ...prev,
-        [inscripcionId]: false, // Ahora usa la variable local que TypeScript sabe que es string
+        [inscripcionId]: false,
       }));
+
     } catch (error) {
       console.error("Error al guardar asistencia:", error);
+
+      // En caso de error, recargar los datos reales desde el servidor
+      if (curso?.id) {
+        const updated = await fetchInscripcionesByCursoId(curso.id);
+        setInscripciones(updated ?? []);
+      }
     } finally {
-      setLoading(false);
     }
   };
 

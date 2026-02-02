@@ -424,35 +424,6 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
         toast.success('Asistencia confirmada correctamente');
         return
       }
-
-      // Primero obtenemos el valor actual
-      // const { data: currentData, error: fetchError } = await supabase
-      //   .from('inscripciones')
-      //   .select('class_count')
-      //   .eq('id', inscripcionId)
-      //   .single();
-
-      // if (fetchError) throw fetchError;
-
-      // Incrementamos el valor
-      // const { data, error } = await supabase
-      //   .from('inscripciones')
-      //   .update({ class_count: (currentData.class_count || 0) + 1 })
-      //   .eq('id', inscripcionId)
-      //   .select(`*, course:cursos (*)`)
-      //   .single();
-
-      // if (error) throw error;
-
-      // if (data) {
-      //   set({
-      //     inscripciones: get().inscripciones.map(
-      //       inscripcion => inscripcion.id === inscripcionId ? data : inscripcion
-      //     ),
-      //     selectedInscripcion: data
-      //   });
-      //   toast.success('Asistencia confirmada correctamente');
-      // }
     } catch (error) {
       toast.error('La asistencia no se pudo confirmar');
     }
@@ -464,15 +435,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     adminCheck?: boolean
   ) => {
     try {
-      // const attendance = useAsistenciasStore.getState().markAsistenciaByAdmin(registrationId, teacherId, ownCheck, adminCheck);
       const attendance = await useAsistenciasStore.getState().getAsistenciaByInscripcionIdToday(registrationId);
-      // console.log('handleConfirmMarkAttendanceByAdmin', registrationId, teacherId, ownCheck, adminCheck);
-      // console.log('attendance', attendance);
-
-      // if (!attendance) {
-      //   toast.error('No se pudo marcar la asistencia');
-      //   return;
-      // }
 
       // Primero obtenemos el valor actual
       const { data: currentData, error: fetchError } = await supabase
@@ -496,13 +459,13 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
         if (error) throw error;
 
         if (data) {
-          set({
-            inscripciones: get().inscripciones.map(
-              inscripcion => inscripcion.id === registrationId ? data : inscripcion
-            ),
-            selectedInscripcion: data
-          });
-          toast.success('Asistencia confirmada correctamente');
+          // set({
+          //   inscripciones: get().inscripciones.map(
+          //     inscripcion => inscripcion.id === registrationId ? data : inscripcion
+          //   ),
+          //   selectedInscripcion: data
+          // });
+          toast.success('Asistencia guardada correctamente');
         }
       }
 
@@ -519,12 +482,12 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
         if (error) throw error;
 
         if (data) {
-          set({
-            inscripciones: get().inscripciones.map(
-              inscripcion => inscripcion.id === registrationId ? data : inscripcion
-            ),
-            selectedInscripcion: data
-          });
+          // set({
+          //   inscripciones: get().inscripciones.map(
+          //     inscripcion => inscripcion.id === registrationId ? data : inscripcion
+          //   ),
+          //   selectedInscripcion: data
+          // });
           toast.success('Asistencia confirmada correctamente');
         }
       }
