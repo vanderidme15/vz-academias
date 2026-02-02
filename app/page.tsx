@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getClient } from "@/lib/supabase/client"
 import { BookIcon, CalendarIcon, PieChartIcon, UsersIcon } from "lucide-react"
+import { useAuth } from "@/lib/hooks/use-auth"
 
 export default function LandingPage() {
   const [email, setEmail] = useState("")
@@ -16,6 +17,7 @@ export default function LandingPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,78 +112,85 @@ export default function LandingPage() {
               </CardHeader>
 
               <CardContent className="">
-                <form onSubmit={handleLogin} className="space-y-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-slate-700 font-medium">
-                      Correo Electrónico
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="admin@academia.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                        className="pl-10 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
-                      />
-                      <svg className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                      </svg>
-                    </div>
+                {isAuthenticated ? (
+                  <div className="flex flex-col gap-4">
+                    <p className="text-center text-muted-foreground">Ya has iniciado sesión</p>
+                    <Button onClick={() => router.push("/dashboard")}>Ir al dashboard</Button>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-slate-700 font-medium">
-                      Contraseña
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={loading}
-                        className="pl-10 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
-                      />
-                      <svg className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-shake">
-                      <p className="text-sm text-red-600 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                ) : (
+                  <form onSubmit={handleLogin} className="space-y-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-slate-700 font-medium">
+                        Correo Electrónico
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="admin@academia.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          disabled={loading}
+                          className="pl-10 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
+                        />
+                        <svg className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                         </svg>
-                        {error}
-                      </p>
+                      </div>
                     </div>
-                  )}
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-600/30 transition-all duration-300 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-slate-700 font-medium">
+                        Contraseña
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          disabled={loading}
+                          className="pl-10 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
+                        />
+                        <svg className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        Iniciando sesión...
-                      </span>
-                    ) : (
-                      "Iniciar Sesión"
+                      </div>
+                    </div>
+
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-shake">
+                        <p className="text-sm text-red-600 flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                          {error}
+                        </p>
+                      </div>
                     )}
-                  </Button>
-                </form>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-600/30 transition-all duration-300 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Iniciando sesión...
+                        </span>
+                      ) : (
+                        "Iniciar Sesión"
+                      )}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
 

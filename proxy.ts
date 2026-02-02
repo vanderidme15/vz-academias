@@ -45,7 +45,7 @@ export async function proxy(request: NextRequest) {
 
   // Proteger rutas del dashboard
   if (pathname.startsWith("/dashboard") && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/iniciar-sesion", request.url))
+    return NextResponse.redirect(new URL("/", request.url))
   }
 
   // Redirigir usuarios autenticados lejos del login

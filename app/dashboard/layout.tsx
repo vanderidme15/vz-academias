@@ -22,7 +22,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/iniciar-sesion")
+      router.push("/")
     }
   }, [isLoading, isAuthenticated, router])
 
