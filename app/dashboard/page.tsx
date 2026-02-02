@@ -37,9 +37,10 @@ export default function DashboardPage() {
   const [showManualSearchModal, setShowManualSearchModal] = useState(false)
   const [allInscripciones, setAllInscripciones] = useState<Inscripcion[]>([])
 
+  const [openScheduleFilter, setOpenScheduleFilter] = useState(false)
+
   const today = new Date();
 
-  console.log(horarios, selectedHorarioId)
 
   // Función para obtener el día actual en el formato que usa tu sistema
   const getCurrentDayKey = (): string => {
@@ -202,10 +203,9 @@ export default function DashboardPage() {
               {/* Selector de horarios mejorado */}
               <div className="w-full lg:w-64">
                 <Label htmlFor="horario" className="mb-1">Filtrar por horario</Label>
-                <Popover>
+                <Popover open={openScheduleFilter} onOpenChange={setOpenScheduleFilter}>
                   <PopoverTrigger asChild>
                     <button
-                      role="combobox"
                       className={cn(
                         "w-full justify-between font-normal border text-sm flex items-center p-2 rounded-lg bg-card text-muted-foreground",
                         !selectedHorarioId && "text-muted-foreground"
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                       <CommandGroup className="max-h-64 overflow-auto">
                         <CommandItem
                           value="todos"
-                          onSelect={() => handleHorarioSelect(null)}
+                          onSelect={() => { handleHorarioSelect(null); setOpenScheduleFilter(false) }}
                           className={cn(
                             selectedHorarioId === null && "bg-accent"
                           )}
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                           <CommandItem
                             key={horario.id}
                             value={`${horario.id}-${horario.name}`} // Usar ID + nombre para hacerlo único
-                            onSelect={() => handleHorarioSelect(horario.id || null)}
+                            onSelect={() => { handleHorarioSelect(horario.id || null); setOpenScheduleFilter(false) }}
                             className={cn(
                               selectedHorarioId === horario.id && "bg-accent"
                             )}

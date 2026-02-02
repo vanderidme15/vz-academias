@@ -143,10 +143,10 @@ export default function AsistenciaCursoDetalle({
       setOpenDialog={setOpenDialog}
       title="Registrar asistencia para el curso"
     >
-      <div className="flex flex-col gap-4 h-full overflow-y-auto">
+      <div className="h-full flex flex-col gap-4 overflow-y-auto w-full md:w-2xl">
         {/* Header del curso */}
-        <div className="flex items-end gap-2 border px-4 rounded-xl border-dashed">
-          <div style={{ backgroundColor: curso.color }} className="w-2 h-12 rounded-full shrink-0"></div>
+        <div className="flex items-center gap-2 border px-4 py-2 rounded-xl border-dashed">
+          <div style={{ backgroundColor: curso.color }} className="w-2 h-16 rounded-full"></div>
 
           <div className="grow">
             <p className="text-lg font-medium">{curso.name}</p>
@@ -154,9 +154,12 @@ export default function AsistenciaCursoDetalle({
               Profesor: {curso.teacher?.name ?? "Sin asignar"}
             </p>
           </div>
-          <div className="flex flex-col lg:flex-row gap-px lg:gap-3 text-sm">
-            <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(curso.schedule?.days || [])}</p>
-            <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
+          <div className="flex flex-col gap-px text-sm">
+            <span className="text-xs text-muted-foreground">Horario:</span>
+            <div className="flex flex-col md:flex-row gap-2">
+              <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(curso.schedule?.days || [])}</p>
+              <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(curso.schedule?.start_time)} - {formatTime(curso.schedule?.end_time)}</p>
+            </div>
           </div>
         </div>
 
@@ -195,7 +198,7 @@ export default function AsistenciaCursoDetalle({
                     {/* Información del estudiante */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-medium">{inscripcion.student?.name}</p>
+                        <p className="font-medium">● {inscripcion.student?.name}</p>
                         <p className="text-xs text-muted-foreground"> DNI: {inscripcion.student?.dni}</p>
                       </div>
                       <div className="text-xs text-muted-foreground">
