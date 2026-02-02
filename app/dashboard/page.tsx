@@ -5,7 +5,7 @@ import { formatDate, formatTime, getShortDays } from "@/lib/utils-functions/form
 import { useAlumnosStore } from "@/lib/store/registro/alumnos.store"
 import { useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { CalendarIcon, ClockIcon, NotebookPenIcon, QrCodeIcon, SearchIcon } from "lucide-react"
+import { CalendarIcon, ClockIcon, GraduationCapIcon, NotebookPenIcon, QrCodeIcon, SearchIcon, Check, ChevronsUpDown } from "lucide-react"
 import { useCursosStore } from "@/lib/store/configuraciones/cursos.store"
 import AsistenciaCursoDetalle from "./(registro)/asistencia/components/asistencia-curso-detalle"
 import { useState } from "react"
@@ -15,9 +15,13 @@ import { QRScannerModal } from "@/components/own/check-in/qr-scanner-modal"
 import { InscripcionDetailModal } from "@/components/own/check-in/entity-detail-modal"
 import { useCheckIn } from "@/components/own/check-in/use-check-in"
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store"
-import { DaysConfig, daysConfig } from "@/lib/constants/days"
 import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store"
 import { ManualSearchModal } from "@/components/own/check-in/manual-search-modal"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -34,6 +38,8 @@ export default function DashboardPage() {
   const [allInscripciones, setAllInscripciones] = useState<Inscripcion[]>([])
 
   const today = new Date();
+
+  console.log(horarios, selectedHorarioId)
 
   // Función para obtener el día actual en el formato que usa tu sistema
   const getCurrentDayKey = (): string => {
@@ -140,73 +146,145 @@ export default function DashboardPage() {
   }, [cursos, selectedHorarioId]);
 
   // Función para manejar la selección de horario
-  const handleHorarioSelect = (horarioId: string) => {
+  const handleHorarioSelect = (horarioId: string | null) => {
     setSelectedHorarioId(horarioId);
   };
 
-  // Opción para mostrar todos los cursos
-  const handleShowAll = () => {
-    setSelectedHorarioId(null);
-  };
+  // Obtener el horario seleccionado para mostrar
+  const selectedHorario = horarios.find(h => h.id === selectedHorarioId);
 
   return (
     <>
       <div className="flex flex-col gap-4 w-full h-screen overflow-y-auto bg-muted rounded-xl p-4">
         <div className="w-full grid grid-cols-6 gap-4">
-          <div className="rounded-xl col-span-6 lg:col-span-3 p-4 flex flex-col justify-center bg-card">
-            <h2 className="font-display text-2xl">{academia?.name}</h2>
-            <p>Suscripción: {academia?.plan_type === 'year' ? 'Anual' : 'Mensual'}</p>
-            <p className="text-muted-foreground text-xs">vence el {formatDate(academia?.end_date)}</p>
+          <div className="rounded-xl col-span-6 lg:col-span-3 p-4 flex items-center gap-2 bg-card">
+            <Avatar className="size-20">
+              <AvatarImage src={academia?.logo_url} />
+              <AvatarFallback>
+                <GraduationCapIcon size={20} />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col justify-center">
+              <h2 className="font-bold font-sans text-xl">{academia?.name}</h2>
+              <p>Suscripción: {academia?.plan_type === 'year' ? 'Anual' : 'Mensual'}</p>
+              <p className="text-muted-foreground text-xs">vence el {formatDate(academia?.end_date)}</p>
+            </div>
           </div>
           <div className="col-span-6 lg:col-span-3 flex justify-between gap-2">
             <div className="bg-card rounded-xl p-2 flex flex-col justify-center gap-px grow">
-              <p className="text-xs font-bold">ALUMNOS</p>
-              <p className="font-display text-2xl">{countAlumnos}</p>
+              <p className="text-xs">Alumnos</p>
+              <p className="font-display text-2xl font-bold">{countAlumnos}</p>
             </div>
             <div className="bg-card rounded-xl p-2 flex flex-col justify-center gap-px grow">
-              <p className="uppercase font-bold">{today.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
-              <p className="text-2xl">{today.toLocaleDateString('es-ES')}</p>
+              <p className="text-xs capitalize">{today.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
+              <p className="font-display text-2xl font-bold">{today.toLocaleDateString('es-ES')}</p>
             </div>
           </div>
         </div>
         <div className="w-full flex flex-col gap-4">
           <div className="bg-card w-full gap-4 p-4 rounded-xl">
             <h3 className="text-xl font-bold w-full">Asistencia rápida</h3>
-            <div className="flex justify-center items-center gap-2 w-full">
-              <Button onClick={handleOpenManualSearch}>
+            <div className="flex flex-col lg:flex-row justify-center items-center gap-2 w-full mt-2 ">
+              <Button onClick={handleOpenManualSearch} className="w-full lg:w-auto">
                 <SearchIcon /> Buscar Alumno
               </Button>
-              <Button onClick={checkInInscripciones.handleStartScan}>
+              <Button onClick={checkInInscripciones.handleStartScan} className="w-full lg:w-auto">
                 <QrCodeIcon /> Marcar Asistencia con QR
               </Button>
             </div>
           </div>
           <div className="w-full flex flex-col gap-2">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
+            <div className="flex flex-col lg:flex-row items-start justify-start lg:items-center gap-2">
               <h3 className="text-xl font-bold">
                 Cursos ({cursosFiltrados.length})
               </h3>
-              {/* lista de horarios para filtrar */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={selectedHorarioId === null ? "default" : "outline"}
-                  onClick={handleShowAll}
-                  size="sm"
-                >
-                  Todos
-                </Button>
-                {horarios.map((horario) => (
-                  <Button
-                    key={horario.id}
-                    variant={selectedHorarioId === horario.id ? "default" : "outline"}
-                    onClick={() => handleHorarioSelect(horario.id || '')}
-                    size="sm"
-                  >
-                    {horario.name}
-                  </Button>
-                ))}
+
+              {/* Selector de horarios mejorado */}
+              <div className="w-full lg:w-64">
+                <Label htmlFor="horario" className="mb-1">Filtrar por horario</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between font-normal border text-sm flex items-center p-2 rounded-lg bg-card text-muted-foreground",
+                        !selectedHorarioId && "text-muted-foreground"
+                      )}
+                    >
+                      <div className="truncate">
+                        {selectedHorario ? (
+                          <div className="flex flex-col gap-1">
+                            <p>{selectedHorario.name}</p>
+                            <div className="flex items-center gap-2 text-xs">
+                              <div className="flex items-center gap-1">
+                                <CalendarIcon size={12} /> {getShortDays(selectedHorario.days || [])}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <ClockIcon size={12} /> {formatTime(selectedHorario.start_time)} - {formatTime(selectedHorario.end_time)}
+                              </div>
+                            </div>
+                          </div>
+                        ) : "Todos los horarios"}
+                      </div>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </button>
+                  </PopoverTrigger>
+
+                  <PopoverContent className="w-full p-0" align="end">
+                    <Command>
+                      <CommandInput placeholder="Buscar horario..." />
+                      <CommandEmpty>No se encontraron horarios.</CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        <CommandItem
+                          value="todos"
+                          onSelect={() => handleHorarioSelect(null)}
+                          className={cn(
+                            selectedHorarioId === null && "bg-accent"
+                          )}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedHorarioId === null ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          Todos los horarios
+                        </CommandItem>
+                        {horarios.map((horario) => (
+                          <CommandItem
+                            key={horario.id}
+                            value={`${horario.id}-${horario.name}`} // Usar ID + nombre para hacerlo único
+                            onSelect={() => handleHorarioSelect(horario.id || null)}
+                            className={cn(
+                              selectedHorarioId === horario.id && "bg-accent"
+                            )}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedHorarioId === horario.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span>{horario.name}</span>
+                              <div className="flex gap-1">
+                                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <CalendarIcon /> {getShortDays(horario.days || [])}
+                                </p>
+                                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <ClockIcon /> {formatTime(horario.start_time)} - {formatTime(horario.end_time)}
+                                </p>
+                              </div>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               {cursosFiltrados.length === 0 ? (
                 <div className="col-span-full text-center py-8 text-muted-foreground">
