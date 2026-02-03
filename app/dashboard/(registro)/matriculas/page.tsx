@@ -68,7 +68,9 @@ export default function MatriculasPage() {
         setOpenDialog={dialogHandlers.setOpenDialog}
         title="Nueva Matrícula"
       >
-        <AlumnoForm dialogHandlers={dialogHandlers} onCreate={createAlumno} onEdit={updateAlumno} />
+        <div className="w-full md:w-2xl">
+          <AlumnoForm dialogHandlers={dialogHandlers} onCreate={createAlumno} onEdit={updateAlumno} />
+        </div>
       </GenericDialog>
       <DeleteDialog
         openDeleteDialog={dialogHandlers.openDialogDelete}

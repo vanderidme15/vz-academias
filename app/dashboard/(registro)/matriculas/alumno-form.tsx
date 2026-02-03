@@ -253,7 +253,7 @@ export default function AlumnoForm({ dialogHandlers, onCreate, onEdit }: AlumnoF
       fields={fields}
       onSubmit={dialogHandlers.selectedItem ? handleEdit : handleCreate}
       selectedItem={dialogHandlers.selectedItem}
-      className='w-full md:w-2xl grid-cols-4'
+      className='w-full grid-cols-4'
     />
   )
 }
