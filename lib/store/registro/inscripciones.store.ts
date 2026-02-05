@@ -20,6 +20,9 @@ type InscripcionesStore = {
   fetchInscripcionesByCursoId: (cursoId?: string) => Promise<InscripcionWithRelations[]>
   fetchInscripcionesByCursoIdYFecha: (cursoId?: string, fecha?: string) => Promise<InscripcionWithRelations[]>
 
+  // fetch para traer solo inscripciones sin asistencia por curso
+  fetchInscripcionesByCursoAndCurrentMonth: (cursoId?: string, date?: Date) => Promise<Inscripcion[]>
+
   fetchInscripcionById: (id?: string) => Promise<Inscripcion | null>
   createInscripcion: (values: Inscripcion) => Promise<Inscripcion | null>
   updateInscripcion: (values: Inscripcion, id: string) => Promise<Inscripcion | null>
@@ -187,6 +190,36 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       }));
 
       return transformedData;
+    } catch (err) {
+      console.error(err);
+      toast.error('No se pudieron cargar las inscripciones');
+      return [];
+    }
+  },
+
+  fetchInscripcionesByCursoAndCurrentMonth: async (cursoId?: string, date?: Date) => {
+    // traer las inscripciones de un curso en el mes actual
+    // considerando la fecha de inicio date_from de la inscripcion
+    if (!cursoId || !date) {
+      toast.error('No se proporcionó un ID de curso o fecha');
+      return [];
+    }
+
+    try {
+      // Obtener el primer y último día del mes
+      const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+      const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`*, student:alumnos (*)`)
+        .eq('course_id', cursoId)
+        .gte('date_from', startOfMonth.toISOString())
+        .lte('date_from', endOfMonth.toISOString());
+
+      if (error) throw error;
+
+      return data || [];
     } catch (err) {
       console.error(err);
       toast.error('No se pudieron cargar las inscripciones');

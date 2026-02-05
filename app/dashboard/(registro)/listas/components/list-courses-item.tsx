@@ -2,16 +2,21 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon, ClockIcon, UsersIcon } from "lucide-react";
 import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
 import { Curso } from "@/shared/types/supabase.types";
-import { useState } from "react";
+import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
 
 interface ListCoursesItemProps {
   curso: Curso;
+  date: Date;
   dialogHandlers: any;
 }
 
-export default function ListCoursesItem({ curso, dialogHandlers }: ListCoursesItemProps) {
+export default function ListCoursesItem({ curso, date, dialogHandlers }: ListCoursesItemProps) {
+  const { fetchInscripcionesByCursoAndCurrentMonth } = useInscripcionesStore();
 
-  const getStudents = () => {
+  const getStudents = async () => {
+    const inscripciones = await fetchInscripcionesByCursoAndCurrentMonth(curso.id, date);
+    // console.log(inscripciones);
+    dialogHandlers.setInscripcionesByCurso(inscripciones);
     dialogHandlers.setOpenDialog(true);
     dialogHandlers.setSelectedCourse(curso);
   }

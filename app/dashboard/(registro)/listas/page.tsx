@@ -1,6 +1,5 @@
 'use client'
 
-import { DialogHandlers } from "@/shared/types/ui.types";
 import { useState, useMemo, useEffect } from "react";
 
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon } from "lucide-react";
@@ -8,16 +7,19 @@ import { Button } from "@/components/ui/button";
 import ListCoursesFilters from "./components/list-courses-filters";
 import ListCoursesItem from "./components/list-courses-item";
 import { useCursosStore } from "@/lib/store/configuraciones/cursos.store";
-import { Curso } from "@/shared/types/supabase.types";
+import { Curso, Inscripcion } from "@/shared/types/supabase.types";
 import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
-import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
+import { formatDate, formatTime, getShortDays } from "@/lib/utils-functions/format-date";
+import { cn } from "@/lib/utils";
 
 
 function useDialogHandlers() {
-  const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
+
+  const [inscripcionesByCurso, setInscripcionesByCurso] = useState<Inscripcion[]>([]);
 
   return useMemo(() => ({
     openDialog,
@@ -25,8 +27,10 @@ function useDialogHandlers() {
     loading,
     setLoading,
     selectedCourse,
-    setSelectedCourse
-  }), [openDialog, setOpenDialog, loading, setLoading, selectedCourse, setSelectedCourse]);
+    setSelectedCourse,
+    inscripcionesByCurso,
+    setInscripcionesByCurso
+  }), [openDialog, setOpenDialog, loading, setLoading, selectedCourse, setSelectedCourse, inscripcionesByCurso, setInscripcionesByCurso]);
 }
 
 export default function ListasPage() {
@@ -164,7 +168,7 @@ export default function ListasPage() {
               {/* Cursos del grupo */}
               <div className="space-y-2 pl-4">
                 {cursosDelGrupo.map((curso) => (
-                  <ListCoursesItem key={curso.id} curso={curso} dialogHandlers={dialogHandlers} />
+                  <ListCoursesItem key={curso.id} curso={curso} date={mes} dialogHandlers={dialogHandlers} />
                 ))}
               </div>
             </div>
@@ -211,11 +215,103 @@ export default function ListasPage() {
             <p className="text-sm text-muted-foreground">Cargando asistencias...</p>
           )}
 
-          {/* {!dialogHandlers.loading && dialogHandlers.selectedCourse?.inscripciones.length === 0 && (
+          {!dialogHandlers.loading && dialogHandlers.inscripcionesByCurso.length === 0 && (
             <p className="text-sm text-muted-foreground">
               No hay inscripciones para este curso
             </p>
-          )} */}
+          )}
+
+          {/* Lista de alumnos */}
+          {!dialogHandlers.loading && dialogHandlers.inscripcionesByCurso.length > 0 && (
+            <div className="flex flex-col gap-2 mt-2">
+              <span>Listado de alumnos ({dialogHandlers.inscripcionesByCurso.length})</span>
+              <div className="flex flex-col gap-2">
+                {dialogHandlers.inscripcionesByCurso.map((inscripcion) => {
+                  const payments = inscripcion.payments ?? []
+                  const total = payments?.reduce((total, payment) => total + (payment.payment_amount || 0), 0)
+                  const saldo = (inscripcion.price_charged || 0) - (total || 0)
+                  const porcentajeAsistencia = (inscripcion.total_classes || 0) > 0 ? (((inscripcion.class_count || 0) / (inscripcion.total_classes || 0)) * 100).toFixed(0) : 0;
+
+                  return (
+                    <div className="flex gap-1 items-center w-full" key={inscripcion.id}>
+                      <span>●</span>
+                      <div className="grow flex flex-col justify-center border rounded-md p-2">
+                        <p>{inscripcion.student?.name}</p>
+                        <div className="w-full flex gap-1">
+                          <div className="flex flex-col text-sm border-r px-2">
+                            <span className="text-xs font-bold">Precio</span>
+                            <span className="font-medium">S/ {inscripcion.price_charged?.toFixed(2)}</span>
+                            {inscripcion.includes_registration && (
+                              <span className="text-xs text-muted-foreground">
+                                Mat: S/ {inscripcion.registration_price?.toFixed(2)} + Curso: S/ {inscripcion.course_price?.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-col text-sm border-r px-2">
+                            <span className="text-xs font-bold">Pagos</span>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {saldo > 0 ? (
+                                  <span className="text-xs text-orange-600 font-medium">
+                                    Saldo: S/ {saldo.toFixed(2)}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-green-600 font-medium">
+                                    Pagado ✓
+                                  </span>
+                                )}
+                              </div>
+                              {payments.length > 0 ? (
+                                <div className="flex gap-1 flex-wrap max-w-40 mt-1">
+                                  {payments.map((payment, index) => (
+                                    <div
+                                      key={`${payment.id}-${index}`}
+                                      className={cn(
+                                        "flex items-center gap-px px-1.5 py-0.5 rounded text-xs border-2 font-medium",
+                                        payment.payment_method === 'efectivo'
+                                          ? 'border-green-500 bg-green-50 text-green-700'
+                                          : 'border-purple-500 bg-purple-50 text-purple-700'
+                                      )}
+                                    >
+                                      S/ {payment.payment_amount?.toFixed(2)}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Sin pagos registrados
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex flex-col text-sm border-r px-2">
+                            <span className="text-xs font-bold">Asistencias</span>
+                            <div className="flex flex-col text-sm">
+                              <span className="font-medium">
+                                {inscripcion.class_count} / {inscripcion.total_classes}
+                                <span className="text-xs text-muted-foreground"> ({porcentajeAsistencia}%)</span>
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col text-sm">
+                            <span className="text-xs font-bold">Fechas</span>
+                            <div className="flex flex-col text-sm">
+                              <div className="text-xs">
+                                Inicio: {formatDate(inscripcion.date_from || '')}
+                              </div>
+                              <div className="text-xs">
+                                Fin: {formatDate(inscripcion.date_to || '')}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
         </div>
       </GenericDialog>
