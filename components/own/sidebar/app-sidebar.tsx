@@ -3,16 +3,14 @@
 import * as React from "react"
 import {
   BookAIcon,
+  BookOpenTextIcon,
   ChartColumnBigIcon,
   ClockIcon,
   GraduationCapIcon,
   HeadsetIcon,
   HomeIcon,
-  ListCheckIcon,
-  PieChartIcon,
   PiggyBankIcon,
   SquarePenIcon,
-  TrelloIcon,
   UsersIcon,
 } from "lucide-react"
 
@@ -88,16 +86,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>
-          {/* <SidebarMenu>
+          <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/dashboard/asistencia">
-                <SidebarMenuButton tooltip="Asistencia">
-                  <ListCheckIcon />
-                  <span>Asistencia</span>
+              <Link href="/dashboard/listas">
+                <SidebarMenuButton tooltip="Listas">
+                  <BookOpenTextIcon />
+                  <span>Listas</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-          </SidebarMenu> */}
+          </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Configuraciones</SidebarGroupLabel>

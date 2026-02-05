@@ -21,11 +21,27 @@ export const useHorariosStore = create<HorariosStore>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('horarios')
-        .select('*')
-        .order('created_at', { ascending: false }); // Ordenar por más reciente
+        .select('*');
 
       if (error) throw error;
-      set({ horarios: data ?? [] });
+
+      // Ordenar en el cliente
+      const ordenDias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+
+      const horariosOrdenados = (data ?? []).sort((a: any, b: any) => {
+        // Comparar por el primer día del array
+        const diaA = ordenDias.indexOf(a.days[0]?.toLowerCase());
+        const diaB = ordenDias.indexOf(b.days[0]?.toLowerCase());
+
+        if (diaA !== diaB) {
+          return diaA - diaB;
+        }
+
+        // Si el día es el mismo, ordenar por hora de inicio
+        return a.start_time.localeCompare(b.start_time);
+      });
+
+      set({ horarios: horariosOrdenados });
     } catch (error) {
       toast.error('No se pudieron cargar los horarios');
     }
