@@ -190,7 +190,7 @@ export default function ListasPage() {
         title="Alumnos"
         description="Lista de alumnos del curso"
       >
-        <div className="w-xl">
+        <div className="w-3xl">
           {/* Header del curso */}
           <div className="flex items-center gap-2 border px-4 py-2 rounded-xl border-dashed">
             <div style={{ backgroundColor: dialogHandlers.selectedCourse?.color }} className="w-2 h-16 rounded-full"></div>
@@ -238,18 +238,23 @@ export default function ListasPage() {
                       <div className="grow flex flex-col justify-center border rounded-md p-2">
                         <p>{inscripcion.student?.name}</p>
                         <div className="w-full flex gap-1">
-                          <div className="flex flex-col text-sm border-r px-2">
+                          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
                             <span className="text-xs font-bold">Precio</span>
                             <span className="font-medium">S/ {inscripcion.price_charged?.toFixed(2)}</span>
                             {inscripcion.includes_registration && (
-                              <span className="text-xs text-muted-foreground">
-                                Mat: S/ {inscripcion.registration_price?.toFixed(2)} + Curso: S/ {inscripcion.course_price?.toFixed(2)}
-                              </span>
+                              <>
+                                <span className="text-xs text-muted-foreground">
+                                  Mat: S/ {inscripcion.registration_price?.toFixed(2)}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  Curso: S/ {inscripcion.course_price?.toFixed(2)}
+                                </span>
+                              </>
                             )}
                           </div>
-                          <div className="flex flex-col text-sm border-r px-2">
+                          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
                             <span className="text-xs font-bold">Pagos</span>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col justify-center gap-px">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {saldo > 0 ? (
                                   <span className="text-xs text-orange-600 font-medium">
@@ -284,7 +289,7 @@ export default function ListasPage() {
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-col text-sm border-r px-2">
+                          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
                             <span className="text-xs font-bold">Asistencias</span>
                             <div className="flex flex-col text-sm">
                               <span className="font-medium">
@@ -293,7 +298,7 @@ export default function ListasPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-col text-sm">
+                          <div className="flex flex-col text-sm pl-2 basis-0 grow">
                             <span className="text-xs font-bold">Fechas</span>
                             <div className="flex flex-col text-sm">
                               <div className="text-xs">

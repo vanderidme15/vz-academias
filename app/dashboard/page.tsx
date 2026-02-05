@@ -294,7 +294,11 @@ export default function DashboardPage() {
                 cursosFiltrados.map((curso) => (
                   <div
                     key={curso.id}
-                    className="flex gap-2 p-4 border rounded-xl bg-card"
+                    className="flex gap-2 p-4 border rounded-xl bg-card cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => {
+                      setSelectedCourse(curso);
+                      setOpenDialog(true);
+                    }}
                   >
                     <div style={{ backgroundColor: curso.color }} className="w-2 h-full rounded-full"></div>
                     <div className="grow flex flex-col md:flex-row gap-1 md:items-end">
