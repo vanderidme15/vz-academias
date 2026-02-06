@@ -190,7 +190,7 @@ export default function ListasPage() {
         title="Alumnos"
         description="Lista de alumnos del curso"
       >
-        <div className="w-3xl">
+        <div className="flex flex-col w-3xl overflow-auto">
           {/* Header del curso */}
           <div className="flex items-center gap-2 border px-4 py-2 rounded-xl border-dashed">
             <div style={{ backgroundColor: dialogHandlers.selectedCourse?.color }} className="w-2 h-16 rounded-full"></div>
@@ -223,7 +223,7 @@ export default function ListasPage() {
 
           {/* Lista de alumnos */}
           {!dialogHandlers.loading && dialogHandlers.inscripcionesByCurso.length > 0 && (
-            <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col gap-2 mt-2 overflow-auto">
               <span>Listado de alumnos ({dialogHandlers.inscripcionesByCurso.length})</span>
               <div className="flex flex-col gap-2">
                 {dialogHandlers.inscripcionesByCurso.map((inscripcion) => {
