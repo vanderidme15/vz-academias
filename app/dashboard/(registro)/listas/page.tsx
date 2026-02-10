@@ -10,8 +10,9 @@ import { useCursosStore } from "@/lib/store/configuraciones/cursos.store";
 import { Curso, Inscripcion } from "@/shared/types/supabase.types";
 import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
-import { formatDate, formatTime, getShortDays } from "@/lib/utils-functions/format-date";
-import { cn } from "@/lib/utils";
+import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
+import ListStudentItem from "./components/list-course/list-course-student";
+import ListCourse from "./components/list-course/list-course";
 
 
 function useDialogHandlers() {
@@ -32,6 +33,8 @@ function useDialogHandlers() {
     setInscripcionesByCurso
   }), [openDialog, setOpenDialog, loading, setLoading, selectedCourse, setSelectedCourse, inscripcionesByCurso, setInscripcionesByCurso]);
 }
+
+export type DialogHandlersListType = ReturnType<typeof useDialogHandlers>;
 
 export default function ListasPage() {
   const dialogHandlers = useDialogHandlers();
@@ -187,138 +190,10 @@ export default function ListasPage() {
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title="Alumnos"
-        description="Lista de alumnos del curso"
+        title="Lista de alumnos del curso"
+        description=""
       >
-        <div className="flex flex-col w-3xl overflow-auto">
-          {/* Header del curso */}
-          <div className="flex items-center gap-2 border px-4 py-2 rounded-xl border-dashed">
-            <div style={{ backgroundColor: dialogHandlers.selectedCourse?.color }} className="w-2 h-16 rounded-full"></div>
-
-            <div className="grow">
-              <p className="text-lg font-medium">{dialogHandlers.selectedCourse?.name}</p>
-              <p className="text-xs text-muted-foreground">
-                Profesor: {dialogHandlers.selectedCourse?.teacher?.name ?? "Sin asignar"}
-              </p>
-            </div>
-            <div className="flex flex-col gap-px text-sm">
-              <span className="text-xs text-muted-foreground">Horario:</span>
-              <div className="flex flex-col md:flex-row gap-2">
-                <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(dialogHandlers.selectedCourse?.schedule?.days || [])}</p>
-                <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(dialogHandlers.selectedCourse?.schedule?.start_time)} - {formatTime(dialogHandlers.selectedCourse?.schedule?.end_time)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Estados de carga */}
-          {dialogHandlers.loading && (
-            <p className="text-sm text-muted-foreground">Cargando asistencias...</p>
-          )}
-
-          {!dialogHandlers.loading && dialogHandlers.inscripcionesByCurso.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              No hay inscripciones para este curso
-            </p>
-          )}
-
-          {/* Lista de alumnos */}
-          {!dialogHandlers.loading && dialogHandlers.inscripcionesByCurso.length > 0 && (
-            <div className="flex flex-col gap-2 mt-2 overflow-auto">
-              <span>Listado de alumnos ({dialogHandlers.inscripcionesByCurso.length})</span>
-              <div className="flex flex-col gap-2">
-                {dialogHandlers.inscripcionesByCurso.map((inscripcion) => {
-                  const payments = inscripcion.payments ?? []
-                  const total = payments?.reduce((total, payment) => total + (payment.payment_amount || 0), 0)
-                  const saldo = (inscripcion.price_charged || 0) - (total || 0)
-                  const porcentajeAsistencia = (inscripcion.total_classes || 0) > 0 ? (((inscripcion.class_count || 0) / (inscripcion.total_classes || 0)) * 100).toFixed(0) : 0;
-
-                  return (
-                    <div className="flex gap-1 items-center w-full" key={inscripcion.id}>
-                      <span>●</span>
-                      <div className="grow flex flex-col justify-center border rounded-md p-2">
-                        <p>{inscripcion.student?.name}</p>
-                        <div className="w-full flex gap-1">
-                          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-                            <span className="text-xs font-bold">Precio</span>
-                            <span className="font-medium">S/ {inscripcion.price_charged?.toFixed(2)}</span>
-                            {inscripcion.includes_registration && (
-                              <>
-                                <span className="text-xs text-muted-foreground">
-                                  Mat: S/ {inscripcion.registration_price?.toFixed(2)}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  Curso: S/ {inscripcion.course_price?.toFixed(2)}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-                            <span className="text-xs font-bold">Pagos</span>
-                            <div className="flex flex-col justify-center gap-px">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {saldo > 0 ? (
-                                  <span className="text-xs text-orange-600 font-medium">
-                                    Saldo: S/ {saldo.toFixed(2)}
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-green-600 font-medium">
-                                    Pagado ✓
-                                  </span>
-                                )}
-                              </div>
-                              {payments.length > 0 ? (
-                                <div className="flex gap-1 flex-wrap max-w-40 mt-1">
-                                  {payments.map((payment, index) => (
-                                    <div
-                                      key={`${payment.id}-${index}`}
-                                      className={cn(
-                                        "flex items-center gap-px px-1.5 py-0.5 rounded text-xs border-2 font-medium",
-                                        payment.payment_method === 'efectivo'
-                                          ? 'border-green-500 bg-green-50 text-green-700'
-                                          : 'border-purple-500 bg-purple-50 text-purple-700'
-                                      )}
-                                    >
-                                      S/ {payment.payment_amount?.toFixed(2)}
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  Sin pagos registrados
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-                            <span className="text-xs font-bold">Asistencias</span>
-                            <div className="flex flex-col text-sm">
-                              <span className="font-medium">
-                                {inscripcion.class_count} / {inscripcion.total_classes}
-                                <span className="text-xs text-muted-foreground"> ({porcentajeAsistencia}%)</span>
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col text-sm pl-2 basis-0 grow">
-                            <span className="text-xs font-bold">Fechas</span>
-                            <div className="flex flex-col text-sm">
-                              <div className="text-xs">
-                                Inicio: {formatDate(inscripcion.date_from || '')}
-                              </div>
-                              <div className="text-xs">
-                                Fin: {formatDate(inscripcion.date_to || '')}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-        </div>
+        <ListCourse dialogHandlers={dialogHandlers} mes={mes} mesLabel={mesLabel} />
       </GenericDialog>
     </>
   )
