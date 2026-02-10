@@ -12,29 +12,23 @@ interface ListCourseProps {
 
 export default function ListCourse({ dialogHandlers, mes, mesLabel }: ListCourseProps) {
   return (
-    <div className="flex flex-col w-3xl overflow-auto">
+    <div className="flex flex-col w-full md:w-[calc(100vw-20rem)] overflow-auto">
       {/* Header del curso */}
-
-      <div className="flex items-center gap-2 border px-4 py-2 rounded-xl border-dashed">
+      <div className="flex items-center gap-1 md:gap-2 border px-4 py-2 rounded-xl border-dashed">
         <div style={{ backgroundColor: dialogHandlers.selectedCourse?.color }} className="w-2 h-16 rounded-full"></div>
 
         <div className="grow">
-          <div className="flex items-center gap-2">
-            <p className="text-lg font-medium">{dialogHandlers.selectedCourse?.name}</p>
-            <div className="px-2 py-1 rounded-full bg-amber-500 text-white w-fit text-xs">
-              {mesLabel}
-            </div>
-          </div>
+          <p className="text-sm md:text-lg font-medium">{dialogHandlers.selectedCourse?.name}</p>
           <p className="text-xs text-muted-foreground">
-            Profesor: {dialogHandlers.selectedCourse?.teacher?.name ?? "Sin asignar"}
+            {dialogHandlers.selectedCourse?.teacher?.name ?? "Sin asignar"}
           </p>
         </div>
-        <div className="flex flex-col gap-px text-sm">
-          <span className="text-xs text-muted-foreground">Horario:</span>
-          <div className="flex flex-col md:flex-row gap-2">
-            <p className="flex items-center gap-1"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(dialogHandlers.selectedCourse?.schedule?.days || [])}</p>
-            <p className="flex items-center gap-1"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(dialogHandlers.selectedCourse?.schedule?.start_time)} - {formatTime(dialogHandlers.selectedCourse?.schedule?.end_time)}</p>
+        <div className="flex flex-col gap-1 text-sm">
+          <div className="px-2 py-1 rounded-full border font-bold border-dashed border-amber-500 text-amber-500 w-fit text-xs">
+            {mesLabel}
           </div>
+          <p className="flex items-center gap-1 text-xs"><CalendarIcon size={12} className="text-muted-foreground" />{getShortDays(dialogHandlers.selectedCourse?.schedule?.days || [])}</p>
+          <p className="flex items-center gap-1 text-xs"><ClockIcon size={12} className="text-muted-foreground" />{formatTime(dialogHandlers.selectedCourse?.schedule?.start_time)} - {formatTime(dialogHandlers.selectedCourse?.schedule?.end_time)}</p>
         </div>
       </div>
 

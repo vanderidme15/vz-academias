@@ -1,111 +1,148 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils-functions/format-date";
 import { Inscripcion } from "@/shared/types/supabase.types";
+import { Calendar, MoreVertical, CreditCard, UserCheck, PiggyBankIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ListStudentItemProps {
-  inscripcion: Inscripcion
+  inscripcion: Inscripcion;
 }
 
 export default function ListCourseStudent({ inscripcion }: ListStudentItemProps) {
+  const payments = inscripcion.payments ?? [];
+  const total = payments?.reduce((total, payment) => total + (payment.payment_amount || 0), 0);
+  const saldo = (inscripcion.price_charged || 0) - (total || 0);
+  const porcentajeAsistencia = (inscripcion.total_classes || 0) > 0
+    ? (((inscripcion.class_count || 0) / (inscripcion.total_classes || 0)) * 100).toFixed(0)
+    : 0;
 
-  const payments = inscripcion.payments ?? []
-  const total = payments?.reduce((total, payment) => total + (payment.payment_amount || 0), 0)
-  const saldo = (inscripcion.price_charged || 0) - (total || 0)
-  const porcentajeAsistencia = (inscripcion.total_classes || 0) > 0 ? (((inscripcion.class_count || 0) / (inscripcion.total_classes || 0)) * 100).toFixed(0) : 0;
+  const getStatusBadge = () => {
+    if (saldo <= 0) {
+      return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Pagado</Badge>;
+    }
+    return <Badge variant="secondary" className="bg-slate-100 text-slate-800">Deuda</Badge>;
+  };
+
 
   return (
-    <div className="flex gap-1 items-center w-full" key={inscripcion.id}>
-      <span>●</span>
-      <div className="grow flex flex-col justify-center border rounded-md p-2">
-        <p>{inscripcion.student?.name}</p>
-        <div className="w-full flex gap-1">
-          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-            <span className="text-xs font-bold">Precio</span>
-            <span className="font-medium">S/ {inscripcion.price_charged?.toFixed(2)}</span>
-            {inscripcion.includes_registration && (
-              <>
-                <span className="text-xs text-muted-foreground">
-                  Mat: S/ {inscripcion.registration_price?.toFixed(2)}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Curso: S/ {inscripcion.course_price?.toFixed(2)}
-                </span>
-              </>
-            )}
-          </div>
-          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-            <span className="text-xs font-bold">Pagos</span>
-            <div className="flex flex-col justify-center gap-px">
-              <div className="flex items-center gap-2 flex-wrap">
-                {saldo > 0 ? (
-                  <span className="text-xs text-orange-600 font-medium">
-                    Saldo: S/ {saldo.toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="text-xs text-green-600 font-medium">
-                    Pagado ✓
-                  </span>
-                )}
-              </div>
-              {payments.length > 0 ? (
-                <div className="flex gap-1 flex-wrap max-w-40 mt-1">
-                  {payments.map((payment, index) => (
-                    <div
-                      key={`${payment.id}-${index}`}
-                      className={cn(
-                        "flex items-center gap-px px-1.5 py-0.5 rounded text-xs border-2 font-medium",
-                        payment.payment_method === 'efectivo'
-                          ? 'border-green-500 bg-green-50 text-green-700'
-                          : 'border-purple-500 bg-purple-50 text-purple-700'
-                      )}
-                    >
-                      S/ {payment.payment_amount?.toFixed(2)}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-xs text-muted-foreground mt-1">
-                  Sin pagos registrados
-                </div>
-              )}
+    <div className="grid grid-cols-9 items-start justify-between p-4 gap-3 border rounded-xl bg-card">
+      {/* Student Info */}
+      <div className="col-span-9 md:col-span-3 flex items-center h-full  gap-3">
+        <h3 className="w-full truncate leading-none tracking-tight">
+          {inscripcion.student?.name}
+        </h3>
+      </div>
+
+      {/* Price */}
+      <div className="col-span-9 md:col-span-1 flex md:flex-col items-center md:items-start gap-2">
+        <span className="text-sm font-bold text-muted-foreground tracking-tight">
+          Precio
+        </span>
+        <div className="flex items-baseline gap-1">
+          <span className="text-foreground">
+            S/ {inscripcion.price_charged?.toFixed(2)}
+          </span>
+        </div>
+      </div>
+
+      {/* Payment Status */}
+      <div className="col-span-7 md:col-span-2 flex md:flex-col items-center md:items-start gap-1">
+        <span className="text-sm font-bold text-muted-foreground tracking-tight">
+          Estado
+        </span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-medium text-muted-foreground tracking-tight">
+              Pagos
+            </span>
+            <div className="text-sm">
+              {payments && payments.length > 0 && payments.map((payment) => {
+                return (
+                  <div key={payment.id} className="flex items-center gap-1">
+                    <span className="font-medium text-muted-foreground tracking-tight">
+                      • S/ {payment.payment_amount?.toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-            <span className="text-xs font-bold">Asistencias</span>
-            <div className="flex flex-col text-sm">
-              <span className="font-medium">
-                {inscripcion.class_count} / {inscripcion.total_classes}
-                <span className="text-xs text-muted-foreground"> ({porcentajeAsistencia}%)</span>
+          {saldo > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium text-muted-foreground tracking-tight">
+                Saldo
+              </span>
+              <span className="text-sm font-medium text-muted-foreground tracking-tight">
+                S/ {saldo.toFixed(2)}
               </span>
             </div>
-          </div>
-          <div className="flex flex-col text-sm border-r px-2 basis-0 grow">
-            <span className="text-xs font-bold">Fechas</span>
-            <div className="flex flex-col text-sm">
-              <div className="text-xs">
-                Inicio: {formatDate(inscripcion.date_from || '')}
-              </div>
-              <div className="text-xs">
-                Fin: {formatDate(inscripcion.date_to || '')}
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col text-sm px-2 basis-0 grow">
-            <span className="text-xs font-bold">Acciones</span>
-            <div className="flex flex-col text-sm">
-              <Button variant="outline" size="sm">
-                regularizar asistencias
-              </Button>
-              <Button variant="outline" size="sm">
-                regularizar pagos
-              </Button>
-              <Button variant="outline" size="sm">
-                ver asistencias
-              </Button>
-            </div>
+          )}
+        </div>
+        <div>{getStatusBadge()}</div>
+      </div>
+
+      {/* Attendance Progress */}
+      <div className="col-span-9 md:col-span-2 flex flex-col gap-1.5 flex-1">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-bold text-muted-foreground tracking-tight">
+            Asistencias
+          </span>
+          <span className="text-sm font-bold text-primary">
+            {porcentajeAsistencia}%
+          </span>
+        </div>
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${porcentajeAsistencia}%` }}
+          />
+        </div>
+        <div className="flex justify-between items-center text-xs text-muted-foreground">
+          <span>
+            {inscripcion.class_count} / {inscripcion.total_classes} clases
+          </span>
+          <div className="flex items-center gap-1">
+            <Calendar size={10} />
+            <span>{formatDate(inscripcion.date_from || '')} - {formatDate(inscripcion.date_to || '')}</span>
           </div>
         </div>
+      </div>
+
+      {/* Actions */}
+      <div className="col-span-9 md:col-span-1 h-full flex items-center gap-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="grow basis-0 bg-green-600 text-white hover:bg-green-700 hover:text-white"
+            >
+              <PiggyBankIcon />
+              <span className="text-xs md:hidden">Regularizar pago</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="bg-green-600 text-white fill-green-600">
+            <p>Regularizar pago</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="grow basis-0 bg-amber-400 text-white hover:bg-amber-500 hover:text-white"
+            >
+              <UserCheck />
+              <span className="text-xs md:hidden">Regularizar asistencia</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="bg-amber-400 text-white fill-amber-400">
+            <p>Regularizar asistencia</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
