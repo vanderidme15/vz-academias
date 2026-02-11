@@ -8,9 +8,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 interface ListStudentItemProps {
   inscripcion: Inscripcion;
+  setOpenAttendanceDialog: (open: boolean) => void;
+  setInscripcionSelected: (inscripcion: Inscripcion) => void;
 }
 
-export default function ListCourseStudent({ inscripcion }: ListStudentItemProps) {
+export default function ListCourseStudent({ inscripcion, setOpenAttendanceDialog, setInscripcionSelected }: ListStudentItemProps) {
   const payments = inscripcion.payments ?? [];
   const total = payments?.reduce((total, payment) => total + (payment.payment_amount || 0), 0);
   const saldo = (inscripcion.price_charged || 0) - (total || 0);
@@ -112,7 +114,7 @@ export default function ListCourseStudent({ inscripcion }: ListStudentItemProps)
 
       {/* Actions */}
       <div className="col-span-9 md:col-span-1 h-full flex items-center gap-0.5">
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="outline"
@@ -126,7 +128,7 @@ export default function ListCourseStudent({ inscripcion }: ListStudentItemProps)
           <TooltipContent className="bg-green-600 text-white fill-green-600">
             <p>Regularizar pago</p>
           </TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -134,6 +136,10 @@ export default function ListCourseStudent({ inscripcion }: ListStudentItemProps)
               variant="outline"
               size="sm"
               className="grow basis-0 bg-amber-400 text-white hover:bg-amber-500 hover:text-white"
+              onClick={() => {
+                setOpenAttendanceDialog(true);
+                setInscripcionSelected && setInscripcionSelected(inscripcion);
+              }}
             >
               <UserCheck />
               <span className="text-xs md:hidden">Regularizar asistencia</span>

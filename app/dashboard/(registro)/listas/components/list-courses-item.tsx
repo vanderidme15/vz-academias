@@ -3,20 +3,19 @@ import { CalendarIcon, ClockIcon, UsersIcon } from "lucide-react";
 import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
 import { Curso } from "@/shared/types/supabase.types";
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
+import { DialogHandlersCourses } from "../page";
 
 interface ListCoursesItemProps {
   curso: Curso;
   date: Date;
-  dialogHandlers: any;
+  dialogHandlers: DialogHandlersCourses;
 }
 
 export default function ListCoursesItem({ curso, date, dialogHandlers }: ListCoursesItemProps) {
   const { fetchInscripcionesByCursoAndCurrentMonth } = useInscripcionesStore();
 
   const getStudents = async () => {
-    const inscripciones = await fetchInscripcionesByCursoAndCurrentMonth(curso.id, date);
-    // console.log(inscripciones);
-    dialogHandlers.setInscripcionesByCurso(inscripciones);
+    await fetchInscripcionesByCursoAndCurrentMonth(curso.id, date);
     dialogHandlers.setOpenDialog(true);
     dialogHandlers.setSelectedCourse(curso);
   }

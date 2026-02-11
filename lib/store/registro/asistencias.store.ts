@@ -7,9 +7,11 @@ const supabase = createClient();
 
 type AsistenciasStore = {
   asistencias: Asistencia[]
+  asistenciasByRegistrationId: Asistencia[]
 
   //mantenedores basicos
   fetchAsistencias: () => Promise<void>
+  fetchAsistenciasByRegistrationId: (registrationId?: string) => Promise<void>
   fetchAsistenciaById: (id: string) => Promise<Asistencia | null>
   createAsistencia: (values: Asistencia) => Promise<Asistencia | null>
   updateAsistencia: (values: Asistencia, id: string) => Promise<Asistencia | null>
@@ -19,10 +21,14 @@ type AsistenciasStore = {
   markAsistenciaByStudent: (registrationId: string) => Promise<Asistencia | null>
   markAsistenciaByAdmin: (registrationId?: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean, showToast?: boolean) => Promise<Asistencia | null>
   getAsistenciaByInscripcionIdToday: (registrationId: string) => Promise<Asistencia | null>
+
+  // accion para actualizar y crear asistencia pasada
+  regularizeAttendance: (registrationId: string, date: string, teacherId: string, ownCheck: boolean, adminCheck: boolean) => Promise<Asistencia | null>
 }
 
 export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
   asistencias: [],
+  asistenciasByRegistrationId: [],
 
   fetchAsistencias: async () => {
     try {
@@ -33,6 +39,26 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
 
       if (error) throw error;
       set({ asistencias: data ?? [] });
+    } catch (error) {
+      console.error('Error al cargar asistencias:', error);
+      toast.error('No se pudieron cargar las asistencias');
+    }
+  },
+
+  fetchAsistenciasByRegistrationId: async (registrationId?: string) => {
+    try {
+      if (!registrationId) {
+        toast.error('No se proporcionó un ID de registro');
+        return;
+      }
+      const { data, error } = await supabase
+        .from('asistencias')
+        .select(`*`)
+        .eq('registration_id', registrationId)
+        .order('date_time', { ascending: true });
+
+      if (error) throw error;
+      set({ asistenciasByRegistrationId: data ?? [] });
     } catch (error) {
       console.error('Error al cargar asistencias:', error);
       toast.error('No se pudieron cargar las asistencias');
@@ -303,4 +329,78 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       return null;
     }
   },
+
+  regularizeAttendance: async (
+    registrationId: string,
+    date: string,
+    teacherId: string,
+    ownCheck: boolean,
+    adminCheck: boolean
+  ) => {
+    try {
+      // 1. Primero verificar si la asistencia existe
+      const { data: existingAttendance, error: fetchError } = await supabase
+        .from('asistencias')
+        .select()
+        .eq('registration_id', registrationId)
+        .eq('date_time', date)
+        .maybeSingle(); // Usar maybeSingle() en lugar de single() para evitar error si no existe
+
+      if (fetchError) throw fetchError;
+
+      // 2. Preparar los datos a guardar
+      const attendanceData = {
+        registration_id: registrationId,
+        date_time: date,
+        teacher_id: teacherId,
+        own_check: ownCheck,
+        admin_check: adminCheck,
+        // Agregar otros campos necesarios como status si lo requieres
+      };
+
+      let result;
+
+      if (existingAttendance) {
+        // 3. Si existe, actualizar
+        const { data, error } = await supabase
+          .from('asistencias')
+          .update(attendanceData)
+          .eq('id', existingAttendance.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+
+        // Actualizar en el estado
+        set({
+          asistenciasByRegistrationId: get().asistenciasByRegistrationId.map(
+            asistencia => asistencia.id === data.id ? data : asistencia
+          )
+        });
+      } else {
+        // 4. Si no existe, crear
+        console.log('Creando asistencia:', attendanceData);
+        const { data, error } = await supabase
+          .from('asistencias')
+          .insert(attendanceData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+
+        // Agregar al estado
+        set({
+          asistenciasByRegistrationId: [...get().asistenciasByRegistrationId, data]
+        });
+      }
+
+      return result;
+
+    } catch (error) {
+      console.error('Error al regularizar asistencia:', error);
+      return null;
+    }
+  }
 }))

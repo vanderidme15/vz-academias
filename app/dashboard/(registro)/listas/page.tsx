@@ -2,16 +2,14 @@
 
 import { useState, useMemo, useEffect } from "react";
 
-import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ListCoursesFilters from "./components/list-courses-filters";
 import ListCoursesItem from "./components/list-courses-item";
 import { useCursosStore } from "@/lib/store/configuraciones/cursos.store";
-import { Curso, Inscripcion } from "@/shared/types/supabase.types";
+import { Curso } from "@/shared/types/supabase.types";
 import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
-import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
-import ListStudentItem from "./components/list-course/list-course-student";
 import ListCourse from "./components/list-course/list-course";
 
 
@@ -20,8 +18,6 @@ function useDialogHandlers() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
-  const [inscripcionesByCurso, setInscripcionesByCurso] = useState<Inscripcion[]>([]);
-
   return useMemo(() => ({
     openDialog,
     setOpenDialog,
@@ -29,12 +25,10 @@ function useDialogHandlers() {
     setLoading,
     selectedCourse,
     setSelectedCourse,
-    inscripcionesByCurso,
-    setInscripcionesByCurso
-  }), [openDialog, setOpenDialog, loading, setLoading, selectedCourse, setSelectedCourse, inscripcionesByCurso, setInscripcionesByCurso]);
+  }), [openDialog, setOpenDialog, loading, setLoading, selectedCourse, setSelectedCourse]);
 }
 
-export type DialogHandlersListType = ReturnType<typeof useDialogHandlers>;
+export type DialogHandlersCourses = ReturnType<typeof useDialogHandlers>;
 
 export default function ListasPage() {
   const dialogHandlers = useDialogHandlers();
