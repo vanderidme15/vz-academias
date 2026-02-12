@@ -24,7 +24,7 @@ export default function StudentAttendanceForce({ inscripcion, setOpenDialog }: S
       class_count: z
         .union([z.number(), z.string()])
         .pipe(z.coerce.number())
-        .refine((val) => val >= 1, { message: 'Debe ser mayor a 0' })
+        .refine((val) => val >= 0, { message: 'El valor no puede ser negativo' })
         .refine((val) => val <= maxClasses, {
           message: `No puede ser mayor a ${maxClasses} clases totales`
         }),
