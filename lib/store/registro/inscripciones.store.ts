@@ -64,8 +64,6 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     }
   },
 
-  // cosa rara
-  // Agregar este método a tu useInscripcionesStore
   fetchAllInscripciones: async () => {
     try {
       const { data, error } = await supabase

@@ -1,9 +1,10 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, AlertCircle, DollarSign } from "lucide-react"
 import { Inscripcion, Pago } from "@/shared/types/supabase.types"
+import { formatDate } from "@/lib/utils-functions/format-date";
 
 interface InscripcionDetailModalProps {
   open: boolean
@@ -20,16 +21,6 @@ export function InscripcionDetailModal({
   onConfirmAction,
   actionLabel = "Confirmar"
 }: InscripcionDetailModalProps) {
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A"
-    return new Date(dateString).toLocaleDateString("es-PE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    })
-  }
 
   const formatCurrency = (amount?: number) => {
     if (!amount) return "S/ 0.00"
@@ -55,47 +46,61 @@ export function InscripcionDetailModal({
   // Mostrar advertencia si no tiene pagos o no está completamente pagado
   const showPaymentWarning = !hasPayments || !isFullyPaid
 
+  const outOfDate = inscripcion?.date_to && new Date() > new Date(inscripcion.date_to);
+  const mesLabel = inscripcion?.date_to && new Date(inscripcion.date_to).toLocaleDateString("es-PE", {
+    month: "long",
+    year: "numeric"
+  });
+
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="flex flex-col w-full md:w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="w-6 h-6 text-green-500" />
             Detalle de Inscripción
           </DialogTitle>
+          <DialogDescription>
+            Información detallada de la inscripción del alumno.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 py-4">
+        <div className="flex flex-col gap-4 py-4 overflow-y-auto">
+          <div className="border border-dashed border-amber-500 rounded-full px-2 py-1 text-xs text-amber-500 font-bold w-fit">{mesLabel}</div>
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             {/* Datos del alumno */}
             <div>
-              <span className="text-sm text-gray-500">Alumno</span>
+              <span className="text-sm text-gray-500">Estudiante</span>
               <p className="font-semibold">{student?.name || "N/A"}</p>
               {student?.dni && (
                 <p className="text-sm text-gray-600">DNI: {student.dni}</p>
               )}
             </div>
 
-            {/* Datos del curso */}
-            <div className="pt-3 border-t border-gray-200">
-              <span className="text-sm text-gray-500">Curso</span>
-              <p className="font-semibold">{course?.name || "N/A"}</p>
-              {inscripcion.is_personalized && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">
-                  Personalizado
-                </span>
-              )}
+            <div className="flex gap-1 items-center justify-between">
+              <div className="pt-3 border-t border-gray-200">
+                <span className="text-sm text-gray-500">Curso</span>
+                <p className="font-semibold">{course?.name || "N/A"}</p>
+                {inscripcion.is_personalized && (
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">
+                    Personalizado
+                  </span>
+                )}
+              </div>
+
+              {/* Progreso */}
+              <div>
+                <span className="text-sm text-gray-500">Progreso</span>
+                <p className="font-semibold">{progress} clases</p>
+              </div>
             </div>
 
-            {/* Progreso */}
-            <div>
-              <span className="text-sm text-gray-500">Progreso</span>
-              <p className="font-semibold">{progress} clases</p>
-            </div>
+            {/* Datos del curso */}
 
             {/* Información de pago */}
-            <div className="pt-3 border-t border-gray-200 space-y-2">
-              <div>
+            <div className="flex flex-col gap-1 pt-3 border-t border-gray-200 space-y-2">
+              <div className="flex gap-2 items-center">
                 <span className="text-sm text-gray-500">Monto a cobrar</span>
                 <p className="font-semibold">{formatCurrency(amountCharged)}</p>
                 {inscripcion.includes_registration && (
@@ -104,60 +109,18 @@ export function InscripcionDetailModal({
                   </p>
                 )}
               </div>
-
-              <div>
-                <span className="text-sm text-gray-500">Total pagado</span>
-                <p className={`font-semibold ${isFullyPaid ? 'text-green-600' : 'text-orange-600'}`}>
-                  {formatCurrency(totalPaid)}
-                </p>
-              </div>
-
-              {remainingBalance > 0 && (
-                <div>
-                  <span className="text-sm text-gray-500">Saldo pendiente</span>
-                  <p className="font-semibold text-red-600">{formatCurrency(remainingBalance)}</p>
+              {showPaymentWarning && (
+                <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-700">
+                    {!hasPayments
+                      ? "No se han registrado pagos para esta inscripción."
+                      : `Falta pagar ${formatCurrency(remainingBalance)} para completar el pago.`
+                    }
+                  </p>
                 </div>
               )}
-
-              <div>
-                <span className="text-sm text-gray-500">Estado de pago</span>
-                <p className="font-semibold">
-                  {isFullyPaid ? (
-                    <span className="text-green-600">✓ Pagado</span>
-                  ) : hasPayments ? (
-                    <span className="text-orange-600">⚠ Pago parcial</span>
-                  ) : (
-                    <span className="text-red-600">✗ Sin pagos</span>
-                  )}
-                </p>
-              </div>
             </div>
-
-            {/* Lista de pagos */}
-            {hasPayments && (
-              <div className="pt-3 border-t border-gray-200">
-                <span className="text-sm text-gray-500 mb-2 block">Pagos registrados</span>
-                <div className="space-y-2">
-                  {payments.map((payment: Pago, index: number) => (
-                    <div key={payment.id || index} className="bg-white p-2 rounded border border-gray-200">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-medium">{formatCurrency(payment.payment_amount)}</p>
-                          <p className="text-xs text-gray-600 capitalize">
-                            {payment.payment_method}
-                            {payment.payment_code && ` - ${payment.payment_code}`}
-                          </p>
-                        </div>
-                        <p className="text-xs text-gray-500">{formatDate(payment.created_at)}</p>
-                      </div>
-                      {payment.register_by && (
-                        <p className="text-xs text-gray-500 mt-1">Por: {payment.register_by}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Observaciones */}
             {inscripcion.observations && (
@@ -167,18 +130,14 @@ export function InscripcionDetailModal({
               </div>
             )}
 
-            {/* Registrado por */}
-            {inscripcion.register_by && (
-              <div>
-                <span className="text-sm text-gray-500">Registrado por</span>
-                <p className="text-sm">{inscripcion.register_by}</p>
-              </div>
-            )}
-
             {/* Fecha */}
             <div>
-              <span className="text-sm text-gray-500">Fecha de inscripción</span>
-              <p className="text-sm">{formatDate(inscripcion.created_at)}</p>
+              <p className="text-xs text-gray-500 mb-1">Fechas</p>
+              <p className="text-xs font-semibold text-gray-900"><span className="font-light">Inicio:</span> {formatDate(inscripcion.date_from || '')}</p>
+              <p className="text-xs font-semibold text-gray-900"><span className="font-light">Fin:</span> {formatDate(inscripcion.date_to || '')}</p>
+              {outOfDate && (
+                <p className="text-xs text-red-400 font-bold mt-2">Inscripción vencida</p>
+              )}
             </div>
           </div>
 
@@ -198,19 +157,6 @@ export function InscripcionDetailModal({
               Cerrar
             </Button>
           </div>
-
-          {/* Advertencia de pago */}
-          {showPaymentWarning && (
-            <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-orange-700">
-                {!hasPayments
-                  ? "No se han registrado pagos para esta inscripción."
-                  : `Falta pagar ${formatCurrency(remainingBalance)} para completar el pago.`
-                }
-              </p>
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>

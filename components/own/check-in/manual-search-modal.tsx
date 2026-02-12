@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { SearchIcon, UserIcon, CalendarIcon, ClockIcon } from "lucide-react"
@@ -47,9 +47,11 @@ export function ManualSearchModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="w-full md:w-xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Buscar Alumno</DialogTitle>
+          <DialogDescription>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="relative">
@@ -75,59 +77,61 @@ export function ManualSearchModal({
               <p>No se encontraron resultados</p>
             </div>
           ) : (
-            filteredInscripciones.map((inscripcion) => (
-              <div
-                key={inscripcion.id}
-                className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <UserIcon size={16} className="text-muted-foreground" />
-                      <p className="font-bold">{inscripcion.student?.name}</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      DNI: {inscripcion.student?.dni || "No registrado"}
-                    </p>
+            filteredInscripciones.map((inscripcion) => {
+              const mesLabel = inscripcion.date_from && new Date(inscripcion.date_from).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
+              return (
+                <div
+                  key={inscripcion.id}
+                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <UserIcon size={16} className="text-muted-foreground" />
+                        <p className="font-bold">{inscripcion.student?.name}</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        DNI: {inscripcion.student?.dni || "No registrado"}
+                      </p>
 
-                    <div className="space-y-2">
-                      <div
-                        className="flex gap-2 items-center p-3 bg-muted rounded-lg"
-                        style={{
-                          borderLeft: `4px solid ${inscripcion.course?.color || "#ccc"}`
-                        }}
-                      >
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm">
-                            {inscripcion.course?.name}
-                          </p>
-                          <div className="flex gap-3 text-xs text-muted-foreground mt-1">
-                            <span className="flex items-center gap-1">
-                              <CalendarIcon size={12} />
-                              {getShortDays(inscripcion.course?.schedule?.days || [])}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <ClockIcon size={12} />
-                              {formatTime(inscripcion.course?.schedule?.start_time)} -{" "}
-                              {formatTime(inscripcion.course?.schedule?.end_time)}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Clases: {inscripcion.class_count || 0} / {inscripcion.total_classes || 0}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => handleSelectInscripcion(inscripcion)}
+                      <div className="space-y-2">
+                        <div
+                          className="flex gap-2 items-center p-3 bg-muted rounded-lg"
                         >
-                          Registrar
-                        </Button>
+                          <div className="h-12 w-2 rounded" style={{ backgroundColor: inscripcion.course?.color }}></div>
+                          <div className="flex-1">
+                            <div className="border border-dashed border-amber-500 text-amber-500 rounded-full text-xs px-2 py-1 w-fit font-bold">{mesLabel}</div>
+                            <p className="font-semibold text-sm">
+                              {inscripcion.course?.name}
+                            </p>
+                            <div className="flex gap-3 text-xs text-muted-foreground mt-1">
+                              <span className="flex items-center gap-1">
+                                <CalendarIcon size={12} />
+                                {getShortDays(inscripcion.course?.schedule?.days || [])}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <ClockIcon size={12} />
+                                {formatTime(inscripcion.course?.schedule?.start_time)} -{" "}
+                                {formatTime(inscripcion.course?.schedule?.end_time)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Clases: {inscripcion.class_count || 0} / {inscripcion.total_classes || 0}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => handleSelectInscripcion(inscripcion)}
+                          >
+                            Registrar
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       </DialogContent>
