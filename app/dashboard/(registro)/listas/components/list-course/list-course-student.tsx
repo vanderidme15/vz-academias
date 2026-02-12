@@ -144,13 +144,13 @@ export default function ListCourseStudent({ inscripcion, setOpenAttendanceDialog
             </DropdownMenuItem>
 
             {/* regularizar pagos */}
-            <DropdownMenuItem onClick={() => {
+            {/* <DropdownMenuItem onClick={() => {
               setOpenPaymentsDialog(true);
               setInscripcionSelected && setInscripcionSelected(inscripcion);
             }}>
               <PiggyBankIcon />
               <span>Regularizar pagos</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
 
             {/* forzar asistencia */}
             <DropdownMenuItem
