@@ -132,6 +132,8 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
         class_count: item.class_count,
         total_classes: item.total_classes,
         created_at: item.created_at,
+        date_from: item.date_from,
+        date_to: item.date_to,
         attendance: {
           id: item.attendance_id,
           date_time: item.attendance_date_time,

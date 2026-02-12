@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils-functions/format-date";
 import { Inscripcion } from "@/shared/types/supabase.types";
-import { Calendar, MoreVertical, CreditCard, UserCheck, PiggyBankIcon } from "lucide-react";
+import { Calendar, MoreVertical, CreditCard, UserCheck, PiggyBankIcon, ContactRoundIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ListStudentItemProps {
@@ -129,6 +129,25 @@ export default function ListCourseStudent({ inscripcion, setOpenAttendanceDialog
             <p>Regularizar pago</p>
           </TooltipContent>
         </Tooltip> */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="grow basis-0 bg-blue-600 text-white hover:bg-blue-700 hover:text-white"
+              onClick={() => {
+                const url = `${window.location.origin}/carnet/${inscripcion.id}`;
+                window.open(url, "_blank");
+              }}
+            >
+              <ContactRoundIcon />
+              <span className="text-xs md:hidden">Ver Carnet</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="bg-blue-600 text-white fill-blue-600">
+            <p>Ver Carnet</p>
+          </TooltipContent>
+        </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>

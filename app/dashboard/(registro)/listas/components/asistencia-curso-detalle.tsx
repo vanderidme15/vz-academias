@@ -224,7 +224,7 @@ export default function AsistenciaCursoDetalle({
                 const state = asistenciaStates[inscripcionId];
                 const pendingChanges = hasChanges[inscripcionId];
                 const hasRecord = hasAttendanceRecord(inscripcion);
-
+                const mesLabel = inscripcion?.date_from && new Date(inscripcion.date_from).toLocaleString("es-ES", { month: "long", year: "numeric" });
                 if (!state) return null;
 
                 return (
@@ -236,9 +236,10 @@ export default function AsistenciaCursoDetalle({
                     {/* Información del estudiante */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-medium">● {inscripcion.student?.name}</p>
+                        <p className="font-medium w-full truncate">● {inscripcion.student?.name}</p>
                         <p className="text-xs text-muted-foreground"> DNI: {inscripcion.student?.dni}</p>
                       </div>
+                      <div className="border border-dashed border-amber-500 text-amber-500 px-2 py-1 rounded-full w-fit text-xs font-bold">{mesLabel}</div>
                       <div className="text-xs text-muted-foreground">
                         <span>Clases: {inscripcion.class_count || 0}/{inscripcion.total_classes}</span>
                         <Progress value={inscripcion.class_count || 0} max={inscripcion.total_classes} />

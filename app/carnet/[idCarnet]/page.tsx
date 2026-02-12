@@ -45,6 +45,9 @@ export default function CarnetPage() {
 
   const outOfDate = inscripcion?.date_to && new Date() > new Date(inscripcion.date_to);
 
+  const mesLabel = inscripcion?.date_from && new Date(inscripcion.date_from).toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+
+
   if (!inscripcion) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -93,6 +96,7 @@ export default function CarnetPage() {
           <div className="grid md:grid-cols-2 gap-6 p-6">
             {/* Información del estudiante */}
             <div className="space-y-4">
+              <div className="w-fit border border-dashed border-amber-400 rounded-full py-1 px-2 text-amber-700">{mesLabel}</div>
               <div className="border-l-4 pl-4" style={{ borderColor: academia?.primary_color }}>
                 <h2 className="text-sm font-semibold text-gray-500 uppercase mb-2">Estudiante</h2>
                 <p className="text-2xl font-bold text-gray-900">
