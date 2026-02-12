@@ -1,47 +1,63 @@
-// components/own/check-in/manual-search-modal.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SearchIcon, UserIcon, CalendarIcon, ClockIcon } from "lucide-react"
+import { SearchIcon, UserIcon, CalendarIcon, ClockIcon, Loader2 } from "lucide-react"
 import { Inscripcion } from "@/shared/types/supabase.types"
-import { formatDate, formatTime, getShortDays } from "@/lib/utils-functions/format-date"
+import { formatTime, getShortDays } from "@/lib/utils-functions/format-date" // Necesitarás crear este hook
+import { useDebounce } from "@/lib/hooks/use-debounce"
 
 interface ManualSearchModalProps {
   open: boolean
   onClose: () => void
-  inscripciones: Inscripcion[]
   onSelectInscripcion: (inscripcion: Inscripcion) => void
+  onSearch: (searchTerm: string) => Promise<Inscripcion[]> // Nueva prop
 }
 
 export function ManualSearchModal({
   open,
   onClose,
-  inscripciones,
-  onSelectInscripcion
+  onSelectInscripcion,
+  onSearch
 }: ManualSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [inscripciones, setInscripciones] = useState<Inscripcion[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const debouncedSearch = useDebounce(searchTerm, 500)
 
-  const filteredInscripciones = inscripciones.filter((inscripcion) => {
-    const student = inscripcion.student
-    if (!student) return false
+  useEffect(() => {
+    const performSearch = async () => {
+      if (debouncedSearch.trim().length === 0) {
+        setInscripciones([])
+        return
+      }
 
-    const searchLower = searchTerm.toLowerCase()
-    const matchesName = student.name?.toLowerCase().includes(searchLower)
-    const matchesDni = student.dni?.toLowerCase().includes(searchLower)
+      setIsLoading(true)
+      try {
+        const results = await onSearch(debouncedSearch)
+        setInscripciones(results)
+      } catch (error) {
+        console.error('Error searching:', error)
+        setInscripciones([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-    return matchesName || matchesDni
-  })
+    performSearch()
+  }, [debouncedSearch, onSearch])
 
   const handleSelectInscripcion = (inscripcion: Inscripcion) => {
     onSelectInscripcion(inscripcion)
     setSearchTerm("")
+    setInscripciones([])
   }
 
   const handleClose = () => {
     setSearchTerm("")
+    setInscripciones([])
     onClose()
   }
 
@@ -63,6 +79,9 @@ export function ManualSearchModal({
             className="pl-10"
             autoFocus
           />
+          {isLoading && (
+            <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" size={20} />
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-2">
@@ -71,13 +90,18 @@ export function ManualSearchModal({
               <SearchIcon size={48} className="mx-auto mb-2 opacity-50" />
               <p>Ingresa un nombre o DNI para buscar</p>
             </div>
-          ) : filteredInscripciones.length === 0 ? (
+          ) : isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Loader2 size={48} className="mx-auto mb-2 opacity-50 animate-spin" />
+              <p>Buscando...</p>
+            </div>
+          ) : inscripciones.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <UserIcon size={48} className="mx-auto mb-2 opacity-50" />
               <p>No se encontraron resultados</p>
             </div>
           ) : (
-            filteredInscripciones.map((inscripcion) => {
+            inscripciones.map((inscripcion) => {
               const mesLabel = inscripcion.date_from && new Date(inscripcion.date_from).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
               return (
                 <div

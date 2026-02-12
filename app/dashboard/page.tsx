@@ -33,9 +33,8 @@ export default function DashboardPage() {
   const { fetchCursos, cursos } = useCursosStore();
   const { fetchProfesores } = useProfesoresStore();
   const { fetchHorarios, horarios } = useHorariosStore();
-  const { fetchInscripcionById, handleConfirmMarkAttendanceByStudent, fetchAllInscripciones } = useInscripcionesStore();
+  const { fetchInscripcionById, handleConfirmMarkAttendanceByStudent, fetchInscripcionesBySearch } = useInscripcionesStore();
   const [showManualSearchModal, setShowManualSearchModal] = useState(false)
-  const [allInscripciones, setAllInscripciones] = useState<Inscripcion[]>([])
 
   const [openScheduleFilter, setOpenScheduleFilter] = useState(false)
 
@@ -121,8 +120,8 @@ export default function DashboardPage() {
 
   // Cargar inscripciones al abrir el modal de búsqueda
   const handleOpenManualSearch = async () => {
-    const inscripciones = await fetchAllInscripciones()
-    setAllInscripciones(inscripciones)
+    // const inscripciones = await fetchAllInscripciones()
+    // setAllInscripciones(inscripciones)
     setShowManualSearchModal(true)
   }
 
@@ -345,7 +344,7 @@ export default function DashboardPage() {
       <ManualSearchModal
         open={showManualSearchModal}
         onClose={() => setShowManualSearchModal(false)}
-        inscripciones={allInscripciones}
+        onSearch={fetchInscripcionesBySearch}
         onSelectInscripcion={handleSelectInscripcionFromSearch}
       />
     </>

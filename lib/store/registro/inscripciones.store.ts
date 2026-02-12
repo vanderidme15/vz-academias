@@ -16,6 +16,7 @@ type InscripcionesStore = {
 
   fetchInscripciones: () => Promise<void>
   fetchAllInscripciones: () => Promise<Inscripcion[]>
+  fetchInscripcionesBySearch: (searchTerm: string) => Promise<Inscripcion[]>
   fetchInscripcionesByAlumnoId: (alumnoId?: string) => Promise<void>
   // fetch a vistas para traer inscripciones con asistencia
   fetchInscripcionesByCursoId: (cursoId?: string) => Promise<InscripcionWithRelations[]>
@@ -65,6 +66,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
   },
 
   fetchAllInscripciones: async () => {
+    console.log('Se ejecuta el fetch all')
     try {
       const { data, error } = await supabase
         .from('inscripciones')
@@ -81,6 +83,50 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
 
       if (error) throw error
 
+      return data || []
+    } catch (error) {
+      console.error('Error fetching inscripciones:', error)
+      return []
+    }
+  },
+
+  fetchInscripcionesBySearch: async (searchTerm: string) => {
+    try {
+      if (!searchTerm || searchTerm.trim().length === 0) {
+        return []
+      }
+
+      const searchLower = `%${searchTerm.toLowerCase().trim()}%`
+
+      // Buscar estudiantes
+      const { data: students } = await supabase
+        .from('alumnos')
+        .select('id')
+        .or(`name.ilike.${searchLower},dni.ilike.${searchLower}`)
+
+      if (!students?.length) return []
+
+      // Traer inscripciones
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`
+        id,
+        date_from,
+        class_count,
+        total_classes,
+        student:alumnos!inner(id, name, dni),
+        course:cursos(
+          id,
+          name,
+          color,
+          schedule:horarios(id, days, start_time, end_time)
+        )
+      `)
+        .in('student_id', students.map((s: any) => s.id))
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (error) throw error
       return data || []
     } catch (error) {
       console.error('Error fetching inscripciones:', error)
