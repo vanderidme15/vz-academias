@@ -5,7 +5,9 @@ import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store
 import { Inscripcion } from "@/shared/types/supabase.types";
 import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";
 import { z } from "zod";
-
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 const studentAttendanceFormSchema = z.object({
   date_time: z.coerce.date({
@@ -39,11 +41,26 @@ export function StudentAttendanceForm({
   onUpdate,
 }: StudentAttendanceFormProps) {
   const { profesores } = useProfesoresStore();
+  const [dateWarning, setDateWarning] = useState<string | null>(null);
 
   const profesoresOptions = profesores.map((profesor) => ({
     value: profesor.id || '',
     label: profesor.name || '',
   }));
+
+  const checkDateWarning = (date: Date) => {
+    if (!selectedInscripcion?.date_to) {
+      setDateWarning(null);
+      return;
+    }
+
+    const maxDate = new Date(selectedInscripcion.date_to);
+    if (date > maxDate) {
+      setDateWarning('La fecha seleccionada supera la fecha de fin de la inscripción');
+    } else {
+      setDateWarning(null);
+    }
+  };
 
   const handleCreate = async (values: Record<string, any>): Promise<void> => {
     if (!teacherId || !selectedInscripcion?.id) {
@@ -91,6 +108,7 @@ export function StudentAttendanceForm({
       required: true,
       placeholder: 'Selecciona la fecha',
       className: 'col-span-2',
+      onChange: (value: Date) => checkDateWarning(value), // Agrega esta propiedad si tu DynamicForm lo soporta
     },
     {
       name: 'teacher_id',
@@ -127,12 +145,22 @@ export function StudentAttendanceForm({
   ];
 
   return (
-    <DynamicForm
-      schema={studentAttendanceFormSchema}
-      fields={fields}
-      onSubmit={dialogHandlers.selectedItem ? handleUpdate : handleCreate}
-      selectedItem={dialogHandlers.selectedItem}
-      className='grid grid-cols-2 px-2 h-fit'
-    />
+    <div className="w-md space-y-4">
+      {dateWarning && (
+        <Alert className="border-yellow-500 bg-yellow-50">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            {dateWarning}
+          </AlertDescription>
+        </Alert>
+      )}
+      <DynamicForm
+        schema={studentAttendanceFormSchema}
+        fields={fields}
+        onSubmit={dialogHandlers.selectedItem ? handleUpdate : handleCreate}
+        selectedItem={dialogHandlers.selectedItem}
+        className='grid grid-cols-2 px-2 h-fit'
+      />
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -14,13 +15,15 @@ interface FormFieldProps {
 }
 
 export default function FieldDatePicker({ fieldConfig, formField }: FormFieldProps) {
+  const [open, setOpen] = useState(false);
+
   return (
     <FormItem className={cn("flex flex-col", fieldConfig.className)}>
       <FormLabel className="w-fit">
         {fieldConfig.label}{" "}
         {fieldConfig.required && <span className="text-red-400">*</span>}
       </FormLabel>
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>
             <Button
@@ -43,7 +46,10 @@ export default function FieldDatePicker({ fieldConfig, formField }: FormFieldPro
           <Calendar
             mode="single"
             selected={formField.value}
-            onSelect={formField.onChange}
+            onSelect={(date) => {
+              formField.onChange(date);
+              setOpen(false);
+            }}
             disabled={(date) =>
               date < new Date("1900-01-01")
             }
