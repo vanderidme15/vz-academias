@@ -40,6 +40,8 @@ type InscripcionesStore = {
   handleRegularizeCreateAttendance: (values: Record<string, any>) => Promise<void>
   handleRegularizeUpdateAttendance: (values: Record<string, any>, attendanceId: string) => Promise<void>
   handleRegularizeDeleteAttendance: (attendanceId: string, inscripcionId?: string) => Promise<void>
+
+  handleForceAttendance: (inscripcionId: string, classCount: number, observations?: string) => Promise<void>
   // handleRegularizeCreateAttendance: (registrationId: string, date: string, teacherId: string, ownCheck: boolean, adminCheck: boolean) => Promise<void>
 
 }
@@ -106,7 +108,7 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
 
       if (!students?.length) return []
 
-      // Traer inscripciones
+      // Traer inscripciones (excluyendo las que ya completaron todas sus clases)
       const { data, error } = await supabase
         .from('inscripciones')
         .select(`
@@ -124,10 +126,17 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
       `)
         .in('student_id', students.map((s: any) => s.id))
         .order('created_at', { ascending: false })
-        .limit(10)
 
       if (error) throw error
-      return data || []
+
+      // Filtrar en JavaScript las inscripciones completas
+      const activeInscripciones = (data || []).filter(
+        (inscripcion: Inscripcion) =>
+          !inscripcion.total_classes ||
+          Number(inscripcion.class_count) < Number(inscripcion.total_classes)
+      ).slice(0, 10)
+
+      return activeInscripciones
     } catch (error) {
       console.error('Error fetching inscripciones:', error)
       return []
@@ -737,6 +746,42 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     } catch (error) {
       console.error('Error al regularizar asistencia:', error);
       toast.error('La asistencia no se pudo regularizar');
+      throw error;
+    }
+  },
+
+  handleForceAttendance: async (inscripcionId: string, classCount: number, observations?: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('inscripciones')
+        .update({
+          class_count: classCount,
+          observations: observations
+        })
+        .eq('id', inscripcionId)
+        .select(`*, course:cursos (*)`)
+        .single();
+
+      if (error) throw error;
+
+      // Actualizar el estado local
+      set((state) => ({
+        inscripcionesByCurso: state.inscripcionesByCurso.map((inscripcion) => {
+          if (inscripcion.id === inscripcionId) {
+            return {
+              ...inscripcion,
+              class_count: classCount,
+              observations: observations
+            };
+          }
+          return inscripcion;
+        })
+      }));
+
+      toast.success('Asistencia forzada correctamente');
+    } catch (error) {
+      console.error('Error al forzar asistencia:', error);
+      toast.error('La asistencia no se pudo forzar');
       throw error;
     }
   },

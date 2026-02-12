@@ -7,6 +7,8 @@ import { Inscripcion } from "@/shared/types/supabase.types";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import StudentAttendanceDetail from "./student-attendance-detail/student-attendance-detail";
 import { useInscripcionesStore } from "@/lib/store/registro/inscripciones.store";
+import StudentAttendanceForce from "./student-attendance-force/student-attendance-force";
+import StudentAttendancePays from "./student-attendance-pays/student-attendance-pays";
 
 
 interface ListCourseProps {
@@ -20,6 +22,8 @@ export default function ListCourse({ dialogHandlers, mes, mesLabel }: ListCourse
 
   const [inscripcionSelected, setInscripcionSelected] = useState<Inscripcion | null>(null);
   const [openAttendanceDialog, setOpenAttendanceDialog] = useState(false);
+  const [openAttendanceForceDialog, setOpenAttendanceForceDialog] = useState(false);
+  const [openPaymentsDialog, setOpenPaymentsDialog] = useState(false);
 
   return (
     <>
@@ -65,6 +69,8 @@ export default function ListCourse({ dialogHandlers, mes, mesLabel }: ListCourse
                     key={inscripcion.id}
                     inscripcion={inscripcion}
                     setOpenAttendanceDialog={setOpenAttendanceDialog}
+                    setOpenAttendanceForceDialog={setOpenAttendanceForceDialog}
+                    setOpenPaymentsDialog={setOpenPaymentsDialog}
                     setInscripcionSelected={setInscripcionSelected}
                   />
                 );
@@ -84,6 +90,29 @@ export default function ListCourse({ dialogHandlers, mes, mesLabel }: ListCourse
           <StudentAttendanceDetail inscripcion={inscripcionSelected} course={dialogHandlers.selectedCourse} />
         </div>
       </GenericDialog>
+      <GenericDialog
+        openDialog={openPaymentsDialog}
+        setOpenDialog={setOpenPaymentsDialog}
+        title="Regularizar pagos"
+        description={`Regularizar pagos de ${inscripcionSelected?.student?.name}`}
+      >
+        <div className="flex flex-col gap-2 w-xl">
+          <StudentAttendancePays inscripcion={inscripcionSelected} course={dialogHandlers.selectedCourse} />
+        </div>
+      </GenericDialog>
+
+      <GenericDialog
+        openDialog={openAttendanceForceDialog}
+        setOpenDialog={setOpenAttendanceForceDialog}
+        title="Forzar asistencia"
+        description={`Forzar asistencia de ${inscripcionSelected?.student?.name}`}
+      >
+        <div className="flex flex-col gap-2 w-xl">
+          <StudentAttendanceForce inscripcion={inscripcionSelected} course={dialogHandlers.selectedCourse} setOpenDialog={setOpenAttendanceForceDialog} />
+        </div>
+      </GenericDialog>
+
+
     </>
   );
 }

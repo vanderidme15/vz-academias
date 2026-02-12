@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 const studentAttendanceFormSchema = z.object({
   date_time: z.coerce.date({
@@ -67,6 +68,13 @@ export function StudentAttendanceForm({
       console.error('Faltan teacherId o inscripción');
       return;
     }
+
+    if ((selectedInscripcion?.class_count || 0) >= (selectedInscripcion?.total_classes || 0)) {
+      toast.error('No se pueden agregar mas asistencias');
+      dialogHandlers.setOpenDialog(false);
+      return;
+    }
+
     const valuesToCreate = {
       registration_id: selectedInscripcion.id,
       date_time: values.date_time.toISOString(),

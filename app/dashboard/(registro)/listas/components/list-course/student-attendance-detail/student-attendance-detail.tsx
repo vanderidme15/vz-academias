@@ -51,10 +51,10 @@ export default function StudentAttendanceDetail({ inscripcion, course }: Student
   if (!inscripcion) return null;
 
   return (
-    <div className="h-full flex flex-col overflow-auto">
+    <div className="flex flex-col h-96 overflow-auto">
       <div className="flex gap-2 items-center">
         <div className="font-bold flex flex-col">
-          <span>Total de asistencias: {totalAsistencias}</span>
+          <span>Total de asistencias: {totalAsistencias}/{inscripcion.total_classes}</span>
         </div>
       </div>
       <DataTable

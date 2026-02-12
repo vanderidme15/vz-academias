@@ -1,18 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils-functions/format-date";
 import { Inscripcion } from "@/shared/types/supabase.types";
-import { Calendar, MoreVertical, CreditCard, UserCheck, PiggyBankIcon, ContactRoundIcon } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Calendar, MoreVertical, UserCheck, PiggyBankIcon, ContactRoundIcon, TicketXIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface ListStudentItemProps {
   inscripcion: Inscripcion;
   setOpenAttendanceDialog: (open: boolean) => void;
+  setOpenAttendanceForceDialog: (open: boolean) => void;
+  setOpenPaymentsDialog: (open: boolean) => void;
   setInscripcionSelected: (inscripcion: Inscripcion) => void;
 }
 
-export default function ListCourseStudent({ inscripcion, setOpenAttendanceDialog, setInscripcionSelected }: ListStudentItemProps) {
+export default function ListCourseStudent({ inscripcion, setOpenAttendanceDialog, setOpenAttendanceForceDialog, setOpenPaymentsDialog, setInscripcionSelected }: ListStudentItemProps) {
   const payments = inscripcion.payments ?? [];
   const total = payments?.reduce((total, payment) => total + (payment.payment_amount || 0), 0);
   const saldo = (inscripcion.price_charged || 0) - (total || 0);
@@ -113,61 +114,57 @@ export default function ListCourseStudent({ inscripcion, setOpenAttendanceDialog
       </div>
 
       {/* Actions */}
-      <div className="col-span-9 md:col-span-1 h-full flex items-center gap-0.5">
-        {/* <Tooltip>
-          <TooltipTrigger asChild>
+      <div className="col-span-9 md:col-span-1 h-full flex items-center justify-end gap-0.5">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="grow basis-0 bg-green-600 text-white hover:bg-green-700 hover:text-white"
             >
-              <PiggyBankIcon />
-              <span className="text-xs md:hidden">Regularizar pago</span>
+              <MoreVertical />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent className="bg-green-600 text-white fill-green-600">
-            <p>Regularizar pago</p>
-          </TooltipContent>
-        </Tooltip> */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="grow basis-0 bg-blue-600 text-white hover:bg-blue-700 hover:text-white"
-              onClick={() => {
-                const url = `${window.location.origin}/carnet/${inscripcion.id}`;
-                window.open(url, "_blank");
-              }}
-            >
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {/* ver carnet */}
+            <DropdownMenuItem onClick={() => {
+              const url = `${window.location.origin}/carnet/${inscripcion.id}`;
+              window.open(url, "_blank");
+            }}>
               <ContactRoundIcon />
-              <span className="text-xs md:hidden">Ver Carnet</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="bg-blue-600 text-white fill-blue-600">
-            <p>Ver Carnet</p>
-          </TooltipContent>
-        </Tooltip>
+              <span>Ver carnet</span>
+            </DropdownMenuItem>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="grow basis-0 bg-amber-400 text-white hover:bg-amber-500 hover:text-white"
+            {/* regularizar asistencia */}
+            <DropdownMenuItem onClick={() => {
+              setOpenAttendanceDialog(true);
+              setInscripcionSelected && setInscripcionSelected(inscripcion);
+            }}>
+              <UserCheck />
+              <span>Regularizar asistencia</span>
+            </DropdownMenuItem>
+
+            {/* regularizar pagos */}
+            <DropdownMenuItem onClick={() => {
+              setOpenPaymentsDialog(true);
+              setInscripcionSelected && setInscripcionSelected(inscripcion);
+            }}>
+              <PiggyBankIcon />
+              <span>Regularizar pagos</span>
+            </DropdownMenuItem>
+
+            {/* forzar asistencia */}
+            <DropdownMenuItem
               onClick={() => {
-                setOpenAttendanceDialog(true);
+                setOpenAttendanceForceDialog(true);
                 setInscripcionSelected && setInscripcionSelected(inscripcion);
               }}
+              className="text-red-700"
             >
-              <UserCheck />
-              <span className="text-xs md:hidden">Regularizar asistencia</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="bg-amber-400 text-white fill-amber-400">
-            <p>Regularizar asistencia</p>
-          </TooltipContent>
-        </Tooltip>
+              <TicketXIcon className="text-red-700" />
+              <span>Forzar asistencias</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
