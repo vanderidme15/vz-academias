@@ -282,6 +282,7 @@ export default function AsistenciaCursoDetalle({
                       title="Check propio del alumno"
                     >
                       <Checkbox
+                        id="own_check"
                         checked={state.own_check}
                         onCheckedChange={(checked) =>
                           updateAsistenciaField(
@@ -293,7 +294,7 @@ export default function AsistenciaCursoDetalle({
                         disabled={loading}
                         className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                       />
-                      <Label className="text-xs text-muted-foreground">Asistencia confirmada por el alumno</Label>
+                      <Label htmlFor="own_check" className="text-xs text-muted-foreground cursor-pointer">Asistencia confirmada por el alumno</Label>
                     </div>
 
                     {/* Check admin */}
@@ -302,6 +303,7 @@ export default function AsistenciaCursoDetalle({
                       title="Check administrativo"
                     >
                       <Checkbox
+                        id="admin_check"
                         checked={state.admin_check}
                         onCheckedChange={(checked) =>
                           updateAsistenciaField(
@@ -313,7 +315,7 @@ export default function AsistenciaCursoDetalle({
                         disabled={loading}
                         className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                       />
-                      <Label className="text-xs text-muted-foreground">Asistencia confirmada por el administrador</Label>
+                      <Label htmlFor="admin_check" className="text-xs text-muted-foreground cursor-pointer">Asistencia confirmada por el administrador</Label>
                     </div>
 
                     {/* Botón de acción */}

@@ -1,61 +1,127 @@
 'use client'
 
 import { DynamicForm } from "@/components/own/dynamic-form/dynamic-form";
+import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
 import { Inscripcion } from "@/shared/types/supabase.types";
 import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";
 import { z } from "zod";
 
+
 const studentAttendanceFormSchema = z.object({
-  date_time: z.date({
+  date_time: z.coerce.date({
     required_error: 'La fecha es obligatoria',
-  }).transform(date => date.toISOString()), // Convierte a ISO
-  own_check: z.boolean().optional(),
-  admin_check: z.boolean().optional(),
+    invalid_type_error: 'Fecha inválida'
+  }),
+  teacher_id: z.string().optional().default(''),
+  own_check: z.boolean().optional().default(false),
+  admin_check: z.boolean().optional().default(false),
+  observations: z.string().optional().default(''),
 });
 
 interface StudentAttendanceFormProps {
   dialogHandlers: DialogHandlers;
   selectedInscripcion: Inscripcion | null;
   teacherId?: string;
-  onHandle: (registrationId: string, date: string, teacherId: string, ownCheck: boolean, adminCheck: boolean) => Promise<void>;
+  onCreate: (
+    values: Record<string, any>
+  ) => Promise<void>;
+  onUpdate: (
+    values: Record<string, any>,
+    id: string
+  ) => Promise<void>;
 }
 
-export function StudentAttendanceForm({ dialogHandlers, selectedInscripcion, teacherId, onHandle }: StudentAttendanceFormProps) {
-  console.log(teacherId)
+export function StudentAttendanceForm({
+  dialogHandlers,
+  selectedInscripcion,
+  teacherId,
+  onCreate,
+  onUpdate,
+}: StudentAttendanceFormProps) {
+  const { profesores } = useProfesoresStore();
+
+  const profesoresOptions = profesores.map((profesor) => ({
+    value: profesor.id || '',
+    label: profesor.name || '',
+  }));
 
   const handleCreate = async (values: Record<string, any>): Promise<void> => {
-    if (!teacherId) return;
-    await onHandle(selectedInscripcion?.id || '', values.date_time, teacherId, values.own_check, values.admin_check);
-    dialogHandlers.setOpenDialog(false);
-  }
+    if (!teacherId || !selectedInscripcion?.id) {
+      console.error('Faltan teacherId o inscripción');
+      return;
+    }
+    const valuesToCreate = {
+      registration_id: selectedInscripcion.id,
+      date_time: values.date_time.toISOString(),
+      teacher_id: values.teacher_id,
+      own_check: values.own_check,
+      admin_check: values.admin_check,
+      observations: values.observations,
+    }
 
-  const handleEdit = async (values: Record<string, any>): Promise<void> => {
-    if (!teacherId) return;
-    await onHandle(selectedInscripcion?.id || '', values.date_time, teacherId, values.own_check, values.admin_check);
-    dialogHandlers.setOpenDialog(false);
-  }
+    await onCreate(valuesToCreate);
 
-  // Configuración de formulario
+    dialogHandlers.setOpenDialog(false);
+  };
+
+  const handleUpdate = async (values: Record<string, any>): Promise<void> => {
+    if (!teacherId || !selectedInscripcion?.id) {
+      console.error('Faltan teacherId o inscripción');
+      return;
+    }
+    const valuesToUpdate = {
+      registration_id: selectedInscripcion.id,
+      date_time: values.date_time.toISOString(),
+      teacher_id: values.teacher_id,
+      own_check: values.own_check,
+      admin_check: values.admin_check,
+      observations: values.observations,
+    }
+
+    await onUpdate(valuesToUpdate, dialogHandlers.selectedItem?.id || '');
+
+    dialogHandlers.setOpenDialog(false);
+  };
+
   const fields: FieldConfig[] = [
     {
       name: 'date_time',
       label: 'Fecha',
       type: 'date',
       required: true,
-      placeholder: 'Ingresa la fecha',
+      placeholder: 'Selecciona la fecha',
+      className: 'col-span-2',
+    },
+    {
+      name: 'teacher_id',
+      label: 'Profesor',
+      type: 'select',
+      required: true,
+      placeholder: 'Selecciona el profesor',
+      options: profesoresOptions,
+      defaultValue: teacherId,
+      className: 'col-span-2',
     },
     {
       name: 'own_check',
-      label: '¿Propio?',
+      label: 'Asistencia confirmada por el alumno',
+      type: 'checkbox',
+      required: false,
+      className: 'col-span-2 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600',
+    },
+    {
+      name: 'admin_check',
+      label: 'Asistencia confirmada por el administrador',
       type: 'checkbox',
       required: false,
       className: 'col-span-2',
     },
     {
-      name: 'admin_check',
-      label: '¿Administrador?',
-      type: 'checkbox',
+      name: 'observations',
+      label: 'Observaciones (opcional)',
+      type: 'textarea',
       required: false,
+      placeholder: 'Observaciones',
       className: 'col-span-2',
     }
   ];
@@ -64,9 +130,9 @@ export function StudentAttendanceForm({ dialogHandlers, selectedInscripcion, tea
     <DynamicForm
       schema={studentAttendanceFormSchema}
       fields={fields}
-      onSubmit={dialogHandlers.selectedItem ? handleEdit : handleCreate}
+      onSubmit={dialogHandlers.selectedItem ? handleUpdate : handleCreate}
       selectedItem={dialogHandlers.selectedItem}
-      className='px-2 h-fit'
+      className='grid grid-cols-2 px-2 h-fit'
     />
-  )
+  );
 }

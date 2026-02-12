@@ -36,7 +36,11 @@ type InscripcionesStore = {
 
   handleConfirmMarkAttendanceByStudent: (inscripcionId: string) => Promise<void>
   handleConfirmMarkAttendanceByAdmin: (registrationId: string, teacherId?: string, ownCheck?: boolean, adminCheck?: boolean, classCountDelta?: number) => Promise<void>
-  handleRegularizeAttendance: (registrationId: string, date: string, teacherId: string, ownCheck: boolean, adminCheck: boolean) => Promise<void>
+  handleRegularizeCreateAttendance: (values: Record<string, any>) => Promise<void>
+  handleRegularizeUpdateAttendance: (values: Record<string, any>, attendanceId: string) => Promise<void>
+  handleRegularizeDeleteAttendance: (attendanceId: string, inscripcionId?: string) => Promise<void>
+  // handleRegularizeCreateAttendance: (registrationId: string, date: string, teacherId: string, ownCheck: boolean, adminCheck: boolean) => Promise<void>
+
 }
 
 export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
@@ -516,54 +520,28 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
     }
   },
 
-  handleRegularizeAttendance: async (
-    registrationId: string,
-    date: string,
-    teacherId: string,
-    ownCheck: boolean,
-    adminCheck: boolean
-  ) => {
+  handleRegularizeCreateAttendance: async (values: Record<string, any>) => {
     try {
-      // 1. Obtener la asistencia existente para ese día específico
-      const { data: existingAttendance, error: fetchError } = await supabase
-        .from('asistencias')
-        .select()
-        .eq('registration_id', registrationId)
-        .eq('date_time', date)
-        .maybeSingle();
-
-      if (fetchError) throw fetchError;
-
-      // 2. Calcular el delta de class_count
+      // 1. Calcular el delta de class_count
       let classCountDelta = 0;
 
-      if (existingAttendance) {
-        // Si existe, verificar si cambia el estado de admin_check
-        const wasChecked = existingAttendance.admin_check === true;
-        const willBeChecked = adminCheck === true;
-
-        if (!wasChecked && willBeChecked) {
-          classCountDelta = 1;
-        } else if (wasChecked && !willBeChecked) {
-          classCountDelta = -1;
-        }
-      } else {
-        // Si no existe y se marca como asistido, incrementar
-        if (adminCheck === true) {
-          classCountDelta = 1;
-        }
+      if (values.admin_check === true) {
+        classCountDelta = 1;
       }
 
-      // 3. Actualizar class_count si hay cambio
+      // 2. Actualizar class_count si hay cambio
       if (classCountDelta !== 0) {
-        const { error } = await supabase.rpc('increment_class_count', {
-          p_registration_id: registrationId,
+        const { error: rpcError } = await supabase.rpc('increment_class_count', {
+          p_registration_id: values.registration_id,
           p_increment: classCountDelta
         });
 
+        if (rpcError) throw rpcError;
+
+        // Actualizar el estado local
         set((state) => ({
           inscripcionesByCurso: state.inscripcionesByCurso.map((inscripcion) => {
-            if (inscripcion.id === registrationId) {
+            if (inscripcion.id === values.registration_id) {
               return {
                 ...inscripcion,
                 class_count: (inscripcion.class_count || 0) + classCountDelta
@@ -572,26 +550,229 @@ export const useInscripcionesStore = create<InscripcionesStore>((set, get) => ({
             return inscripcion;
           })
         }));
-
-        if (error) throw error;
       }
 
-      // 4. Regularizar la asistencia (sin toast duplicado)
-      await useAsistenciasStore.getState().regularizeAttendance(
-        registrationId,
-        date,
-        teacherId,
-        ownCheck,
-        adminCheck
-      );
+      // 3. Crear la asistencia
+      await useAsistenciasStore.getState().createAsistencia(values);
 
-      // Toast único aquí
+      // Toast único al final
       toast.success('Asistencia regularizada correctamente');
 
     } catch (error) {
-      console.error('Error en handleRegularizeAttendance:', error);
+      console.error('Error al regularizar asistencia:', error);
       toast.error('La asistencia no se pudo regularizar');
       throw error;
     }
   },
+
+  handleRegularizeUpdateAttendance: async (values: Record<string, any>, attendanceId: string) => {
+    try {
+      // 1. Calcular el delta de class_count
+      let classCountDelta = 0;
+
+      // 2. Obtener la asistencia existente por el id
+      const { data: existingAttendance, error: fetchError } = await supabase
+        .from('asistencias')
+        .select()
+        .eq('id', attendanceId)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existingAttendance) {
+        // Si existe, verificar si cambia el estado de admin_check
+        const wasChecked = existingAttendance.admin_check === true;
+        const willBeChecked = values.admin_check === true;
+
+        if (!wasChecked && willBeChecked) {
+          classCountDelta = 1; // Se marca como asistido
+        } else if (wasChecked && !willBeChecked) {
+          classCountDelta = -1; // Se desmarca la asistencia
+        }
+        // Si ambos son true o ambos son false, delta = 0
+      } else {
+        throw new Error('No se pudo obtener la asistencia existente');
+      }
+
+      // 3. Actualizar class_count si hay cambio
+      if (classCountDelta !== 0) {
+        const { error: rpcError } = await supabase.rpc('increment_class_count', {
+          p_registration_id: values.registration_id,
+          p_increment: classCountDelta
+        });
+
+        if (rpcError) throw rpcError;
+
+        // Actualizar el estado local
+        set((state) => ({
+          inscripcionesByCurso: state.inscripcionesByCurso.map((inscripcion) => {
+            if (inscripcion.id === values.registration_id) {
+              return {
+                ...inscripcion,
+                class_count: (inscripcion.class_count || 0) + classCountDelta
+              };
+            }
+            return inscripcion;
+          })
+        }));
+      }
+
+      // 4. Actualizar la asistencia
+      await useAsistenciasStore.getState().updateAsistencia(values, attendanceId);
+
+      // Toast único al final
+      toast.success('Asistencia regularizada correctamente');
+
+    } catch (error) {
+      console.error('Error al regularizar asistencia:', error);
+      toast.error('La asistencia no se pudo regularizar');
+      throw error;
+    }
+  },
+
+  handleRegularizeDeleteAttendance: async (attendanceId: string, inscripcionId?: string) => {
+
+    if (!inscripcionId) {
+      toast.error('No se proporcionó un ID de inscripción');
+      return;
+    }
+    try {
+      // 1. Obtener la asistencia existente para ese día específico
+      const { data: existingAttendance, error: fetchError } = await supabase
+        .from('asistencias')
+        .select()
+        .eq('id', attendanceId)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      let classCountDelta = 0;
+
+      if (existingAttendance) {
+        // Si existe, verificar si cambia el estado de admin_check
+        const wasChecked = existingAttendance.admin_check === true;
+
+        if (wasChecked) {
+          classCountDelta = -1; // Se desmarca la asistencia
+        }
+      } else {
+        throw new Error('No se pudo obtener la asistencia existente');
+      }
+
+      // 3. Actualizar class_count si hay cambio
+      if (classCountDelta !== 0) {
+        const { error: rpcError } = await supabase.rpc('increment_class_count', {
+          p_registration_id: inscripcionId,
+          p_increment: classCountDelta
+        });
+
+        if (rpcError) throw rpcError;
+
+        // Actualizar el estado local
+        set((state) => ({
+          inscripcionesByCurso: state.inscripcionesByCurso.map((inscripcion) => {
+            if (inscripcion.id === inscripcionId) {
+              return {
+                ...inscripcion,
+                class_count: (inscripcion.class_count || 0) + classCountDelta
+              };
+            }
+            return inscripcion;
+          })
+        }));
+      }
+
+      // 4. Actualizar la asistencia
+      await useAsistenciasStore.getState().deleteAsistencia(attendanceId);
+
+      // Toast único al final
+      toast.success('Asistencia regularizada correctamente');
+
+    } catch (error) {
+      console.error('Error al regularizar asistencia:', error);
+      toast.error('La asistencia no se pudo regularizar');
+      throw error;
+    }
+  },
+
+  // handleRegularizeCreateAttendance: async (
+  //   registrationId: string,
+  //   date: string,
+  //   teacherId: string,
+  //   ownCheck: boolean,
+  //   adminCheck: boolean
+  // ) => {
+  //   try {
+  //     // 1. Obtener la asistencia existente para ese día específico
+  //     const { data: existingAttendance, error: fetchError } = await supabase
+  //       .from('asistencias')
+  //       .select()
+  //       .eq('registration_id', registrationId)
+  //       .eq('date_time', date)
+  //       .maybeSingle();
+
+  //     if (fetchError) throw fetchError;
+
+  //     // 2. Calcular el delta de class_count
+  //     let classCountDelta = 0;
+
+  //     if (existingAttendance) {
+  //       // Si existe, verificar si cambia el estado de admin_check
+  //       const wasChecked = existingAttendance.admin_check === true;
+  //       const willBeChecked = adminCheck === true;
+
+  //       if (!wasChecked && willBeChecked) {
+  //         classCountDelta = 1; // Se marca como asistido
+  //       } else if (wasChecked && !willBeChecked) {
+  //         classCountDelta = -1; // Se desmarca la asistencia
+  //       }
+  //       // Si ambos son true o ambos son false, delta = 0
+  //     } else {
+  //       // Si no existe y se marca como asistido, incrementar
+  //       if (adminCheck === true) {
+  //         classCountDelta = 1;
+  //       }
+  //     }
+
+  //     // 3. Actualizar class_count si hay cambio
+  //     if (classCountDelta !== 0) {
+  //       const { error: rpcError } = await supabase.rpc('increment_class_count', {
+  //         p_registration_id: registrationId,
+  //         p_increment: classCountDelta
+  //       });
+
+  //       if (rpcError) throw rpcError;
+
+  //       // Actualizar el estado local
+  //       set((state) => ({
+  //         inscripcionesByCurso: state.inscripcionesByCurso.map((inscripcion) => {
+  //           if (inscripcion.id === registrationId) {
+  //             return {
+  //               ...inscripcion,
+  //               class_count: (inscripcion.class_count || 0) + classCountDelta
+  //             };
+  //           }
+  //           return inscripcion;
+  //         })
+  //       }));
+  //     }
+
+  //     // 4. Regularizar la asistencia (crear o actualizar)
+  //     await useAsistenciasStore.getState().regularizeAttendance(
+  //       registrationId,
+  //       date, // Pasar la fecha normalizada
+  //       teacherId,
+  //       ownCheck,
+  //       adminCheck
+  //     );
+
+  //     // Toast único al final
+  //     toast.success('Asistencia regularizada correctamente');
+
+  //   } catch (error) {
+  //     console.error('Error al regularizar asistencia:', error);
+  //     toast.error('La asistencia no se pudo regularizar');
+  //     throw error;
+  //   }
+  // },
 }))

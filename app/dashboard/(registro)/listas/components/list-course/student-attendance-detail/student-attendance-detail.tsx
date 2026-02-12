@@ -35,7 +35,7 @@ interface StudentAttendanceDetailProps {
 
 export default function StudentAttendanceDetail({ inscripcion, course }: StudentAttendanceDetailProps) {
   const dialogHandlers = useDialogHandlers();
-  const { deletePayment, handleRegularizeAttendance } = useInscripcionesStore();
+  const { handleRegularizeCreateAttendance, handleRegularizeUpdateAttendance, handleRegularizeDeleteAttendance } = useInscripcionesStore();
   const { fetchAsistenciasByRegistrationId, asistenciasByRegistrationId } = useAsistenciasStore();
 
   useEffect(() => {
@@ -60,26 +60,27 @@ export default function StudentAttendanceDetail({ inscripcion, course }: Student
       <DataTable
         columns={columns}
         data={asistenciasByRegistrationId || []}
-        entity=""
+        entity="Asistencia"
         dialogHandlers={dialogHandlers}
       />
       <GenericDialog
         openDialog={dialogHandlers.openDialog}
         setOpenDialog={dialogHandlers.setOpenDialog}
-        title="Agregar asistencia"
+        title={dialogHandlers.selectedItem ? 'Editar asistencia' : 'Agregar asistencia'}
       >
         <StudentAttendanceForm
           dialogHandlers={dialogHandlers}
           selectedInscripcion={inscripcion}
           teacherId={course?.teacher_id}
-          onHandle={handleRegularizeAttendance}
+          onCreate={handleRegularizeCreateAttendance}
+          onUpdate={handleRegularizeUpdateAttendance}
         />
       </GenericDialog>
       <DeleteDialog
         openDeleteDialog={dialogHandlers.openDialogDelete}
         setOpenDeleteDialog={dialogHandlers.setOpenDialogDelete}
         selectedItem={dialogHandlers.selectedItem}
-        action={(paymentId: string) => deletePayment(paymentId, inscripcion.id)}
+        action={(paymentId: string) => handleRegularizeDeleteAttendance(paymentId, inscripcion.id)}
       />
     </div>
   );

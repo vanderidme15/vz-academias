@@ -139,6 +139,7 @@ export type Asistencia = {
   teacher_id?: string;
   own_check?: boolean;
   admin_check?: boolean;
+  observations?: string;
   created_at?: string;
   updated_at?: string;
 }

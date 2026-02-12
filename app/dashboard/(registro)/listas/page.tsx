@@ -11,6 +11,7 @@ import { Curso } from "@/shared/types/supabase.types";
 import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import ListCourse from "./components/list-course/list-course";
+import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
 
 
 function useDialogHandlers() {
@@ -40,10 +41,12 @@ export default function ListasPage() {
 
   const { cursos, fetchCursos } = useCursosStore();
   const { fetchHorarios, horarios } = useHorariosStore();
+  const { fetchProfesores } = useProfesoresStore();
 
   useEffect(() => {
     fetchHorarios();
     fetchCursos();
+    fetchProfesores();
   }, []);
 
   useEffect(() => {

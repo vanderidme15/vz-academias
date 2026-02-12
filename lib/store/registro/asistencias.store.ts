@@ -91,7 +91,7 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       const { data, error } = await supabase
         .from('asistencias')
         .insert(values)
-        .select(`*, course:cursos (*)`)
+        .select(`*`)
         .single();
 
       if (error) {
@@ -103,6 +103,9 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       if (data) {
         toast.success('Asistencia creada correctamente');
         set({ asistencias: [data, ...get().asistencias] });
+        set({
+          asistenciasByRegistrationId: [...get().asistenciasByRegistrationId, data]
+        });
         return data;
       }
 
@@ -120,7 +123,7 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
         .from('asistencias')
         .update(values)
         .eq('id', id)
-        .select(`*, course:cursos (*)`)
+        .select(`*`)
         .single();
 
       if (error) {
@@ -132,6 +135,11 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       if (data) {
         set({
           asistencias: get().asistencias.map(
+            asistencia => asistencia.id === id ? data : asistencia
+          )
+        });
+        set({
+          asistenciasByRegistrationId: get().asistenciasByRegistrationId.map(
             asistencia => asistencia.id === id ? data : asistencia
           )
         });
@@ -161,6 +169,11 @@ export const useAsistenciasStore = create<AsistenciasStore>((set, get) => ({
       if (data) {
         set({
           asistencias: get().asistencias.filter(
+            asistencia => asistencia.id !== id
+          )
+        });
+        set({
+          asistenciasByRegistrationId: get().asistenciasByRegistrationId.filter(
             asistencia => asistencia.id !== id
           )
         });

@@ -32,9 +32,18 @@ export const columns: ColumnDef<Asistencia>[] = [
     header: 'Admin',
     cell: ({ row }) => (
       <div className="flex flex-col gap-1">
-        <Badge variant='outline' className={row.original.admin_check ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
+        <Badge variant='outline' className={row.original.admin_check ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}>
           {row.original.admin_check ? <CheckIcon /> : <XIcon />}
         </Badge>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'observations',
+    header: 'Observaciones',
+    cell: ({ row }) => (
+      <div className="flex flex-col gap-1">
+        <span>{row.original.observations}</span>
       </div>
     ),
   },

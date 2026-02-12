@@ -15,6 +15,7 @@ export default function FieldCheckbox({ fieldConfig, formField }: FormFieldProps
           checked={formField.value}
           onCheckedChange={formField.onChange}
           disabled={formField.disabled}
+          className={fieldConfig.className}
         />
       </FormControl>
       <div className="space-y-1 leading-none">
