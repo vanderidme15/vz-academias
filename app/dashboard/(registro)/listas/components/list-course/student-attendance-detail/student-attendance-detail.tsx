@@ -53,8 +53,8 @@ export default function StudentAttendanceDetail({ inscripcion, course }: Student
   return (
     <div className="flex flex-col h-96 overflow-auto">
       <div className="flex gap-2 items-center">
-        <div className="font-bold flex flex-col">
-          <span>Total de asistencias: {totalAsistencias}/{inscripcion.total_classes}</span>
+        <div className="font-bold flex flex-col text-sm">
+          <span>Total de asistencias diarias registradas: {totalAsistencias}/{inscripcion.total_classes}</span>
         </div>
       </div>
       <DataTable

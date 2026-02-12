@@ -10,11 +10,10 @@ import { useMemo } from "react";
 
 interface StudentAttendanceForceProps {
   inscripcion: Inscripcion | null;
-  course: Curso | null;
   setOpenDialog: (open: boolean) => void;
 }
 
-export default function StudentAttendanceForce({ inscripcion, course, setOpenDialog }: StudentAttendanceForceProps) {
+export default function StudentAttendanceForce({ inscripcion, setOpenDialog }: StudentAttendanceForceProps) {
   const { handleForceAttendance } = useInscripcionesStore();
 
   // Schema dinámico basado en total_classes de la inscripción

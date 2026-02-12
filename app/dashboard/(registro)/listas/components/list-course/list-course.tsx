@@ -97,7 +97,7 @@ export default function ListCourse({ dialogHandlers, mes, mesLabel }: ListCourse
         description={`Regularizar pagos de ${inscripcionSelected?.student?.name}`}
       >
         <div className="flex flex-col gap-2 w-xl">
-          <StudentAttendancePays inscripcion={inscripcionSelected} course={dialogHandlers.selectedCourse} />
+          <StudentAttendancePays inscripcion={inscripcionSelected} />
         </div>
       </GenericDialog>
 
@@ -108,7 +108,7 @@ export default function ListCourse({ dialogHandlers, mes, mesLabel }: ListCourse
         description={`Forzar asistencia de ${inscripcionSelected?.student?.name}`}
       >
         <div className="flex flex-col gap-2 w-xl">
-          <StudentAttendanceForce inscripcion={inscripcionSelected} course={dialogHandlers.selectedCourse} setOpenDialog={setOpenAttendanceForceDialog} />
+          <StudentAttendanceForce inscripcion={inscripcionSelected} setOpenDialog={setOpenAttendanceForceDialog} />
         </div>
       </GenericDialog>
 
