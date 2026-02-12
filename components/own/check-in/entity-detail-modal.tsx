@@ -144,6 +144,7 @@ export function InscripcionDetailModal({
           {/* Botones de acción */}
           <div className="flex gap-2">
             <Button
+              disabled={(inscripcion.class_count || 0) >= (inscripcion.total_classes || 0)}
               onClick={onConfirmAction}
               className="flex-1"
             >
