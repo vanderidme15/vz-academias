@@ -97,19 +97,11 @@ export type Curso = {
   schedule_id?: string;
   teacher_id?: string;
   color?: string;
+  schedule_days?: string[];
+  schedule_start_time?: string;
+  schedule_end_time?: string;
   // relaciones opcionales
   teacher?: Profesor;
-  schedule?: Horario;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export type Horario = {
-  id?: string;
-  days?: string[];
-  start_time?: string;
-  end_time?: string;
-  name?: string;
   created_at?: string;
   updated_at?: string;
 }

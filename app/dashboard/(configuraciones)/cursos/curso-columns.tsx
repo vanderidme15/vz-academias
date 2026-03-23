@@ -42,19 +42,20 @@ export const columns: ColumnDef<Curso>[] = [
     accessorKey: 'schedule',
     header: 'Horario',
     cell: ({ row }) => {
-      const horario = row.original.schedule;
+      const schedule_days = row.original.schedule_days;
+      const schedule_start_time = row.original.schedule_start_time;
+      const schedule_end_time = row.original.schedule_end_time;
 
-      if (!horario) return '-';
+      if (!schedule_days || !schedule_start_time || !schedule_end_time) return '-';
 
       return (
         <>
           {/* Ajusta según las propiedades de tu tipo Horario */}
-          {horario.days && horario.start_time && horario.end_time
+          {schedule_days && schedule_start_time && schedule_end_time
             ? (
               <div className="flex flex-col">
-                <span className="text-sm">{horario.name}</span>
-                <span className="text-xs text-muted-foreground">{horario.days.join(', ')}</span>
-                <span className="text-xs text-muted-foreground">{horario.start_time} - {horario.end_time}</span>
+                <span className="text-sm">{schedule_days.join(', ')}</span>
+                <span className="text-xs text-muted-foreground">{schedule_start_time} - {schedule_end_time}</span>
               </div>
             )
             : '-'

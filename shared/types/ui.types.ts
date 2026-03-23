@@ -111,3 +111,15 @@ export interface CheckInConfig<T extends CheckInEntity> {
   handleCheckIn: (id: string) => Promise<void>
   getExtraFields?: (entity: T) => React.ReactNode
 }
+
+
+
+export type HorarioKey = string
+
+export interface HorarioOption {
+  key: HorarioKey
+  days: string[]
+  start_time: string
+  end_time: string
+  label: string
+}

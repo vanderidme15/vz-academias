@@ -1,7 +1,6 @@
 'use client'
 
 import { DynamicForm } from "@/components/own/dynamic-form/dynamic-form";
-import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
 import { Curso } from "@/shared/types/supabase.types";
 import type { DialogHandlers, FieldConfig } from "@/shared/types/ui.types";
@@ -11,17 +10,20 @@ import { z } from "zod";
 const cursoFormSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
-  total_classes: z.coerce.number().min(1, 'Debe haber al menos 1 clase').optional(),
+  total_classes: z.coerce.number().min(1, 'Debe haber al menos 1 clase'),
   price: z.union([
-    z.string(),
+    z.string().min(1, 'El precio es requerido'),
     z.number()
   ]).transform((val) => {
-    if (val === '' || val === null || val === undefined) return 0;
+    if (val === '' || val === null || val === undefined) return NaN;
     const num = typeof val === 'string' ? parseFloat(val) : val;
-    return isNaN(num) ? 0 : num;
-  }).pipe(z.number().nonnegative('El precio debe ser mayor o igual a 0')),
+    return isNaN(num) ? NaN : num;
+  }).pipe(z.number({ invalid_type_error: 'El precio es requerido' }).nonnegative('El precio debe ser mayor o igual a 0')),
   teacher_id: z.string().min(1, 'El profesor es requerido'),
-  schedule_id: z.string().min(1, 'El horario es requerido'),
+  schedule_days: z.array(z.enum(['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'])).min(1, 'Debes seleccionar al menos un día'),
+  schedule_start_time: z.string().min(1, 'La hora de inicio es requerida'),
+  schedule_end_time: z.string().min(1, 'La hora de fin es requerida'),
+  // schedule_id: z.string().min(1, 'El horario es requerido'),
   color: z.string().optional(),
 })
 
@@ -33,12 +35,10 @@ interface CursoFormProps {
 
 export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFormProps) {
   const { profesores, fetchProfesores } = useProfesoresStore();
-  const { horarios, fetchHorarios } = useHorariosStore();
 
   useEffect(() => {
     fetchProfesores();
-    fetchHorarios();
-  }, [fetchProfesores, fetchHorarios]);
+  }, [fetchProfesores]);
 
   const handleCreate = async (values: Record<string, any>): Promise<void> => {
     await onCreate(values as Curso);
@@ -72,27 +72,40 @@ export default function CursoForm({ dialogHandlers, onCreate, onEdit }: CursoFor
       }))
     },
     {
-      name: 'schedule_id',
-      label: 'Horario',
-      type: 'select',
+      name: 'schedule_days',
+      label: 'Días',
+      type: 'multiple-select',
       required: true,
       className: 'col-span-4',
-      placeholder: 'Selecciona un horario',
-      options: horarios.map(horario => ({
-        value: horario.id!,
-        label: (
-          <div className="flex flex-col">
-            <span className="text-xs">{horario.name}</span>
-            <span className="text-xs text-muted-foreground">{horario.days?.join(', ')} {horario.start_time}-{horario.end_time}</span>
-          </div>
-        )
-      }))
+      options: [
+        { label: 'Lunes', value: 'lunes' },
+        { label: 'Martes', value: 'martes' },
+        { label: 'Miercoles', value: 'miercoles' },
+        { label: 'Jueves', value: 'jueves' },
+        { label: 'Viernes', value: 'viernes' },
+        { label: 'Sabado', value: 'sabado' },
+        { label: 'Domingo', value: 'domingo' },
+      ]
+    },
+    {
+      name: 'schedule_start_time',
+      label: 'Hora de Inicio',
+      type: 'time',
+      required: true,
+      className: 'col-span-2',
+    },
+    {
+      name: 'schedule_end_time',
+      label: 'Hora de Fin',
+      type: 'time',
+      required: true,
+      className: 'col-span-2',
     },
     {
       name: 'total_classes',
       label: 'Número de Clases Base',
       type: 'integer',
-      required: false,
+      required: true,
       className: 'col-span-2',
       placeholder: 'Ej: 12'
     },

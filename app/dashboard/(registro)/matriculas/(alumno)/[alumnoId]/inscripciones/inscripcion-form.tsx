@@ -83,7 +83,7 @@ export default function InscripcionForm({
           <div className="flex flex-col items-start text-xs">
             <span className="font-medium">{curso.name}</span>
             <span className="text-muted-foreground">
-              {curso.schedule?.name} • S/ {curso.price}
+              {curso.schedule_days?.join(', ')} - {curso.schedule_start_time} - {curso.schedule_end_time} • S/ {curso.price}
             </span>
           </div>
         )
@@ -235,7 +235,7 @@ export default function InscripcionForm({
         Se ${action} la inscripción para ${student.name} con:
 
         • Curso: ${course.name}${isPersonalized}
-        • Horario: ${course.schedule?.name ?? 'Sin horario'}
+        • Horario: ${course.schedule_days?.join(', ')} - ${course.schedule_start_time} - ${course.schedule_end_time}
         • Número de clases: ${values.total_classes || 'No especificado'}
         • Fecha inicio: ${values.date_range?.from ? format(values.date_range.from, 'dd/MM/yyyy', { locale: es }) : 'No especificada'}
         • Fecha fin: ${values.date_range?.to ? format(values.date_range.to, 'dd/MM/yyyy', { locale: es }) : 'No especificada'}

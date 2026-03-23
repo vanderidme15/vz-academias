@@ -8,11 +8,25 @@ import ListCoursesFilters from "./components/list-courses-filters";
 import ListCoursesItem from "./components/list-courses-item";
 import { useCursosStore } from "@/lib/store/configuraciones/cursos.store";
 import { Curso } from "@/shared/types/supabase.types";
-import { useHorariosStore } from "@/lib/store/configuraciones/horarios.store";
 import GenericDialog from "@/components/own/generic-dialog/generic-dialog";
 import ListCourse from "./components/list-course/list-course";
 import { useProfesoresStore } from "@/lib/store/configuraciones/profesores.store";
+import { formatTime, getShortDays } from "@/lib/utils-functions/format-date";
+import { HorarioKey, HorarioOption } from "@/shared/types/ui.types";
 
+
+function buildHorarioKey(curso: Curso): HorarioKey {
+  if (!curso.schedule_days?.length && !curso.schedule_start_time && !curso.schedule_end_time) {
+    return 'sin-horario'
+  }
+  const sortedDays = [...(curso.schedule_days ?? [])].sort().join(',')
+  return `${sortedDays}|${curso.schedule_start_time ?? ''}|${curso.schedule_end_time ?? ''}`
+}
+
+function buildHorarioLabel(curso: Curso): string {
+  if (!curso.schedule_days?.length) return 'Sin horario asignado'
+  return `${getShortDays(curso.schedule_days)} · ${formatTime(curso.schedule_start_time)} - ${formatTime(curso.schedule_end_time)}`
+}
 
 function useDialogHandlers() {
   const [loading, setLoading] = useState(false);
@@ -26,7 +40,7 @@ function useDialogHandlers() {
     setLoading,
     selectedCourse,
     setSelectedCourse,
-  }), [openDialog, setOpenDialog, loading, setLoading, selectedCourse, setSelectedCourse]);
+  }), [openDialog, loading, selectedCourse]);
 }
 
 export type DialogHandlersCourses = ReturnType<typeof useDialogHandlers>;
@@ -37,93 +51,94 @@ export default function ListasPage() {
   const [mes, setMes] = useState(new Date());
   const [mesLabel, setMesLabel] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedHorarioId, setSelectedHorarioId] = useState<string | null>(null);
+  const [selectedHorarioKey, setSelectedHorarioKey] = useState<HorarioKey | null>(null);
 
   const { cursos, fetchCursos } = useCursosStore();
-  const { fetchHorarios, horarios } = useHorariosStore();
   const { fetchProfesores } = useProfesoresStore();
 
   useEffect(() => {
-    fetchHorarios();
     fetchCursos();
     fetchProfesores();
   }, []);
 
   useEffect(() => {
-    const mesActual = new Date().toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-    setMesLabel(mesActual);
+    setMesLabel(new Date().toLocaleString('es-ES', { month: 'long', year: 'numeric' }));
   }, []);
+
+  // Horarios únicos derivados de los cursos — para pasarle al filtro
+  const horariosUnicos = useMemo(() => {
+    const seen = new Map<HorarioKey, HorarioOption>()
+    for (const curso of cursos) {
+      const key = buildHorarioKey(curso)
+      if (!seen.has(key)) {
+        seen.set(key, {
+          key,
+          label: buildHorarioLabel(curso),
+          days: curso.schedule_days ?? [],
+          start_time: curso.schedule_start_time ?? '',
+          end_time: curso.schedule_end_time ?? '',
+        })
+      }
+    }
+    return Array.from(seen.values())
+  }, [cursos])
 
   // Filtrar cursos por búsqueda y horario
   const cursosFiltrados = useMemo(() => {
     return cursos.filter((curso) => {
-      // Filtro por búsqueda de nombre
       const matchesSearch = searchTerm === "" ||
         curso.name?.toLowerCase().includes(searchTerm.toLowerCase());
-
-      // Filtro por horario
-      const matchesHorario = selectedHorarioId === null ||
-        curso.schedule_id === selectedHorarioId;
-
+      const matchesHorario = selectedHorarioKey === null ||
+        buildHorarioKey(curso) === selectedHorarioKey;
       return matchesSearch && matchesHorario;
     });
-  }, [cursos, searchTerm, selectedHorarioId]);
+  }, [cursos, searchTerm, selectedHorarioKey]);
 
-  // Agrupar y ordenar cursos filtrados por schedule_id
+  // Agrupar cursos filtrados por clave de horario
   const cursosAgrupados = useMemo(() => {
-    const grupos: Record<string, Curso[]> = {};
+    const grupos = new Map<HorarioKey, Curso[]>()
 
-    // Agrupar cursos
-    cursosFiltrados.forEach((curso) => {
-      const scheduleId = curso.schedule_id || 'sin-horario';
-      if (!grupos[scheduleId]) {
-        grupos[scheduleId] = [];
-      }
-      grupos[scheduleId].push(curso);
-    });
+    for (const curso of cursosFiltrados) {
+      const key = buildHorarioKey(curso)
+      if (!grupos.has(key)) grupos.set(key, [])
+      grupos.get(key)!.push(curso)
+    }
 
-    // Ordenar los cursos dentro de cada grupo por nombre
-    Object.keys(grupos).forEach((scheduleId) => {
-      grupos[scheduleId].sort((a, b) => {
-        return (a.name || '').localeCompare(b.name || '', 'es-ES');
-      });
-    });
+    // Ordenar cursos dentro de cada grupo por nombre
+    for (const [, lista] of grupos) {
+      lista.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'es-ES'))
+    }
 
-    return grupos;
+    return grupos
   }, [cursosFiltrados]);
 
-  // Ordenar los grupos según el orden de los horarios
+  // Ordenar grupos: primero los que tienen horario (en el orden que vienen de horariosUnicos), sin-horario al final
   const gruposOrdenados = useMemo(() => {
-    return Object.entries(cursosAgrupados).sort(([scheduleIdA], [scheduleIdB]) => {
-      // Los grupos sin horario van al final
-      if (scheduleIdA === 'sin-horario') return 1;
-      if (scheduleIdB === 'sin-horario') return -1;
+    const horarioKeyOrder = horariosUnicos.map(h => h.key)
 
-      // Buscar el índice de cada horario en el array de horarios
-      const indexA = horarios.findIndex(h => h.id === scheduleIdA);
-      const indexB = horarios.findIndex(h => h.id === scheduleIdB);
-
-      // Si alguno no se encuentra, va al final
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-
-      // Ordenar por el índice en el array de horarios
-      return indexA - indexB;
-    });
-  }, [cursosAgrupados, horarios]);
+    return Array.from(cursosAgrupados.entries()).sort(([keyA], [keyB]) => {
+      if (keyA === 'sin-horario') return 1
+      if (keyB === 'sin-horario') return -1
+      return horarioKeyOrder.indexOf(keyA) - horarioKeyOrder.indexOf(keyB)
+    })
+  }, [cursosAgrupados, horariosUnicos]);
 
   const handleMesAnterior = () => {
-    const mesAnterior = new Date(mes);
-    mesAnterior.setMonth(mesAnterior.getMonth() - 1);
-    setMes(mesAnterior);
-    setMesLabel(mesAnterior.toLocaleString('es-ES', { month: 'long', year: 'numeric' }));
+    setMes(prev => {
+      const d = new Date(prev)
+      d.setMonth(d.getMonth() - 1)
+      setMesLabel(d.toLocaleString('es-ES', { month: 'long', year: 'numeric' }))
+      return d
+    })
   }
 
   const handleMesSiguiente = () => {
-    const mesSiguiente = new Date(mes);
-    mesSiguiente.setMonth(mesSiguiente.getMonth() + 1);
-    setMes(mesSiguiente);
-    setMesLabel(mesSiguiente.toLocaleString('es-ES', { month: 'long', year: 'numeric' }));
+    setMes(prev => {
+      const d = new Date(prev)
+      d.setMonth(d.getMonth() + 1)
+      setMesLabel(d.toLocaleString('es-ES', { month: 'long', year: 'numeric' }))
+      return d
+    })
   }
 
   return (
@@ -143,22 +158,25 @@ export default function ListasPage() {
           </Button>
         </div>
         <div className="grow border-2 rounded-lg p-2 overflow-auto">
-          {/* Filtros */}
+          {/* Filtros — ahora recibe horariosUnicos en lugar de horarios del store */}
           <ListCoursesFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
-            selectedHorarioId={selectedHorarioId}
-            setSelectedHorarioId={setSelectedHorarioId}
+            selectedHorarioKey={selectedHorarioKey}
+            setSelectedHorarioKey={setSelectedHorarioKey}
+            horariosUnicos={horariosUnicos}
           />
 
-          {/* Lista de cursos agrupados y ordenados */}
-          {gruposOrdenados.map(([scheduleId, cursosDelGrupo]) => (
-            <div key={scheduleId} className="mb-6">
+          {/* Lista de cursos agrupados por horario */}
+          {gruposOrdenados.map(([horarioKey, cursosDelGrupo]) => (
+            <div key={horarioKey} className="mb-6">
               {/* Encabezado del grupo */}
               <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mb-2">
                 <h3 className="font-semibold flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4" />
-                  {cursosDelGrupo[0]?.schedule?.name || 'Sin horario asignado'}
+                  {horarioKey === 'sin-horario'
+                    ? 'Sin horario asignado'
+                    : buildHorarioLabel(cursosDelGrupo[0])}
                 </h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
                   {cursosDelGrupo.length} curso{cursosDelGrupo.length !== 1 ? 's' : ''}
@@ -177,7 +195,7 @@ export default function ListasPage() {
           {/* Mensaje si no hay cursos */}
           {gruposOrdenados.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm || selectedHorarioId
+              {searchTerm || selectedHorarioKey
                 ? 'No se encontraron cursos con los filtros aplicados'
                 : 'No hay cursos disponibles'}
             </div>

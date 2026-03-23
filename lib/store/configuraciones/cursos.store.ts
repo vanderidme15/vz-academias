@@ -32,8 +32,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
         .from('cursos')
         .select(`
           *,
-          teacher:profesores (*),
-          schedule:horarios (*)
+          teacher:profesores (*)
         `)
         .order('created_at', { ascending: false });
 
@@ -50,8 +49,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
         .from('cursos')
         .select(`
           *,
-          teacher:profesores (*),
-          schedule:horarios (*)
+          teacher:profesores (*)
         `)
         .eq('id', id)
         .single();
@@ -140,8 +138,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
         .insert(values)
         .select(`
           *,
-          teacher:profesores (*),
-          schedule:horarios (*)
+          teacher:profesores (*)
         `)
         .single();
 
@@ -169,8 +166,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
         .eq('id', id)
         .select(`
           *,
-          teacher:profesores (*),
-          schedule:horarios (*)
+          teacher:profesores (*)
         `)
         .single();
 

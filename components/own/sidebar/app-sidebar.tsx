@@ -111,16 +111,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/dashboard/horarios">
-                <SidebarMenuButton tooltip="Horarios">
-                  <ClockIcon />
-                  <span>Horarios</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuItem>
               <Link href="/dashboard/cursos">
                 <SidebarMenuButton tooltip="Cursos">
                   <BookAIcon />
