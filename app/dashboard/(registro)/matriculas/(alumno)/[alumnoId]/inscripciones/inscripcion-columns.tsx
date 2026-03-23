@@ -15,7 +15,7 @@ export const columns: ColumnDef<Inscripcion>[] = [
       return (
         <div className="flex flex-col">
           <div className="flex flex-col justify-center gap-px">
-            <span className="font-medium">{row.original.course?.name || '-'}</span>
+            <span className="font-medium">{row.original.course?.name || row.original.course_name || '-'}</span>
             {isPersonalized && (
               <span className="inline-flex items-center w-fit rounded-full bg-blue-50 px-1 text-xs text-blue-700 border border-blue-200">
                 Personalizado
@@ -43,7 +43,7 @@ export const columns: ColumnDef<Inscripcion>[] = [
             <span className="font-medium">{inscriptionClassCount || '-'}</span>
             {classCountModified && (
               <span className="text-xs text-blue-600 line-through">
-                {courseClassCount}
+                {courseClassCount || '-'}
               </span>
             )}
           </div>
@@ -63,23 +63,13 @@ export const columns: ColumnDef<Inscripcion>[] = [
       const priceCharged = row.original.price_charged;
       const registrationPrice = row.original.registration_price;
       const coursePrice = row.original.course_price;
-      const isPersonalized = row.original.is_personalized;
-      const originalCoursePrice = row.original.course?.price;
 
       if (!priceCharged) return '-';
-
-      // Verificar si el precio fue modificado
-      const priceModified = isPersonalized && originalCoursePrice && coursePrice !== originalCoursePrice;
 
       return (
         <div className="flex flex-col text-sm">
           <div className="flex items-center gap-2">
             <span className="font-medium">S/ {priceCharged.toFixed(2)}</span>
-            {priceModified && (
-              <span className="text-xs text-blue-600 line-through">
-                S/ {originalCoursePrice.toFixed(2)}
-              </span>
-            )}
           </div>
           {row.original.includes_registration && (
             <span className="text-xs text-muted-foreground">

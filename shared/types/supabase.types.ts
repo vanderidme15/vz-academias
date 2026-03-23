@@ -61,7 +61,6 @@ export type Inscripcion = {
   payments?: Pago[];
   assistances?: Asistencia[];
   registration_price?: number;
-  course_price?: number;
   price_charged?: number;
   includes_registration?: boolean;
   register_by?: string;
@@ -71,6 +70,13 @@ export type Inscripcion = {
   date_to?: string | null;
   created_at?: string;
   updated_at?: string;
+  // traza
+  course_price?: number;
+  course_name?: string;
+  course_schedule_days?: string[];
+  course_schedule_start_time?: string;
+  course_schedule_end_time?: string;
+  course_color?: string;
 }
 
 export type InscripcionWithRelations = Inscripcion & {
